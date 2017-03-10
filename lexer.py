@@ -19,7 +19,7 @@ tokens = ('ARRAY'     ,'BY'     ,'CHARS'   ,'DCL'       ,'DO'      ,
           'RBRACKET'  ,'ARROW'  ,'ICONST'  ,'AND'       ,'OR'      ,
           'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
           'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
-          'ATRIB'     ,'STR'    ,'COMMENT'                         )
+          'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'             )
 
 
 # Regular expression rules for simple tokens
@@ -86,6 +86,7 @@ t_ID = r'[a-zA-Z_][a-zA-Z_0-9]*' # Must have function
 t_ATRIB = r'='
 t_STR = r'\'.*\'' #Must have function
 t_COMMENT = r'(\/\*.*\*\/)|(\\\\.*)' #Must have function
+t_NOTEQUAL = r'!='
 
 
 
