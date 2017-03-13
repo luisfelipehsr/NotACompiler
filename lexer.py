@@ -106,3 +106,7 @@ def t_error(t):
 
 # Build the lexer
 lexer = lex.lex()
+
+# lex.input() # Read example program
+for tok in iter(lex.token, None):
+    print repr(tok.type), repr(tok.value)
