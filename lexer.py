@@ -56,7 +56,7 @@ tokens = ['PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
           'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
           'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
           'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
-          'SEMICOLON' ] + list(reserved.values()
+          'SEMICOLON' ] + list(reserved.values())
 
 # Regular expression rules for simple tokens
 t_ARRAY = r'array'
