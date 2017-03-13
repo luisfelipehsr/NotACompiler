@@ -96,7 +96,7 @@ def t_STR(t):
 t_COMMENT = r'(\/\*.*\*\/)|(\/\/.*)' #Must have function
 
 def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*' 
+    r'[a-zA-Z_][a-zA-Z_0-9]*'
     return t
 
 def t_ICONST(t):
@@ -107,7 +107,7 @@ def t_ICONST(t):
         print("Integer value too large %d", t.value)
         t.value = 0
     return t
-        
+
 
 
 
@@ -123,6 +123,9 @@ def t_error(t):
 # Build the lexer
 lexer = lex.lex()
 
-# lex.input() # Read example program
+programArchive = open("Example1","r")
+programCode = programArchive.read()
+
+lex.input(programCode) # Read example program
 for tok in iter(lex.token, None):
     print repr(tok.type), repr(tok.value)
