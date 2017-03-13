@@ -105,7 +105,8 @@ def t_ICONST(t):
 def t_COMMENT(t): 
     r'(\/\*.*\*\/)|(\/\/.*)' 
 
-t_ignore  = r" |\\t"
+t_ignore  = (r' |'
+             r'//t')
 
 def t_newline(t):
     r'\n+'
