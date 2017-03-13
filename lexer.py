@@ -51,12 +51,12 @@ reserved = {
 }
 
 # List of token names.   This is always required
-tokens = ('PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
+tokens = ['PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
           'RBRACKET'  ,'ARROW'  ,'ICONST'  ,'AND'       ,'OR'      ,
           'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
           'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
           'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
-          'SEMICOLON') + list(reserved.values())
+          'SEMICOLON') + list(reserved.values()]
 
 # Regular expression rules for simple tokens
 t_ARRAY = r'array'
