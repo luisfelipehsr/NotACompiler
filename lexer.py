@@ -83,7 +83,6 @@ t_MOD = r'%'
 t_NOT = r'!'
 t_ATRIB = r'='
 t_NOTEQUAL = r'!='
-
 t_ignore  = r' |\t'
 
 
@@ -91,9 +90,6 @@ def t_STR(t):
     r'\".*\"'
     t.value = t.value[1:-1]
     return t
-
-
-t_COMMENT = r'(\/\*.*\*\/)|(\/\/.*)' #Must have function
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*' 
@@ -108,6 +104,9 @@ def t_ICONST(t):
         t.value = 0
     return t
 
+def t_COMMENT(t): 
+    r'(\/\*.*\*\/)|(\/\/.*)' 
+
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += t.value.count("\n")
@@ -115,8 +114,6 @@ def t_newline(t):
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
-
-
 
 
 # Build the lexer
