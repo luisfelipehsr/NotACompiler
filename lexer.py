@@ -122,7 +122,7 @@ def t_error(t):
 # Build the lexer
 lexer = lex.lex()
 
-programArchive = open("Example1","r")
+programArchive = open("Example2","r")
 programCode = programArchive.read()
 
 lex.input(programCode) # Read example program
