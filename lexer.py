@@ -107,12 +107,11 @@ def t_ICONST(t):
         print("Integer value too large %d", t.value)
         t.value = 0
     return t
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += t.value.count("\n")
         
-
-
-
-
-
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
@@ -125,4 +124,4 @@ lexer = lex.lex()
 
 # lex.input() # Read example program
 for tok in iter(lex.token, None):
-    print repr(tok.type), repr(tok.value)
+    print (repr(tok.type), repr(tok.value))
