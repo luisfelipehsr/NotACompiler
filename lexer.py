@@ -96,7 +96,7 @@ def t_STR(t):
 t_COMMENT = r'(\/\*.*\*\/)|(\/\/.*)' #Must have function
 
 def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    r'[a-zA-Z_][a-zA-Z_0-9]*' 
     return t
 
 def t_ICONST(t):
@@ -108,10 +108,9 @@ def t_ICONST(t):
         t.value = 0
     return t
 
-
-
-
-
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += t.value.count("\n")
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
