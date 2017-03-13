@@ -5,14 +5,6 @@
 # ------------------------------------------------------------
 import ply.lex as lex
 
-# List of token names.   This is always required
-tokens = ('PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
-          'RBRACKET'  ,'ARROW'  ,'ICONST'  ,'AND'       ,'OR'      ,
-          'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
-          'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
-          'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
-          'SEMICOLON') + list(reserved.values())
-
 # Rule for reserved and predefined words
 
 reserved = {
@@ -57,6 +49,14 @@ reserved = {
     'true'    : 'TRUE',
     'upper'   : 'UPPER'
 }
+
+# List of token names.   This is always required
+tokens = ('PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
+          'RBRACKET'  ,'ARROW'  ,'ICONST'  ,'AND'       ,'OR'      ,
+          'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
+          'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
+          'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
+          'SEMICOLON') + list(reserved.values())
 
 # Regular expression rules for simple tokens
 t_ARRAY = r'array'
