@@ -94,8 +94,20 @@ def t_STR(t):
 
 
 t_COMMENT = r'(\/\*.*\*\/)|(\/\/.*)' #Must have function
-t_ID = r'[a-zA-Z_][a-zA-Z_0-9]*' # Must have function
-t_ICONST = r'[0-9]+'#Must have function
+
+def t_ID(t):
+    r'[a-zA-Z_][a-zA-Z_0-9]*' 
+    return t
+
+def t_ICONST(t):
+    r'[0-9]+'
+    try:
+        t.value = int(t.value)
+    except ValueError:
+        print("Integer value too large %d", t.value)
+        t.value = 0
+    return t
+        
 
 
 
