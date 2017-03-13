@@ -1,8 +1,7 @@
 # ------------------------------------------------------------
-# calclex.py
+# lexer.py
 #
-# tokenizer for a simple expression evaluator for
-# numbers and +,-,*,/
+# tokenizer for Lya
 # ------------------------------------------------------------
 import ply.lex as lex
 
