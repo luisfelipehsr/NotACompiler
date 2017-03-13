@@ -93,7 +93,7 @@ def t_STR(t):
     return t
 
 
-t_COMMENT = r'(\/\*.*\*\/)|(\\\\.*)' #Must have function
+t_COMMENT = r'(\/\*.*\*\/)|(\/\/.*)' #Must have function
 t_ID = r'[a-zA-Z_][a-zA-Z_0-9]*' # Must have function
 t_ICONST = r'[0-9]+'#Must have function
 
