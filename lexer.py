@@ -123,4 +123,4 @@ programCode = programArchive.read()
 
 lex.input(programCode) # Read example program
 for tok in iter(lex.token, None):
-    print repr(tok.type), repr(tok.value)
+    print (repr(tok.type), repr(tok.value))
