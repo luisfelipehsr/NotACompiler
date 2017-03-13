@@ -6,63 +6,62 @@
 import ply.lex as lex
 
 # List of token names.   This is always required
-tokens = ('ARRAY'     ,'BY'     ,'CHARS'   ,'DCL'       ,'DO'      ,
-          'DOWN'      ,'ELSE'   ,'ELSIF'   ,'END'       ,'EXIT'    ,
-          'FI'        ,'FOR'    ,'IF'      ,'IN'        ,'LOC'     ,
-          'TYPE'      ,'OD'     ,'PROC'    ,'REF'       ,'RESULT'  ,
-          'RETURN'    ,'RETURNS','SYN'     ,'THEN'      ,'TO'      ,
-          'WHILE'     ,'ABS'    ,'ASC'     ,'BOOL'      ,'CHAR'    ,
-          'FALSE'     ,'INT'    ,'LENGTH'  ,'LOWER'     ,'NULL'    ,
-          'NUM'       ,'PRINT'  ,'READ'    ,'TRUE'      ,'UPPER'   ,
-          'PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
+tokens = ('PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
           'RBRACKET'  ,'ARROW'  ,'ICONST'  ,'AND'       ,'OR'      ,
           'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
           'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
           'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
-          'SEMICOLON'                                               )
+          'SEMICOLON') + list(reserved.values())
 
+# Rule for reserved and predefined words
+
+reserved = {
+    'array'   : 'ARRAY'
+    'by'      : 'BY'
+    'chars'   : 'CHARS'
+    'dcl'     : 'DCL'
+    'do'      : 'DO'
+    'down'    : 'DOWN'
+    'else'    : 'ELSE'
+    'elseif'  : 'ELSEIF'
+    'end'     : 'END'
+    'exit'    : 'EXIT'
+    'fi'      : 'FI'
+    'for'     : 'FOR'
+    'if'      : 'IF'
+    'in'      : 'IN'
+    'loc'     : 'LOC'
+    'type'    : 'TYPE'
+    'od'      : 'OD'
+    'proc'    : 'PROC'
+    'ref'     : 'REF'
+    'result'  : 'RESULT'
+    'returns' : 'RETURNS'
+    'return'  : 'RETURN'
+    'syn'     : 'SYN'
+    'then'    : 'THEN'
+    'to'      : 'TO'
+    'while'   : 'WHILE'
+    'abs'     : 'ABS'
+    'asc'     : 'ASC'
+    'bool'    : 'BOOL'
+    'char'    : 'CHAR'
+    'false'   : 'FALSE'
+    'int'     : 'INT'
+    'length'  : 'LENGHT'
+    'lower'   : 'LOWER'
+    'null'    : 'NULL'
+    'num'     : 'NUM'
+    'print'   : 'PRINT'
+    'read'    : 'READ'
+    'true'    : 'TRUE'
+    'upper'   : 'UPPER'
+}
 
 # Regular expression rules for simple tokens
 t_ARRAY = r'array'
-t_BY = r'by'
-t_CHARS = r'chars'
-t_DCL = r'dcl'
-t_DO = r'do'
-t_DOWN = r'down'
-t_ELSE = r'else'
-t_ELSIF = r'elseif'
-t_END = r'end'
-t_EXIT = r'exit'
-t_FI = r'fi'
-t_FOR = r'for'
-t_IF = r'if'
-t_IN = r'in'
-t_LOC = r'loc'
-t_TYPE = r'type'
-t_OD = r'od'
-t_PROC = r'proc'
-t_REF = r'ref'
-t_RESULT = r'result'
-t_RETURN = r'return'
-t_RETURNS = r'returns'
-t_SYN = r'syn'
-t_THEN = r'then'
-t_TO = r'to'
-t_WHILE = r'while'
-t_ABS = r'abs'
-t_ASC = r'asc'
-t_BOOL = r'bool'
-t_CHAR = r'char'
-t_FALSE = r'false'
-t_INT = r'int'
-t_LENGTH = r'length'
-t_LOWER = r'lower'
-t_NULL = r'null'
-t_NUM = r'num'
-t_PRINT = r'print'
-t_READ = r'read'
-t_TRUE = r'true'
-t_UPPER = r'upper'
+
+
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_MUL = r'\*'
@@ -92,7 +91,8 @@ def t_STR(t):
     return t
 
 def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*' 
+    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    t.type = reserved.get(t.value, 'ID')  # Check for reserved words
     return t
 
 def t_ICONST(t):
