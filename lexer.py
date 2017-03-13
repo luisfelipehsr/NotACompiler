@@ -16,7 +16,7 @@ tokens = ('PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
 # Rule for reserved and predefined words
 
 reserved = {
-    'array'   : 'ARRAY'
+    'array' : 'ARRAY'
     'by'      : 'BY'
     'chars'   : 'CHARS'
     'dcl'     : 'DCL'
