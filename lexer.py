@@ -65,12 +65,11 @@ t_TRUE = r'true'
 t_UPPER = r'upper'
 t_PLUS = r'\+'
 t_MINUS = r'-'
-t_MUL = r'*'
-t_DIV = r'/'
-t_LBRACKET = r'('
-t_RBRACKET = r')'
+t_MUL = r'\*'
+t_DIV = r'\/'
+t_LBRACKET = r'\('
+t_RBRACKET = r'\)'
 t_ARROW = r'->'
-t_ICONST = r'[0-9]+'#Must have function
 t_AND = r'&&'
 t_OR = r'\|\|'
 t_EQUAL = r'=='
@@ -82,13 +81,25 @@ t_EQLESSTHEN = r'<='
 t_STRCAT = r'&'
 t_MOD = r'%'
 t_NOT = r'!'
-t_ID = r'[a-zA-Z_][a-zA-Z_0-9]*' # Must have function
 t_ATRIB = r'='
-t_STR = r'\'.*\'' #Must have function
-t_COMMENT = r'(\/\*.*\*\/)|(\\\\.*)' #Must have function
 t_NOTEQUAL = r'!='
 
+t_ignore  = r' |\t'
 
+t_STR = r'\'.*\'' #Must have function
+t_COMMENT = r'(\/\*.*\*\/)|(\\\\.*)' #Must have function
+t_ID = r'[a-zA-Z_][a-zA-Z_0-9]*' # Must have function
+t_ICONST = r'[0-9]+'#Must have function
+
+
+
+
+
+
+
+def t_error(t):
+    print("Illegal character '%s'" % t.value[0])
+    t.lexer.skip(1)
 
 
 
