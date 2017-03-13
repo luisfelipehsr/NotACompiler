@@ -86,12 +86,16 @@ t_NOTEQUAL = r'!='
 
 t_ignore  = r' |\t'
 
-t_STR = r'\'.*\'' #Must have function
+
+def t_STR(t):
+    r'\".*\"'
+    t.value = t.value[1:-1]
+    return t
+
+
 t_COMMENT = r'(\/\*.*\*\/)|(\\\\.*)' #Must have function
 t_ID = r'[a-zA-Z_][a-zA-Z_0-9]*' # Must have function
 t_ICONST = r'[0-9]+'#Must have function
-
-
 
 
 
