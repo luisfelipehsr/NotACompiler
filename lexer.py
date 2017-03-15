@@ -86,7 +86,7 @@ t_SEMICOLON = r';'
 t_ignore = ' \t'
 
 def t_STR(t):
-    r'\".*\"'
+    r'\"([^\\n\\r\"\\\\]|(\\\\n)|(\\\\t)|(\\\\")|(\\\\\\\\))*"'
     t.value = t.value[1:-1]
     return t
 
