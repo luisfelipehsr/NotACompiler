@@ -59,10 +59,16 @@ class ModeDefinition(AST):
     _fields = ['identifierList','mode']
 
 class Mode(AST):
-    _fields = ['mode']
+    #          'discreteMode'
+    #          'referenceMode'
+    #          'compositeMode'
+    _fields = ['modeName']
     
 class DiscreteMode(AST):
-    _fields = ['discreteMode']
+    #          'booleanMode'
+    #          'characterMode'
+    #          'discreteRangeMode'
+    _fields = ['integerMode']
     
 class IntegerMode(AST):
     _fields = ['int']
