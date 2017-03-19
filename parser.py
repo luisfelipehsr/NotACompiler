@@ -104,7 +104,19 @@ class StringMode(AST):
 
 class StringLength(AST):
     _fields = ['integerLiteral']
+
+class arrayMode(AST):
+    _fields = ['indexModeList']
+
+class IndexModeList(AST):
+    _fields = ['indexMode','indexModeList']
     
+class IndexMode(AST):
+    #          'literalMode'
+    _fields = ['discreteMode']
+    
+class ElementMode(AST):
+    _fields = ['mode']
     
     
     
