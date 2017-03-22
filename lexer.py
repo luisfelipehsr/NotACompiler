@@ -56,7 +56,8 @@ tokens = ['PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
           'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
           'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
           'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
-          'SEMICOLON' ,'COLON'  ,'CHALIT'  ,'LPAREN'    ,'RPAREN'  ] + list(reserved.values())
+          'SEMICOLON' ,'COLON'  ,'CHALIT'  ,'LPAREN'    ,
+          'RPAREN'  ] + list(reserved.values())
 
 # Regular expression rules for simple tokens
 t_PLUS = r'\+'
