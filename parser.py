@@ -14,16 +14,16 @@ class Program(AST):
     _fields = ['StatementList']
     
 class StatementList(AST):
-    #<StatementList> ::= <Statement> <StatemenList>
+    #<StatementList> ::= <StatemenList> <Statement> 
     #                  | <Statement> 
-    _fields = ['Statement','StatementList']
+    _fields = ['StatementList']
     
 class Statement(AST):
     #<Statement> ::= <DeclarationStatement>
     #        | <SynonymStatement>
     #        | <NewModeStatement>
-    #        | <procedure_Statement>
-    #        | <action_Statement>
+    #        | <ProcedureStatement>
+    #        | <ActionStatement>
     _fields = ['Statement']
     
 class DeclarationStatement(AST):
@@ -33,10 +33,10 @@ class DeclarationStatement(AST):
 class DeclaratioList(AST):
     #<DeclaratioList> ::= <Declaration> , <DeclaratioList>
     #                   | <Declaration>
-    _fields = ['Declaration','DeclarationList'] 
+    _fields = ['DeclarationList'] 
     
 class Declaration(AST):
-    #<Declaration> ::= <IdentifierList> <mode> [ <Initialization> ]
+    #<Declaration> ::= <IdentifierList> <Mode> [ <Initialization> ]
     _fields = ['IdentifierList','Mode','Initialization']
 
 class Initialization(AST):
@@ -44,9 +44,9 @@ class Initialization(AST):
     _fields = ['Expression']
     
 class IdentifierList(AST):
-    #<IdentifierList> ::= <Identifier> , <IdentifierList>
+    #<IdentifierList> ::= <IdentifierList> ,<Identifier> 
     #                   | <Identifier> 
-    _fields = ['Identifier','IdentifierList']
+    _fields = ['IdentifierList']
     
 class Identifier(AST):
     #<Identifier> ::= ID
@@ -126,8 +126,8 @@ class LiteralRange(AST):
     _fields = ['lowerBound','UpperBound']
 
 class LowerBound(AST):
-    #<LowerBound> ::= <expression>
-    _fields = ['expression']
+    #<LowerBound> ::= <Expression>
+    _fields = ['Expression']
     
 class UpperBound(AST):
     #<UpperBound> ::= <Expression>
@@ -146,7 +146,7 @@ class StringMode(AST):
     _fields = ['Chars','StringLenght']
 
 class StringLength(AST):
-    #<StringLength> ::= <integer_literal>
+    #<StringLength> ::= <IntegerLiteral>
     _fields = ['IntegerLiteral']
 
 class ArrayMode(AST):
@@ -456,9 +456,9 @@ class ProcedureCall(AST):
 class ParameterList(AST):
     #<ParameterList> ::= <Parameter> , <ParameterList>
     #                | <Parameter>
-    _fields = ['Parameter','ParameterList'
+    _fields = ['Parameter','ParameterList']
 
-class Parameter(AST):
+class Parameter():
     #<Parameter> ::= <Expression>
     _fields = ['Expression']
 
@@ -521,4 +521,65 @@ class ResultSpec(AST):
 
 class ResultAttribute(AST):
     #<ResultAttribute>::= LOC
-    _fields = [] 
+    _fields = []
+
+import tokens from lexer 
+
+class Parser():
+
+    def p_Program(self,p):
+        """ Program : StatementList """
+        p[0] = Program(p[1])
+
+    def p_StatementList(self,p):
+        """ StatementList : StatemenList Statement | Statement """
+        if(len(p) == 2):
+            p[0] = StatementList([p[1]])
+        else:
+            p[0] = StatementList(p[1]._fields[0] + [p[2]])
+
+    def p_Statement(self,p):
+        """ Statement : DeclarationStatement
+                      | SynonymStatement
+                      | NewModeStatement
+                      | ProcedureStatement
+                      | ActionStatement """
+        p[0] = Statement(p[1])
+
+    def p_DeclarationStatement(self,p):
+        """ DeclarationStatement : DCL DeclaratioList SEMICOLON """
+        p[0] = DeclarationStatement(p[2])
+
+    def p_DeclarationList(self,p):
+        """DeclaratioList : DeclaratioList COMMA Declaration
+                          | Declaration """
+        if(len(p) == 2):
+            p[0] = DeclaratioList([p[1]])
+        else:
+            p[0] = DeclaratioList(p[1]._fields[0] + [p[2]])
+
+    def p_Declaration(self,p):
+        """ Declaration : IdentifierList Mode LBRACKET Initialization RBRACKET """
+        p[0] = Declaration(p[1],p[2],p[4])
+
+    def p_IdentifierList(self,p):
+        """ IdentifierList : IdentifierList COMMA Identifier 
+                           | Identifier """
+        if(len(p) == 2):
+            p[0] = IdentifierList([p[1]])
+        else:
+            p[0] = IdentifierList(p[1]._fields[0] + [p[2]])
+
+    def p_Identifier(self,p):
+        """ Identifier : ID """
+        p[0] = p[1]
+
+    def p_Mode(self,p):
+        """ Mode =  ModeName | DiscreteMode
+                 | ReferenceMode | <CompositeMode> """
+        p[0] = Mode(p[1])
+  
+    def p_Initialization(self,p):
+        """ Initialization : ATRIB Expression """
+        p[0] = Initialization(p[2])
+        
