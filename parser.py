@@ -9,158 +9,516 @@ class AST(object):
         for name,value in kwargs.items():
             setattr(self,name,value)
             
-
 class Program(AST):
-    #<program> ::= <statementList> 
-    _fields = ['statementList']
+    #<Program> ::= <StatementList> 
+    _fields = ['StatementList']
     
 class StatementList(AST):
-     #<statementList> ::= <Statement> <StatemenList> 
-    _fields = ['statement','statementList']
+    #<StatementList> ::= <Statement> <StatemenList>
+    #                  | <Statement> 
+    _fields = ['Statement','StatementList']
     
 class Statement(AST):
-    #<statement> ::= <declaration_statement>
-    #        | <synonym_statement>
-    #        | <newmode_statement>
-    #        | <procedure_statement>
-    #        | <action_statement>
+    #<Statement> ::= <DeclarationStatement>
+    #        | <SynonymStatement>
+    #        | <NewModeStatement>
+    #        | <procedure_Statement>
+    #        | <action_Statement>
     _fields = ['Statement']
     
 class DeclarationStatement(AST):
-    #<declaration_statement> ::= DCL <declaration_list> ;
-    _fields = ['declarationList']
+    #<DeclarationStatement> ::= DCL <DeclaratioList> ;
+    _fields = ['DeclarationList']
     
 class DeclaratioList(AST):
-    #<declaration_list> ::= <declaration> { , <declaration> }*
-    _fields = ['declaration','declarationList'] 
+    #<DeclaratioList> ::= <Declaration> , <DeclaratioList>
+    #                   | <Declaration>
+    _fields = ['Declaration','DeclarationList'] 
     
 class Declaration(AST):
-    #<declaration> ::= <identifier_list> <mode> [ <initialization> ]
-    _fields = ['identifierList','mode','initialization']
+    #<Declaration> ::= <IdentifierList> <mode> [ <Initialization> ]
+    _fields = ['IdentifierList','mode','Initialization']
 
 class Initialization(AST):
-    #<initialization> ::=  <assignment_symbol> <expression>
-    _fields = ['assignmentSymbol','expression']
+    #<Initialization> ::= ATRIB <Expression>
+    _fields = ['expression']
     
 class IdentifierList(AST):
-    #<identifier_list> ::= <identifier> { , <identifier> }*
-    _fields = ['identifier','identifierList']
+    #<IdentifierList> ::= <Identifier> , <IdentifierList>
+    #                   | <Identifier> 
+    _fields = ['Identifier','IdentifierList']
     
 class Identifier(AST):
-    #<identifier> ::= [a-zA-Z_][a-zA-Z_0-9]*(AKA id)
+    #<Identifier> ::= [a-zA-Z_][a-zA-Z_0-9]*(AKA id)
     _fields = ['id']
     
 class SynonymStatement(AST):
-    #<synonym_statement> ::= SYN <synonym_list> ;
-    _fields = ['synonymList']
+    #<SynonymStatement> ::= SYN <SynonymList> ;
+    _fields = ['SynonymList']
     
 class SynonymList(AST):
-    #<synonym_list> ::= <synonym_definition> { , <synonym_definition> }*
+    #<SynonymList> ::= <SynonymDefinition> , <SynonymList>
+    #                | <SynonymDefinition>
      _fields = ['synonymDefinition','synonymList']
      
 class SynonymDefinition(AST):
-    #<synonym_definition> ::= <identifier_list> [ <mode> ] = <constant_expression>
-    _fields = ['IdentifierList','mode','constantExpression']
+    #<SynonymDefinition> ::= <IdentifierList> [ <mode> ] = <constant_expression>
+    _fields = ['IdentifierList','Mode','ConstantExpression']
 
 class ConstantExpression(AST):
-    #<constante_expression> ::= <expression>
+    #<ConstantExpression> ::= <expression>
     _fields = ['expression']
     
 class NewModeStatement(AST):
-    #<newmode_statement> ::= TYPE <newmode_list> ;
-    _fields = ['newmodeList']
+    #<NewModeStatement> ::= TYPE <NewModeList> ;
+    _fields = ['NewModeList']
     
 class NewModeList(AST):
-    #<newmode_list> ::= <mode_definition> { , <mode_definition> }*
-    _fields = ['modeDefinition','newModeList']
+    #<NewModeList> ::= <ModeDefinition> , <NewModeList>
+    #                | <ModeDefinition>
+    _fields = ['modeDefinition','NewModeList']
     
 class ModeDefinition(AST):
-    #<mode_definition> ::= <identifier_list> = <mode>
-    _fields = ['identifierList','mode']
+    #<ModeDefinition> ::= <IdentifierList> = <Mode>
+    _fields = ['IdentifierList','Mode']
 
 class Mode(AST):
-    #<mode> ::=  <mode_name>
-    #   | <discrete_mode>
-    #   | <reference_mode>
-    #   | <composite_mode>
-    _fields = ['modeName']
+    #<Mode> ::=  <ModeName>
+    #   | <DiscreteMode>
+    #   | <ReferenceMode>
+    #   | <CompositeMode>
+    _fields = ['ModeName']
     
 class DiscreteMode(AST):
-    #<discrete_mode> ::=  <integer_mode>
-    #            | <boolean_mode>
-    #            | <character_mode>
-    #            | <discrete_range_mode>
+    #<DiscreteMode> ::=  <IntegerMode>
+    #            | <BooleanMode>
+    #            | <CharacterMode>
+    #            | <DiscreteRangeMode>
     _fields = ['integerMode']
     
 class IntegerMode(AST):
-    #<integer_mode> ::=  INT
+    #<IntegerMode> ::=  INT
     _fields = ['int']
     
 class BooleanMode(AST):
-    #<boolean_mode> ::=  BOOL
+    #<BooleanMode> ::=  BOOL
     _fields = ['bool']
     
 class CharacterMode(AST):
-    #<character_mode> ::= CHAR
+    #<CharacterMode> ::= CHAR
     _fields = ['char']
     
 class DiscreteRangeMode(AST):
-    # <discrete_range_mode> ::= <discrete_mode_name> ( <literal_range> )
-    #                  | <discrete_mode> ( <literal_range> )
+    # <DiscreteRangeMode> ::= <DiscreteModeName> ( <LiteralRange> )
+    #                  | <DiscreteMode> ( <LiteralRange> )
     _fields = ['discreteModeName','literalRange']
     
 class ModeName(AST):
-    #<mode_name> ::= <identifier>
-    _fields = ['identifier']
+    #<ModeName> ::= <Identifier>
+    _fields = ['Identifier']
     
 class DiscreteModeName(AST):
-    #<discrete_mode_name> ::= <identifier>
-    _fields = ['identifier']
+    #<DiscreteModeName> ::= <Identifier>
+    _fields = ['Identifier']
 
 class LiteralRange(AST):
-    #<literal_range> ::= <lower_bound> : <upper_bound>
-    _fields = ['lowerBound','upper_bound']
+    #<LiteralRange> ::= <LowerBound> : <UpperBound>
+    _fields = ['lowerBound','UpperBound']
 
 class LowerBound(AST):
-    #<lower_bound> ::= <expression>
+    #<LowerBound> ::= <expression>
     _fields = ['expression']
     
 class UpperBound(AST):
-    #<upper_bound> ::= <expression>
+    #<UpperBound> ::= <expression>
     _fields = ['expression']
     
 class ReferenceMode(AST):
-    #<reference_mode> ::= REF <mode>
+    #<ReferenceMode> ::= REF <mode>
      _fields = ['mode']
      
 class CompositeMode(AST):
-    #<composite_mode> ::= <string_mode> | <array_mode>
+    #<CompositeMode> ::= <StringMode> | <ArrayMode>
     _fields = ['stringMode']
     
 class StringMode(AST):
-    #<string_mode> ::= CHARS LBRACKET <string_length> RBRACKET
+    #<StringMode> ::= CHARS LBRACKET <StringLength> RBRACKET
     _fields = ['chars','stringLenght']
 
 class StringLength(AST):
-    #<string_length> ::= <integer_literal>
+    #<StringLength> ::= <integer_literal>
     _fields = ['integerLiteral']
 
-class arrayMode(AST):
-    #<array_mode> ::= ARRAY LBRACKET <IndexModeList> RBRACKET <element_mode>
+class ArrayMode(AST):
+    #<ArrayMode> ::= ARRAY LBRACKET <IndexModeList> RBRACKET <ElementMode>
     _fields = ['indexModeList']
 
 class IndexModeList(AST):
-    #<IndexModeList> ::= <index_mode> { , <index_mode> }*
+    #<IndexModeList> ::= <IndexMode> , <IndexModeList>
+    #               | <IndexMode> 
     _fields = ['indexMode','indexModeList']
     
 class IndexMode(AST):
-    #<index_mode> ::= <discrete_mode> | <literal_range>
+    #<IndexMode> ::= <DiscreteMode> | <LiteralRange>
     _fields = ['discreteMode']
     
 class ElementMode(AST):
-    #<element_mode> ::= <mode>
+    #<ElementMode> ::= <mode>
     _fields = ['mode']
     
+class Location(AST):
+    #<Location> ::=  <LocationName>
+    #       | <dereferenced_reference>
+    #       | <string_element>
+    #       | <string_slice>
+    #       | <array_element>
+    #       | <array_slice>
+    #       | <call_action>    
+    _fields = ['LocationName']
     
-    
-    
+class DereferencedReference(AST):
+    #<DereferencedReference> ::= <Location> ARROW
+    _fields = ['Location']
+
+class StringElement(AST):
+    #<StringElement> ::= <StringLocation> LBRACKET <StartElement> RBRACKET
+    _fields = ['StringLocation','StartElement']
+
+class StartElement(AST):
+    #<StartElement> ::= <IntegerExpression>
+    _fields = ['IntegerExpression']
+
+class StringSlice(AST):
+    #<StringSlice> ::= <StringLocation> LBRACKET <LeftElement> : <RightElement> RBRACKET
+    _fields = ['StringLocation','LeftElement','RightElement']
+
+class StringLocation(AST):
+    #<StringLocation> ::= <Identifier>
+    _fields = ['Identifier']
+
+class LeftElement(AST):
+    #<LeftElement> ::= <IntegerExpression>
+     _fields = [IntegerExpression]
+
+class RightElement(AST):
+    #<RightElement> ::= <IntegerExpression>
+    _fields = [IntegerExpression]
+
+class ArrayElement(AST):
+    #<ArrayElement> ::= <ArrayLocation> LBRACKET <ExpressionList> RBRACKET
+    _fields = ['ArrayLocation','ExpressionList']
+
+class ExpressionList(AST):
+    #<ExpressionList> ::= <Expression> , <ExpressionList>
+    #               | <Expression> 
+    _fields = ['Expression','ExpressionList']
+
+class ArraySlice(AST):
+    #<ArraySlice> ::= <ArrayLocation> LBRACKET <LowerBound> : <UpperBound> RBRACKET
+    _fields = ['ArrayLocation','LowerBound','UpperBound']
+
+class ArrayLocation(AST):
+    #<ArrayLocation> ::= <Location>
+    _fields = ['Location']
+
+class PrimitiveValue(AST):
+    #<primitive_value> ::=  <Literal>
+    #              | <ValueArrayElement>
+    #              | <ValueArraySlice>
+    #              | <ParenthesizedExpression>
+    _fields = ['Literal']
+
+class Literal(AST):
+    #<Literal> ::=  <IntegerLiteral>
+    #     | <BooleanLiteral>
+    #     | <CharacterLiteral>
+    #     | <EmptyLiteral>
+    #     | <CharacterStringLiteral>
+    _fields = ['IntegerLiteral']
+
+class IntegerLiteral(AST):
+    #<IntegerLiteral> ::=  ICONST
+    _fields = ['ICONST']
+
+class BooleanLiteral(AST):
+    #<BooleanLiteral> ::= FALSE | TRUE
+    _fields = ['Bool']
+        
+class CharacterLiteral(AST):
+    #<CharacterLiteral> ::=  CHALIT
+    _fields = ['Chalit']
+
+class EmptyLiteral(AST):
+    #<EmptyLiteral> ::= NULL
+    _fields = []        
+
+class CharacterStringLiteral(AST):
+    #<CharacterStringLiteral> ::= STR
+    _fields = ['STR']
+
+class ValueArrayElement(AST):
+    #<ValueArrayElement> ::= <ArrayPrimitiveValue> LBRACKET <ExpressionList> RBRACKET
+    _fields = ['ArrayPrimitiveValue','ExpressionList']
+
+class ValueArraySlice(AST):
+    #<ValueArraySlice> ::= <ArrayPrimitiveValue> LBRACKET <LowerElement> : <UpperElement> RBRACKET
+    _fields = ['ArrayPrimitiveValue','LowerElement','UpperElement']
+
+class ArrayPrimitiveValue(AST):
+    #<ArrayPrimitiveValue> ::= <PrimitiveValue>
+    _fields = ['PrimitiveValue']
+
+class ParenthesizedExpression(AST):
+    #<ParenthesizedExpression> ::= ( <Expression> )
+    _fields =['Expression']
+
+class Expression(AST):
+    #<Expression> ::= <Operand0> | <ConditionalExpression>
+    _fields = ['Operand0']
+
+class ConditionalExpression(AST):
+    #<ConditionalExpression> ::=  IF <BooleanExpression> <ThenExpression> <ElseExpression> FI
+    #                     | IF <BooleanExpression> <ThenExpression> <ElsifExpression> <ElseExpression> FI
+    _fields =['BooleanExpression','ThenExpression','ElsifExpression','ElseExpression']
+
+class BooleanExpression(AST):
+    #<BooleanExpression> ::= <Expression>
+    _fields = ['Expression']
+
+class ThenExpression(AST):
+    #<ThenExpression> ::= THEN <Expression>
+    _fields = ['Expression']
+
+class ElseExpression(AST):
+    #<ElseExpression> ::= ELSE <Expression>
+    _fields = ['Expression']
+
+class ElsifExpression(AST):
+    #<ElsifExpression> ::=  ELSIF <BooleanExpression> <ThenExpression>
+    #                | <ElsifExpression> ELSIF <BooleanExpression> <ThenExpression>
+    _fields = ['ElsifExpression','BooleanExpression','ThenExpression']
+
+class Operand0(AST):
+    #<Operand0> ::=  <Operand1>
+    #        | <Operand0> <Operator1> <Operand1>
+    _fields = ['Operand0','Operator1','Operand1']
+
+class Operator1(AST):
+    #<Operator1> ::=  <RelationalOperator>
+    #         | <MembershipOperator>
+    _fields = ['Operator']
+
+class RelationalOperator(AST):
+    #<RelationalOperator> ::=  AND | OR | EQUAL | NEQUAL | MORETHEN | EQMORETHEN | LESSTHEN | EQLESSTHEN
+    _fields = ['RelationalOperator']
+
+class MembershipOperator(AST):
+    #<MembershipOperator> ::= IN
+    _fields = []
+
+class Operand1(AST):
+    #<Operand1> ::=  <Operand2>
+    #        | <Operand1> <Operator2> <Operand2>
+    _fields = ['Operand1','Operator2','Operand2']
+
+class Operator2(AST):
+    #<Operator2> ::=  PLUS
+    #         | STRCAT
+    #         | MINUS
+    _fields = ['AddOperator']
+
+class Operand2(AST):
+    #<Operand2> ::=  <Operand3>
+    #        | <Operand2> MUL <Operand3>
+    #        | <Operand2> DIV <Operand3>
+    #        | <Operand2> MOD <Operand3>
+    _fields = ['Operand2','MultiOperation','Operand3']
+
+#Duvida!!!
+class Operand3(AST):
+    #<Operand3> ::=  [ MINUS ] <Operand4>
+    #        | [ NOT ] <Operand4>
+    #        | <Integer_Literal>
+    _fields = ['MonoOperation','Operand4']
+
+class Operand4(AST):
+    #<Operand4> ::=  <Location> | <ReferencedLocation> | <PrimitiveValue>
+    _fields = ['Location']
+
+class ReferencedLocation(AST):
+    #<ReferencedLocation> ::= ARROW <Location>
+    _fields = ['Location']
+
+class ActionStatement(AST):
+    #<ActionStatement> ::= [ ID: ] <Action> ;
+    _fields = ['Id','Action']
+
+class Action(AST):
+    #<Action> ::=  <BracketedAction>
+    #      | <AssignmentAction>
+    #      | <CallAction>
+    #      | <ExitAction>
+    #      | <ReturnAction>
+    #      | <ResultAction>
+    _fields = ['Actions']
+
+class BracketedAction(AST):
+    #<BracketedAction> ::= <IfAction> | <DoAction>
+    _fields = ['IfDoAction']
+
+class AssignmentAction(AST):
+    #<AssignmentAction> ::= <Location> <AssigningOperator> <Expression>
+    _fields = ['Location','AssigningOperator','Expression']
+
+class AssigningOperator(AST):
+    #<AssigningOperator> ::= [ <ClosedDyadicOperator> ] <AssignmentSymbol>
+    _fields = ['ClosedDyadicOperator','AssignmentSymbol']
+
+class ClosedDyadicOperator(AST):
+    #<ClosedDyadicOperator> ::= PLUS | MINUS | MUL | DIV | MOD | STRCAT
+    _fields = ['ClosedDyadicOperator']
+
+class IfAction(AST):
+    #<IfAction> ::= IF <BooleanExpression> <ThenClause> [ <ElseClause> ] FI
+    _fields = ['BooleanExpression','ThenClause','ElseClause']
+
+class ActionStatementList(AST):
+    #<ActionStatementList> ::= <ActionStatement> <ActionStatementList>
+    #                   | <ActionStatement>
+    _fields = ['ActionStatement','ActionStatementList']
+
+class ThenClause(AST):
+    #<ThenClause> ::= THEN <ActionStatementList>
+    _fields = ['ActionStatementList']
+
+class ElseClause(AST):
+    #<ElseClause> ::=  ELSE <ActionStatementList>
+    #           | ELSIF <BooleanExpression> <ThenClause> [ <ElseClause> ]
+    _fields = ['BooleanExpression','ThenClause','ElseClause']
+
+class DoAction(AST):
+    #<DoAction> ::= DO [ <ControlPart> ; ] <ActionStatementList> OD  
+    _fields = ['ControlPart','ActionStatementList']
+
+class ControlPart(AST):
+    #<ControlPart> ::=  <ForControl> [ <WhileControl> ]
+    #            | <WhileControl>
+    _fields = ['ForControl','WhileControl']
+
+class ForControl(AST):
+    #<ForControl> ::= FOR <Iteration>
+    _fields = ['Iteration']
+
+class Iteration(AST):
+    #<Iteration> ::= <StepEnumeration> | <RangeEnumeration>
+    _fields = ['StepEnumeration']
+
+class StepEnumeration(AST):
+    #<StepEnumeration> ::=  <LoopCounter> <AssignmentSymbol> <StartValue> [ <StepValue> ] [ DOWN ] <EndValue>
+    _fields = ['LoopCounter','AssignmentSymbol','StartValue','StepValue','EndValue']
+
+class LoopCounter(AST):
+    #<LoopCounter> ::= ID
+    _fields = ['Id'] 
+
+class StartValue(AST):
+    #<StartValue> ::= <DiscreteExpression>
+    _fields = ['DiscreteExpression']
+
+class StepValue(AST):
+    #<StepValue> ::= BY <IntegerExpression>
+    _fields = ['IntegerExpression'] 
+
+class EndValue(AST):
+    #<EndValue> ::= TO <DiscreteExpression>
+    _fields = ['DiscreteExpression']
+
+class DiscreteExpression(AST):
+    #<DiscreteExpression> ::= <Expression>
+    _fields = ['Expression']
+
+class RangeEnumeration(AST):
+    #<RangeEnumeration> ::= <LoopCounter> [ DOWN ] IN <DiscreteMode> 
+    _fields = ['LoopCounter','DiscreteMode']
+
+class WhileControl(AST):
+    #<WhileControl> ::= WHILE <BooleanExpression>
+    _fields = ['BooleanExpression']
+
+class CallAction(AST):
+    #<CallAction> ::=  <ProcedureCall> | <BuiltinCall>
+    _fields = ['ProcedureCall']
+
+class ProcedureCall(AST):
+    #<ProcedureCall> ::= <ProcedureName> ( [ <ParameterList> ] )
+    _fields = ['ProcedureName','ParameterList']
+
+class ParameterList(AST):
+    #<ParameterList> ::= <Parameter> , <ParameterList>
+    #                | <Parameter>
+    _fields = ['Parameter','ParameterList'
+
+class Parameter(AST):
+    #<Parameter> ::= <Expression>
+    _fields = ['Expression']
+
+class ProcedureName(AST):
+    #<ProcedureName> ::= <Identifier>
+    _fields = ['Identifier']
+
+class ExitActiom(AST):
+    #<ExitActiom> ::= EXIT ID
+    _fields = [Id]
+
+class ReturnAction(AST):
+    #<ReturnAction> ::= RETURN [ <Result> ]
+    _fields = ['Result']
+
+class ResultAction(AST):
+    #<ResultAction> ::= RESULT <Result>
+    _fields = ['Result']
+
+class Result(AST):
+    #<Result> ::= <Expression>
+    _fields = ['Expression']
+
+class BuiltinCall(AST):
+    #<BuiltinCall> ::= <BuiltinName> ( [ <ParameterList> ] )
+    _fields = ['BuiltinName','ParameterList']
+
+class BuiltinName(AST):
+    #<BuiltinName> ::= ABS | ASC | NUM | UPPER | LOWER | LENGTH | READ | PRINT
+    _fields = ['BuiltinName']
+
+class ProcedureStatement(AST):
+    #<ProcedureStatement> ::= ID : <ProcedureDefinition> ;
+    _fields = ['Id','ProcedureDefinition']
+
+class ProcedureDefinition(AST):
+    #<ProcedureDefinition> ::= PROC ( [ <FormalParameterList> ] ) [ <ResultSpec> ]; <StatementList> END
+    _fields = ['FormalParameterList','ResultSpec','StatementList']
+
+class FormalParameterList(AST):
+    #<FormalParameterList> ::= <FormalParameter> , <FormalParameterList>
+    #                        | <FormalParameter>
+    _fields = ['FormalParameter','FormalParameterList']
+
+class FormalParameter(AST):
+    #<FormalParameter> ::= <IdentifierList> <ParameterSpec>
+    _fields = ['IdentifierList','ParameterSpec']
+
+class ParameterSpec(AST):
+    #<ParameterSpec> ::=  <Mode> [ <ParameterAttribute> ]
+    _fields = ['Mode','ParameterAttribute']
+
+class ParameterAttribute(AST):
+    #<ParameterAttribute> ::= LOC
+    _fields = []
+
+class ResultSpec(AST):
+    #<ResultSpec> ::= RETURNS ( <Mode> [ <ResultAttribute> ] )
+    _fields = ['Mode','ResultAttribute']
+
+class ResultAttribute(AST):
+    #<ResultAttribute>::= LOC
+    _fields = [] 

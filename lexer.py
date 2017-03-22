@@ -56,7 +56,7 @@ tokens = ['PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
           'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
           'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
           'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
-          'SEMICOLON' ,'COLON'    ] + list(reserved.values())
+          'SEMICOLON' ,'COLON'  ,'CHALIT'  ] + list(reserved.values())
 
 # Regular expression rules for simple tokens
 t_PLUS = r'\+'
@@ -88,6 +88,11 @@ t_ignore = ' \t'
 def t_STR(t):
     r'\"([^\\n\\r\"\\\\]|(\\\\n)|(\\\\t)|(\\\\")|(\\\\\\\\))*"'
     t.value = t.value[1:-1]
+    return t
+
+def t_CHALIT(t):
+    r'(\'[0-9]\')|(\'[A-Za-z]\')'
+    t.value = ord(t)
     return t
 
 def t_ID(t):
