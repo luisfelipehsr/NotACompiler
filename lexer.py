@@ -131,6 +131,7 @@ lexer = lex.lex()
 programArchive = open("Example2","r")
 programCode = programArchive.read()
 
+
 lex.input(programCode) # Read example program
-#for tok in iter(lex.token, None):
-#    print (repr(tok.type), repr(tok.value))
+for tok in iter(lex.token, None):
+    print (repr(tok.type), repr(tok.value))

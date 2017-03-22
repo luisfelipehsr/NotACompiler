@@ -1,5 +1,5 @@
 import lexer as rawLexer
-from parserClasses.py import *
+from parserClasses import *
 import ply.yacc as yacc
 
 
