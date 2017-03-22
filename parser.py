@@ -37,11 +37,11 @@ class DeclaratioList(AST):
     
 class Declaration(AST):
     #<Declaration> ::= <IdentifierList> <mode> [ <Initialization> ]
-    _fields = ['IdentifierList','mode','Initialization']
+    _fields = ['IdentifierList','Mode','Initialization']
 
 class Initialization(AST):
     #<Initialization> ::= ATRIB <Expression>
-    _fields = ['expression']
+    _fields = ['Expression']
     
 class IdentifierList(AST):
     #<IdentifierList> ::= <Identifier> , <IdentifierList>
@@ -49,8 +49,8 @@ class IdentifierList(AST):
     _fields = ['Identifier','IdentifierList']
     
 class Identifier(AST):
-    #<Identifier> ::= [a-zA-Z_][a-zA-Z_0-9]*(AKA id)
-    _fields = ['id']
+    #<Identifier> ::= ID
+    _fields = ['Id']
     
 class SynonymStatement(AST):
     #<SynonymStatement> ::= SYN <SynonymList> ;
@@ -62,7 +62,7 @@ class SynonymList(AST):
      _fields = ['synonymDefinition','synonymList']
      
 class SynonymDefinition(AST):
-    #<SynonymDefinition> ::= <IdentifierList> [ <mode> ] = <constant_expression>
+    #<SynonymDefinition> ::= <IdentifierList> [ <Mode> ] = <ConstantExpression>
     _fields = ['IdentifierList','Mode','ConstantExpression']
 
 class ConstantExpression(AST):
@@ -76,7 +76,7 @@ class NewModeStatement(AST):
 class NewModeList(AST):
     #<NewModeList> ::= <ModeDefinition> , <NewModeList>
     #                | <ModeDefinition>
-    _fields = ['modeDefinition','NewModeList']
+    _fields = ['ModeDefinition','NewModeList']
     
 class ModeDefinition(AST):
     #<ModeDefinition> ::= <IdentifierList> = <Mode>
@@ -106,12 +106,12 @@ class BooleanMode(AST):
     
 class CharacterMode(AST):
     #<CharacterMode> ::= CHAR
-    _fields = ['char']
+    _fields = ['Char']
     
 class DiscreteRangeMode(AST):
     # <DiscreteRangeMode> ::= <DiscreteModeName> ( <LiteralRange> )
     #                  | <DiscreteMode> ( <LiteralRange> )
-    _fields = ['discreteModeName','literalRange']
+    _fields = ['DiscreteModeName','LiteralRange']
     
 class ModeName(AST):
     #<ModeName> ::= <Identifier>
@@ -130,50 +130,50 @@ class LowerBound(AST):
     _fields = ['expression']
     
 class UpperBound(AST):
-    #<UpperBound> ::= <expression>
-    _fields = ['expression']
+    #<UpperBound> ::= <Expression>
+    _fields = ['Expression']
     
 class ReferenceMode(AST):
-    #<ReferenceMode> ::= REF <mode>
-     _fields = ['mode']
+    #<ReferenceMode> ::= REF <Mode>
+     _fields = ['Mode']
      
 class CompositeMode(AST):
     #<CompositeMode> ::= <StringMode> | <ArrayMode>
-    _fields = ['stringMode']
+    _fields = ['StringMode']
     
 class StringMode(AST):
     #<StringMode> ::= CHARS LBRACKET <StringLength> RBRACKET
-    _fields = ['chars','stringLenght']
+    _fields = ['Chars','StringLenght']
 
 class StringLength(AST):
     #<StringLength> ::= <integer_literal>
-    _fields = ['integerLiteral']
+    _fields = ['IntegerLiteral']
 
 class ArrayMode(AST):
     #<ArrayMode> ::= ARRAY LBRACKET <IndexModeList> RBRACKET <ElementMode>
-    _fields = ['indexModeList']
+    _fields = ['IndexModeList']
 
 class IndexModeList(AST):
     #<IndexModeList> ::= <IndexMode> , <IndexModeList>
     #               | <IndexMode> 
-    _fields = ['indexMode','indexModeList']
+    _fields = ['IndexMode','IndexModeList']
     
 class IndexMode(AST):
     #<IndexMode> ::= <DiscreteMode> | <LiteralRange>
-    _fields = ['discreteMode']
+    _fields = ['DiscreteMode']
     
 class ElementMode(AST):
     #<ElementMode> ::= <mode>
-    _fields = ['mode']
+    _fields = ['Mode']
     
 class Location(AST):
     #<Location> ::=  <LocationName>
-    #       | <dereferenced_reference>
-    #       | <string_element>
-    #       | <string_slice>
-    #       | <array_element>
-    #       | <array_slice>
-    #       | <call_action>    
+    #       | <DereferencedReference>
+    #       | <StringElement>
+    #       | <StringSlice>
+    #       | <ArrayElement>
+    #       | <ArraySlice>
+    #       | <CallAction>    
     _fields = ['LocationName']
     
 class DereferencedReference(AST):
