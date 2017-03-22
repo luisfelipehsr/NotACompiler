@@ -56,16 +56,18 @@ tokens = ['PLUS'      ,'MINUS'  ,'MUL'     ,'DIV'       ,'LBRACKET',
           'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
           'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
           'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
-          'SEMICOLON' ,'COLON'  ,'CHALIT'  ] + list(reserved.values())
+          'SEMICOLON' ,'COLON'  ,'CHALIT'  ,'LPAREN'    ,'RPAREN'  ] + list(reserved.values())
 
 # Regular expression rules for simple tokens
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_MUL = r'\*'
 t_DIV = r'/'
-t_LBRACKET = r'\('
-t_RBRACKET = r'\)'
+t_LBRACKET = r'\['
+t_RBRACKET = r'\]'
 t_ARROW = r'->'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
 t_AND = r'&&'
 t_OR = r'\|\|'
 t_EQUAL = r'=='
