@@ -372,7 +372,7 @@ class Operand0(AST):
 
 class Operator1(AST):
     # <Operator1> ::=  <RelationalOperator>
-    #         | <MembershipOperator>
+    #         | IN
     _fields = ['Operator']
 
 
@@ -380,7 +380,7 @@ class RelationalOperator(AST):
     # <RelationalOperator> ::=  AND | OR | EQUAL | NEQUAL | MORETHEN | EQMORETHEN | LESSTHEN | EQLESSTHEN
     _fields = ['RelationalOperator']
 
-
+#Unused
 class MembershipOperator(AST):
     # <MembershipOperator> ::= IN
     _fields = []

@@ -58,7 +58,8 @@ class Parser():
 
     #Simplified
     def p_Mode(self,p):
-        """ Mode :  ModeName """
+        """ Mode :  ID 
+                 | DiscreteMode """
 
         p[0] = Mode(p[1])
   
@@ -125,11 +126,28 @@ class Parser():
                      | STR """
         p[0] = Literal(p[1])
 
+    def p_Operator1(self,p):
+        """Operator1 : RelationalOperator
+                     | IN """
+        p[0] = Operator1(p[1])
+
+    def p_RelationalOperator(self,p):
+        """ RelationalOperator : AND 
+                               | OR 
+                               | EQUAL 
+                               | NEQUAL 
+                               | MORETHEN 
+                               | EQMORETHEN 
+                               | LESSTHEN 
+                               | EQLESSTHEN"""
+        p[0] = RelationalOperator(p[1])
+
     def p_error(self, p):
             print("Systax error in input()")
 
     def parse(self, text):
         self.parser.parse(text,self.lexer)
+
 
 a = Parser()
 a.parse("dcl i int = 10;")
