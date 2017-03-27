@@ -72,8 +72,8 @@ class Parser():
         p[0] = Expression(p[1])
 
     def p_Operand0(self,p):
-        """" Operand0 : Operand1
-                      | Operand0 Operator1 Operand1 """
+        """Operand0 : Operand1
+                     | Operand0 Operator1 Operand1 """
         if len(p) == 2 :
             p[0] = Operand0(p[1],False,False)
         else:
@@ -108,18 +108,18 @@ class Parser():
 
     #Simplified
     def p_Operand4(self,p):
-        """ Operand4 =  PrimitiveValue """
+        """ Operand4 : PrimitiveValue """
         p[0] = Operand4(p[1])
 
     def p_PrimitiveValue(self,p):
-        """ PrimitiveValue = Literal
+        """ PrimitiveValue : Literal
                            | ValueArrayElement
                            | ValueArraySlice
                            | ParenthesizedExpression """
         p[0] = PrimitiveValue(p[1])
 
     def p_Literal(self,p):
-        """" Literal : ICONST
+        """ Literal : ICONST
                      | FALSE
                      | TRUE
                      | CHALIT
