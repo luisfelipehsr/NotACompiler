@@ -40,8 +40,12 @@ class Parser():
             p[0] = DeclaratioList(p[1]._fields[0] + [p[2]])
 
     def p_Declaration(self,p):
-        """ Declaration : IdentifierList Mode LBRACKET Initialization RBRACKET """
-        p[0] = Declaration(p[1],p[2],p[4])
+        """ Declaration : IdentifierList Mode 
+                        | IdentifierList Mode Initialization  """
+        if len(p) == 4:
+            p[0] = Declaration(p[1],p[2],p[3])
+        else:
+            p[0] = Declaration(p[1],p[2],False)
 
     def p_IdentifierList(self,p):
         """ IdentifierList : IdentifierList COMMA Identifier 
@@ -162,5 +166,6 @@ class Parser():
 
 
 a = Parser()
-a.parse("dcl i int = 10;")
+a.parse("dcl i int = 10;",)
+
 
