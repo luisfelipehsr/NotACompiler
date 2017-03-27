@@ -18,7 +18,7 @@ class Parser():
 
     def p_StatementList(self,p):
         """ StatementList : Statement
-                          | StatemenList Statement """
+                          | StatementList Statement """
         if(len(p) == 2):
             p[0] = StatementList([p[1]])
         else:
@@ -111,11 +111,9 @@ class Parser():
         """ Operand4 : PrimitiveValue """
         p[0] = Operand4(p[1])
 
+    #Simplified
     def p_PrimitiveValue(self,p):
-        """ PrimitiveValue : Literal
-                           | ValueArrayElement
-                           | ValueArraySlice
-                           | ParenthesizedExpression """
+        """ PrimitiveValue : Literal """
         p[0] = PrimitiveValue(p[1])
 
     def p_Literal(self,p):
