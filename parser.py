@@ -142,6 +142,11 @@ class Parser():
                                | EQLESSTHEN"""
         p[0] = RelationalOperator(p[1])
 
+    def p_Operator2(self,p):
+        # <Operator2> ::=  PLUS
+    #         | STRCAT
+    #         | MINUS
+
     def p_error(self, p):
             print("Systax error in input()")
 
