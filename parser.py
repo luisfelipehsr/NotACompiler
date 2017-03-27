@@ -1,4 +1,4 @@
-import lexer as rawLexer
+from lexer import Lexer as LexerHandle
 from parserClasses import *
 import ply.yacc as yacc
 
@@ -6,10 +6,9 @@ import ply.yacc as yacc
 class Parser():
 
     def __init__(self):
-
-        self.lexer = rawLexer
-        self.tokens = rawLexer.tokens
-
+        self.lexerHandle = LexerHandle()
+        self.lexer = self.lexerHandle.lexer
+        self.tokens = self.lexerHandle.tokens
         self.parser = yacc.yacc(module=self, start='Program')
 
     def p_Program(self,p):
@@ -159,7 +158,7 @@ class Parser():
             print("Systax error in input()")
 
     def parse(self, text):
-        self.parser.parse(text,self.lexer)
+        self.parser.parse(text)
 
 
 a = Parser()
