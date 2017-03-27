@@ -62,7 +62,14 @@ class Parser():
                  | DiscreteMode """
 
         p[0] = Mode(p[1])
-  
+
+    #Simplified
+    def p_DiscreteMode(self,p):
+        """DiscreteMode :  INT
+                        |  BOOL
+                        |  CHAR """
+        p[0] = DiscreteMode(p[1])
+
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression """
         p[0] = Initialization(p[2])
