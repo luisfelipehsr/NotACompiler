@@ -1,18 +1,39 @@
-class AST(object):
-    _fields = []
+import pydot as dot
 
-    def __init__(self, *args, **kwargs):
-        assert len(args) == len(self._fields)
-        for name, value in zip(self._fields, args):
-            setattr(self, name, value)
-        # Assign additional keyword arguments if supplied
-        for name, value in kwargs.items():
-            setattr(self, name, value)
+
+class AST(object):
+    
+
+    def __init__(self, *args):
+        self.fields = list(args)
+
+
+
+    def listCondens(self):
+        for n in self.fields:
+            if type(n) == list:
+                self.fields.remove(n)
+                self.fields += n
+
+    def dfs(self,graph):
+        self.listCondens()
+        for n in self.fields:
+            if(isinstance(n,AST)):
+                graph.add_edge(dot.Edge(self.__class__.__name__, n.__class__.__name__))
+                n.dfs(graph)
+            elif n != None:
+                graph.add_edge(dot.Edge(self.__class__.__name__, str(n)))
+
+
+    def buildGraph(self):
+        graph = dot.Dot(graph_type='graph')
+        self.dfs(graph)
+        graph.write_png('ast.png')
 
 
 class Program(AST):
     # <Program> ::= <StatementList>
-    _fields = ['StatementList']
+    fields = ['StatementList']
 
 
 class StatementList(AST):

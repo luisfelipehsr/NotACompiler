@@ -10,10 +10,12 @@ class Parser():
         self.lexer = self.lexerHandle.lexer
         self.tokens = self.lexerHandle.tokens
         self.parser = yacc.yacc(module=self, start='Program')
+        self.ast = 0
 
     def p_Program(self,p):
         """ Program : StatementList """
         p[0] = Program(p[1])
+        self.ast = AST(p[0])
 
     def p_StatementList(self,p):
         """ StatementList : Statement
@@ -45,7 +47,7 @@ class Parser():
         if len(p) == 4:
             p[0] = Declaration(p[1],p[2],p[3])
         else:
-            p[0] = Declaration(p[1],p[2],False)
+            p[0] = Declaration(p[1],p[2])
 
     def p_IdentifierList(self,p):
         """ IdentifierList : IdentifierList COMMA Identifier 
@@ -53,7 +55,8 @@ class Parser():
         if(len(p) == 2):
             p[0] = IdentifierList([p[1]])
         else:
-            p[0] = IdentifierList(p[1]._fields[0] + [p[2]])
+            print(p[1].fields[0] + [p[3]])
+            p[0] = IdentifierList(p[1].fields[0] + [p[3]])
 
     def p_Identifier(self,p):
         """ Identifier : ID """
@@ -86,7 +89,7 @@ class Parser():
         """Operand0 : Operand1
                      | Operand0 Operator1 Operand1 """
         if len(p) == 2 :
-            p[0] = Operand0(p[1],False,False)
+            p[0] = Operand0(p[1])
         else:
             p[0] = Operand0(p[1],p[2],p[3])
 
@@ -94,7 +97,7 @@ class Parser():
         """ Operand1 : Operand2
                      | Operand1 Operator2 Operand2 """
         if len(p) == 2 :
-            p[0] = Operand1(p[1],False,False)
+            p[0] = Operand1(p[1])
         else:
             p[0] = Operand1(p[1],p[2],p[3])
 
@@ -104,7 +107,7 @@ class Parser():
                      | Operand2 DIV Operand3
                      | Operand2 MOD Operand3 """
         if len(p) == 2:
-            p[0] = Operand2(p[1],False,False)
+            p[0] = Operand2(p[1])
         else:
             p[0] = Operand2(p[1],p[2],p[3])
 
@@ -113,7 +116,7 @@ class Parser():
                      | NOT  Operand4
                      | ICONST """
         if len(p) == 2:
-            p[0] = Operand3(p[1],False)
+            p[0] = Operand3(p[1])
         else:
             p[0] = Operand3(p[1],p[2])
 
@@ -163,9 +166,12 @@ class Parser():
 
     def parse(self, text):
         self.parser.parse(text)
+        print(self.ast)
 
 
 a = Parser()
-a.parse("dcl i int = 10;",)
+a.parse("dcl i,j int = 10;")
+a.ast.buildGraph()
+
 
 
