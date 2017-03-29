@@ -162,10 +162,11 @@ class Parser():
             print("Systax error in input()")
 
     def parse(self, text):
-        self.parser.parse(text)
+        self.test = self.parser.parse(text, lexer=self.lexer)
 
 
 a = Parser()
-a.parse("dcl i int = 10;",)
+a.parse("dcl i int = 10;")
+print (a.test)
 
 
