@@ -23,23 +23,23 @@ class Parser():
         if(len(p) == 2):
             p[0] = StatementList([p[1]])
         else:
-            p[0] = StatementList(p[1]._fields[0] + [p[2]])
+            p[0] = StatementList(p[1].fields[0] + [p[2]])
 
     def p_Statement(self,p):
         """ Statement : DeclarationStatement """
         p[0] = Statement(p[1])
 
     def p_DeclarationStatement(self,p):
-        """ DeclarationStatement : DCL DeclaratioList SEMICOLON """
+        """ DeclarationStatement : DCL DeclarationList SEMICOLON """
         p[0] = DeclarationStatement(p[2])
 
     def p_DeclarationList(self,p):
-        """DeclaratioList : DeclaratioList COMMA Declaration
+        """DeclarationList : DeclarationList COMMA Declaration
                           | Declaration """
         if(len(p) == 2):
-            p[0] = DeclaratioList([p[1]])
+            p[0] = DeclarationList([p[1]])
         else:
-            p[0] = DeclaratioList(p[1]._fields[0] + [p[2]])
+            p[0] = DeclarationList(p[1].fields[0] + [p[2]])
 
     def p_Declaration(self,p):
         """ Declaration : IdentifierList Mode 
@@ -170,7 +170,7 @@ class Parser():
 
 
 a = Parser()
-a.parse("dcl i,j int = 10;")
+a.parse("dcl i,j int = 2*10 * 2;")
 a.ast.buildGraph()
 
 

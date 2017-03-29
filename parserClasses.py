@@ -1,5 +1,5 @@
 import pydot as dot
-
+import uuid
 
 class AST(object):
     
@@ -17,13 +17,18 @@ class AST(object):
 
     def dfs(self,graph):
         self.listCondens()
+        myId = id(self)
+        graph.add_node(dot.Node(myId,label = self.__class__.__name__))
         for n in self.fields:
+            nId = id(n)
             if(isinstance(n,AST)):
-                graph.add_edge(dot.Edge(self.__class__.__name__, n.__class__.__name__))
+                graph.add_node(dot.Node(nId, label=n.__class__.__name__))
+                graph.add_edge(dot.Edge(myId,nId))
                 n.dfs(graph)
-            elif n != None:
-                graph.add_edge(dot.Edge(self.__class__.__name__, str(n)))
-
+            else:
+                nId += + uuid.uuid4().int & (1<<64)-1
+                graph.add_node(dot.Node(nId, label=str(n)))
+                graph.add_edge(dot.Edge(myId, nId))
 
     def buildGraph(self):
         graph = dot.Dot(graph_type='graph')
@@ -33,7 +38,7 @@ class AST(object):
 
 class Program(AST):
     # <Program> ::= <StatementList>
-    fields = ['StatementList']
+    _fields = ['StatementList']
 
 
 class StatementList(AST):
@@ -52,12 +57,12 @@ class Statement(AST):
 
 
 class DeclarationStatement(AST):
-    # <DeclarationStatement> ::= DCL <DeclaratioList> ;
+    # <DeclarationStatement> ::= DCL <DeclarationList> ;
     _fields = ['DeclarationList']
 
 
-class DeclaratioList(AST):
-    # <DeclaratioList> ::= <Declaration> , <DeclaratioList>
+class DeclarationList(AST):
+    # <DeclarationList> ::= <Declaration> , <DeclarationList>
     #                   | <Declaration>
     _fields = ['DeclarationList']
 
