@@ -15,7 +15,21 @@ class AST(object):
                 self.fields.remove(n)
                 self.fields += n
 
-    def dfs(self,graph):
+    def removeChanel(self):
+        self.listCondens()
+        while len(self.fields) == 1:
+            aux = self.fields[0]
+            if(not isinstance(aux,AST)):
+                return
+            self.fields = aux.fields
+
+    def clean(self):
+
+        self.removeChanel()
+        for n in self.fields:
+            n.clean
+
+    def build(self,graph):
         self.listCondens()
         myId = id(self)
         graph.add_node(dot.Node(myId,label = self.__class__.__name__))
@@ -24,7 +38,7 @@ class AST(object):
             if(isinstance(n,AST)):
                 graph.add_node(dot.Node(nId, label=n.__class__.__name__))
                 graph.add_edge(dot.Edge(myId,nId))
-                n.dfs(graph)
+                n.build(graph)
             else:
                 nId += + uuid.uuid4().int & (1<<64)-1
                 graph.add_node(dot.Node(nId, label=str(n)))
@@ -32,7 +46,8 @@ class AST(object):
 
     def buildGraph(self):
         graph = dot.Dot(graph_type='graph')
-        self.dfs(graph)
+        #self.clean()
+        self.build(graph)
         graph.write_png('ast.png')
 
 
