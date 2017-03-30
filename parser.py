@@ -21,9 +21,10 @@ class Parser():
         """ StatementList : Statement
                           | StatementList Statement """
         if(len(p) == 2):
-            p[0] = StatementList([p[1]])
+            p[0] = StatementList(p[1])
         else:
-            p[0] = StatementList(p[1].fields[0] + [p[2]])
+            p[0] = StatementList()
+            p[0].fields = p[1].fields + list(p[2])
 
     def p_Statement(self,p):
         """ Statement : DeclarationStatement """
@@ -37,9 +38,10 @@ class Parser():
         """DeclarationList : DeclarationList COMMA Declaration
                           | Declaration """
         if(len(p) == 2):
-            p[0] = DeclarationList([p[1]])
+            p[0] = DeclarationList(p[1])
         else:
-            p[0] = DeclarationList(p[1].fields[0] + [p[2]])
+            p[0] = DeclarationList()
+            p[0].fields = p[1].fields + list(p[3])
 
     def p_Declaration(self,p):
         """ Declaration : IdentifierList Mode 
@@ -53,10 +55,10 @@ class Parser():
         """ IdentifierList : IdentifierList COMMA Identifier 
                            | Identifier """
         if(len(p) == 2):
-            p[0] = IdentifierList([p[1]])
+            p[0] = IdentifierList(p[1])
         else:
-            print(p[1].fields[0] + [p[3]])
-            p[0] = IdentifierList(p[1].fields[0] + [p[3]])
+            p[0] = IdentifierList()
+            p[0].fields = p[1].fields + list(p[3])
 
     def p_Identifier(self,p):
         """ Identifier : ID """
@@ -76,6 +78,7 @@ class Parser():
                         |  CHAR """
         p[0] = DiscreteMode(p[1])
 
+    #Simplified
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression """
         p[0] = Initialization(p[2])
@@ -114,6 +117,7 @@ class Parser():
     def p_Operand3(self,p):
         """ Operand3 : MINUS Operand4
                      | NOT  Operand4
+                     | Operand4
                      | ICONST """
         if len(p) == 2:
             p[0] = Operand3(p[1])
@@ -122,13 +126,18 @@ class Parser():
 
     #Simplified
     def p_Operand4(self,p):
-        """ Operand4 : PrimitiveValue """
+        """ Operand4 : PrimitiveValue 
+                     | Location """
         p[0] = Operand4(p[1])
 
     #Simplified
     def p_PrimitiveValue(self,p):
         """ PrimitiveValue : Literal """
         p[0] = PrimitiveValue(p[1])
+
+    def p_Location(self,p):
+        """Location : ID"""
+        p[0] = Location(p[1])
 
     def p_Literal(self,p):
         """ Literal : ICONST
@@ -166,11 +175,11 @@ class Parser():
 
     def parse(self, text):
         self.parser.parse(text)
-        print(self.ast)
+
 
 
 a = Parser()
-a.parse("dcl i,j int = 2*10 * 2;")
+a.parse("dcl i,j char = 'i' * j;")
 a.ast.buildGraph()
 
 

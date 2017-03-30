@@ -9,33 +9,33 @@ class AST(object):
 
 
 
-    def listCondens(self):
-        for n in self.fields:
-            if type(n) == list:
-                self.fields.remove(n)
-                self.fields += n
+
+
+
+
+
+
 
     def removeChanel(self):
-        self.listCondens()
         while len(self.fields) == 1:
+            print(self)
             aux = self.fields[0]
-            if(not isinstance(aux,AST)):
+            if(isinstance(aux,AST)):
+                self.fields = aux.fields
+            else:
                 return
-            self.fields = aux.fields
 
-    def clean(self):
-
-        self.removeChanel()
         for n in self.fields:
-            n.clean
+            if isinstance(n,AST):
+                n.removeChanel()
 
     def build(self,graph):
-        self.listCondens()
+        #self.removeLists()
         myId = id(self)
         graph.add_node(dot.Node(myId,label = self.__class__.__name__))
         for n in self.fields:
             nId = id(n)
-            if(isinstance(n,AST)):
+            if isinstance(n,AST):
                 graph.add_node(dot.Node(nId, label=n.__class__.__name__))
                 graph.add_edge(dot.Edge(myId,nId))
                 n.build(graph)
@@ -46,7 +46,7 @@ class AST(object):
 
     def buildGraph(self):
         graph = dot.Dot(graph_type='graph')
-        #self.clean()
+        #self.removeChanel()
         self.build(graph)
         graph.write_png('ast.png')
 

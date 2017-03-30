@@ -97,7 +97,7 @@ class Lexer():
 
     def t_CHALIT(self,t):
         r'(\'[0-9]\')|(\'[A-Za-z]\')'
-        t.value = ord(t)
+        t.value = ord(t.value[1:-1])
         return t
 
     def t_ID(self,t):
