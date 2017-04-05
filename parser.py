@@ -88,6 +88,16 @@ class Parser():
         """ Expression : Operand0"""
         p[0] = Expression(p[1])
 
+    def p_ExpressionList(self,p):
+        """ ExpressionList : ExpressionList COMMA Expression 
+                           | Expression"""
+        if (len(p) == 2):
+            p[0] = ExpressionList(p[1])
+        else:
+            p[0] = ExpressionList
+            p[0].fields = p[1].fields + list(p[3])
+
+
     def p_Operand0(self,p):
         """Operand0 : Operand1
                      | Operand0 Operator1 Operand1 """
@@ -130,10 +140,20 @@ class Parser():
                      | Location """
         p[0] = Operand4(p[1])
 
-    #Simplified
     def p_PrimitiveValue(self,p):
-        """ PrimitiveValue : Literal """
+        """ PrimitiveValue : Literal 
+                           | ValueArrayElement
+                           | ValueArraySlice
+                           | ParenthesizedExpression """
         p[0] = PrimitiveValue(p[1])
+
+    def p_ValueArrayElement(self,p):
+        """ ValueArrayElement : PrimitiveValue LPAREN ExpressionList RPAREN """
+        p[0] = ValueArrayElement(p[1],p[3])
+
+    def p_ValueArraySlice(self,p):
+        """ ValueArraySlice : ArrayPrimitiveValue LBRACKET LowerElement COLON UpperElement RBRACKET"""
+        p[0] = ValueArraySlice(p[1],p[3],p[4])
 
     def p_Location(self,p):
         """Location : ID"""
@@ -179,7 +199,7 @@ class Parser():
 
 
 a = Parser()
-a.parse("dcl i,j char = 'i' * j;")
+a.parse("dcl i int = 10 ;")
 a.ast.buildGraph()
 
 

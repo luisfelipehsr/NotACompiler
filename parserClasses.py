@@ -7,15 +7,6 @@ class AST(object):
     def __init__(self, *args):
         self.fields = list(args)
 
-
-
-
-
-
-
-
-
-
     def removeChanel(self):
         while len(self.fields) == 1:
             print(self)
@@ -361,7 +352,7 @@ class ValueArraySlice(AST):
     # <ValueArraySlice> ::= <ArrayPrimitiveValue> LBRACKET <LowerElement> : <UpperElement> RBRACKET
     _fields = ['ArrayPrimitiveValue', 'LowerElement', 'UpperElement']
 
-
+#Substituido
 class ArrayPrimitiveValue(AST):
     # <ArrayPrimitiveValue> ::= <PrimitiveValue>
     _fields = ['PrimitiveValue']
