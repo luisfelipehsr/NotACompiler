@@ -274,6 +274,8 @@ class LeftElement(AST):
     # <LeftElement> ::= <IntegerExpression>
     _fields = ['IntegerExpression']
 
+class IntegerExpression(AST):
+    _fieds = ['Expression']
 
 class RightElement(AST):
     # <RightElement> ::= <IntegerExpression>
@@ -357,7 +359,7 @@ class ArrayPrimitiveValue(AST):
     # <ArrayPrimitiveValue> ::= <PrimitiveValue>
     _fields = ['PrimitiveValue']
 
-
+#Substituido
 class ParenthesizedExpression(AST):
     # <ParenthesizedExpression> ::= ( <Expression> )
     _fields = ['Expression']

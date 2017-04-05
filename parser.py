@@ -127,8 +127,7 @@ class Parser():
     def p_Operand3(self,p):
         """ Operand3 : MINUS Operand4
                      | NOT  Operand4
-                     | Operand4
-                     | ICONST """
+                     | Operand4 """
         if len(p) == 2:
             p[0] = Operand3(p[1])
         else:
@@ -144,16 +143,20 @@ class Parser():
         """ PrimitiveValue : Literal 
                            | ValueArrayElement
                            | ValueArraySlice
-                           | ParenthesizedExpression """
+                           | LPAREN Expression RPAREN """
         p[0] = PrimitiveValue(p[1])
 
     def p_ValueArrayElement(self,p):
         """ ValueArrayElement : PrimitiveValue LPAREN ExpressionList RPAREN """
         p[0] = ValueArrayElement(p[1],p[3])
 
-    def p_ValueArraySlice(self,p):
-        """ ValueArraySlice : ArrayPrimitiveValue LBRACKET LowerElement COLON UpperElement RBRACKET"""
-        p[0] = ValueArraySlice(p[1],p[3],p[4])
+    def p_ValueArraySlice(self, p):
+        """ ValueArraySlice : PrimitiveValue LBRACKET IntegerExpression COLON IntegerExpression RBRACKET"""
+        p[0] = ValueArraySlice(p[1], p[3], p[4])
+
+    def p_IntegerExpression(self,p):
+        """IntegerExpression : Expression"""
+        p[0] = IntegerExpression(p[1])
 
     def p_Location(self,p):
         """Location : ID"""
