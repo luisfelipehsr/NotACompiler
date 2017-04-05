@@ -64,26 +64,26 @@ class Parser():
         """ Identifier : ID """
         p[0] = p[1]
 
-    #Simplified
+    # TODO Expand
     def p_Mode(self,p):
         """ Mode :  ID 
                  | DiscreteMode """
 
         p[0] = Mode(p[1])
 
-    #Simplified
+    # TODO Expand
     def p_DiscreteMode(self,p):
         """DiscreteMode :  INT
                         |  BOOL
                         |  CHAR """
         p[0] = DiscreteMode(p[1])
 
-    #Simplified
+    # TODO Expand
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression """
         p[0] = Initialization(p[2])
 
-    #Simplified
+    #TODO Expand
     def p_Expression(self,p):
         """ Expression : Operand0"""
         p[0] = Expression(p[1])
@@ -96,7 +96,6 @@ class Parser():
         else:
             p[0] = ExpressionList
             p[0].fields = p[1].fields + list(p[3])
-
 
     def p_Operand0(self,p):
         """Operand0 : Operand1
@@ -133,11 +132,15 @@ class Parser():
         else:
             p[0] = Operand3(p[1],p[2])
 
-    #Simplified
     def p_Operand4(self,p):
         """ Operand4 : PrimitiveValue 
-                     | Location """
+                     | Location 
+                     | ReferencedLocation"""
         p[0] = Operand4(p[1])
+
+    def p_ReferencedLocation(self,p):
+        """ReferencedLocation : ARROW Location"""
+        p[0] = ReferencedLocation(p[2])
 
     def p_PrimitiveValue(self,p):
         """ PrimitiveValue : Literal 
@@ -151,13 +154,10 @@ class Parser():
         p[0] = ValueArrayElement(p[1],p[3])
 
     def p_ValueArraySlice(self, p):
-        """ ValueArraySlice : PrimitiveValue LBRACKET IntegerExpression COLON IntegerExpression RBRACKET"""
+        """ ValueArraySlice : PrimitiveValue LBRACKET Expression COLON Expression RBRACKET"""
         p[0] = ValueArraySlice(p[1], p[3], p[4])
 
-    def p_IntegerExpression(self,p):
-        """IntegerExpression : Expression"""
-        p[0] = IntegerExpression(p[1])
-
+    #TODO expand
     def p_Location(self,p):
         """Location : ID"""
         p[0] = Location(p[1])
