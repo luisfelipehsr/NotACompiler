@@ -154,7 +154,7 @@ class Parser():
         p[0] = ValueArrayElement(p[1],p[3])
 
     def p_ValueArraySlice(self, p):
-        """ ValueArraySlice : PrimitiveValue LBRACKET Expression COLON Expression RBRACKET"""
+        """ ValueArraySlice : PrimitiveValue LBRACKET Operand1 COLON Operand1 RBRACKET"""
         p[0] = ValueArraySlice(p[1], p[3], p[4])
 
     #TODO expand
