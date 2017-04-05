@@ -1,1 +1,5 @@
-upper_element e lower_element -> expressões que devem ser INTEIROS
+    integer_expression somente aparece para definir bounds e steps. Portanto faz sentido que somente
+operand1 seja resolvido por ela. (ifelse de expression nunca valerá por questões de legibilidade, o-
+perand0 inclui a mais somente operações que resultam em booleano)
+
+    location_name é um IDENTIFICADOR.
