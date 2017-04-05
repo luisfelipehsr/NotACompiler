@@ -154,12 +154,9 @@ class Parser():
         p[0] = ValueArrayElement(p[1],p[3])
 
     def p_ValueArraySlice(self, p):
-        """ ValueArraySlice : PrimitiveValue LBRACKET IntegerExpression COLON IntegerExpression RBRACKET"""
+        """ ValueArraySlice : PrimitiveValue LBRACKET Expression COLON Expression RBRACKET"""
         p[0] = ValueArraySlice(p[1], p[3], p[4])
 
-    def p_IntegerExpression(self,p):
-        """IntegerExpression : Expression"""
-        p[0] = IntegerExpression(p[1])
     #TODO expand
     def p_Location(self,p):
         """Location : ID"""
