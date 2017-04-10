@@ -2,4 +2,6 @@
 operand1 seja resolvido por ela. (ifelse de expression nunca valerá por questões de legibilidade, o-
 perand0 inclui a mais somente operações que resultam em booleano)
 
+    SYN e DCL podem ser resolvidos usando a ideia a cima, trocando por operand0 ao invés de EXPRESSION
+
     location_name é um IDENTIFICADOR.
