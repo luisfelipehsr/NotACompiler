@@ -159,8 +159,70 @@ class Parser():
 
     #TODO expand
     def p_Location(self,p):
-        """Location : ID"""
+        """ Location : ID 
+                     | DereferencedReference
+                     | StringElement
+                     | StringSlice
+                     | ArrayElement
+                     | ArraySlice
+                     | CallAction """
         p[0] = Location(p[1])
+
+    def p_DereferencedReference(self,p):
+        """ DereferencedReference : Location ARROW """
+
+        p[0] = DereferencedReference(p[1])
+
+    def p_StringElement(self,p):
+        """ StringElement : ID LBRACKET Operand1 RBRACKET"""
+
+        p[0] = StringElement(p[1],p[3])
+
+    def p_StringSlice(self,p):
+        """ StringSlice : ID LBRACKET Operand1 COLON Operand1 RBRACKET"""
+        p[0] = StringSlice(p[1],p[3],p[5])
+
+    def p_ArrayElement(self,p):
+        """ ArrayElement : Location LBRACKET ExpressionList RBRACKET """
+        p[0] = ArrayElement(p[1],p[3])
+
+    def p_ArraySlice(self,p):
+        """ ArraySlice : Location LBRACKET Operand1 COLON Operand1 RBRACKET """
+        p[0] = ArraySlice(p[1],p[3],p[5])
+
+    def p_CallAction(self,p):
+        """ CallAction :  ProcedureCall 
+                        | BuiltinCall"""
+        p[0] = CallAction(p[1])
+
+    def p_ProcedureCall(self,p):
+        # ExpressionList === ParameterList
+        """ ProcedureCall : ID LPAREN RPAREN
+                          | ID LPAREN ExpressionList RPAREN"""
+        if len(p) == 4:
+            p[0] = ProcedureCall(p[1])
+        else:
+            p[0] = ProcedureCall(p[1],p[3])
+
+    def p_BuilinCall(self,p):
+        #ParameterList === ExpressionList
+        """ BuiltinCall : BuiltinName LPAREN RPAREN
+                        | BuiltinName LPAREN ExpressionList RPAREN"""
+        if len(p) == 4:
+            p[0] = BuiltinCall(p[1])
+        else:
+            p[0] = BuiltinCall(p[1],p[3])
+
+    def p_BuiltinName(self,p):
+        """ BuiltinName : ABS 
+                        | ASC 
+                        | NUM 
+                        | UPPER 
+                        | LOWER 
+                        | LENGHT 
+                        | READ 
+                        | PRINT """
+        p[0] = BuiltinName(p[1])
 
     def p_Literal(self,p):
         """ Literal : ICONST
@@ -202,7 +264,7 @@ class Parser():
 
 
 a = Parser()
-a.parse("dcl i int = 10 ;")
+a.parse("dcl i int = 10*i ;")
 a.ast.buildGraph()
 
 
