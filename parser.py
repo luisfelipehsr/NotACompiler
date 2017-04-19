@@ -96,7 +96,7 @@ class Parser():
 
     def p_LiteralRange(self,p):
         """ LiteralRange : Operand0 COLON Operand0 """
-        p[0] = LiteraRange(p[1],p[3])
+        p[0] = LiteralRange(p[1],p[3])
 
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression 
@@ -319,7 +319,7 @@ class Parser():
 
 a = Parser()
 a.parse("dcl i int = 10*i ;")
-a.ast.buildGraph()
+#a.ast.buildGraph()
 
 
 
