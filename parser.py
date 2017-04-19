@@ -3,7 +3,7 @@ from parserClasses import *
 import ply.yacc as yacc
 
 
-class Parser():
+class Parser:
 
     def __init__(self):
         self.lexerHandle = LexerHandle()
@@ -20,14 +20,15 @@ class Parser():
     def p_StatementList(self,p):
         """ StatementList : Statement
                           | StatementList Statement """
-        if(len(p) == 2):
+        if len(p) == 2:
             p[0] = StatementList(p[1])
         else:
             p[0] = StatementList()
             p[0].fields = p[1].fields + list(p[2])
 
     def p_Statement(self,p):
-        """ Statement : DeclarationStatement """
+        """ Statement : DeclarationStatement
+                      | SynonymStatement """
         p[0] = Statement(p[1])
 
     def p_DeclarationStatement(self,p):
@@ -54,7 +55,7 @@ class Parser():
     def p_IdentifierList(self,p):
         """ IdentifierList : IdentifierList COMMA Identifier 
                            | Identifier """
-        if(len(p) == 2):
+        if len(p) == 2:
             p[0] = IdentifierList(p[1])
         else:
             p[0] = IdentifierList()
@@ -64,10 +65,36 @@ class Parser():
         """ Identifier : ID """
         p[0] = p[1]
 
+    def p_SynonymStatement(self,p):
+        """ SynonymStatement : SYN SynonymList """
+
+        p[0] = SynonymStatement(p[2])
+
+
+    def p_SynonymList(self,p):
+        """ SynonymList : SynonymDefinition SynonymList
+                        | SynonymDefinition """
+
+        if len(p) == 2:
+            p[0] = SynonymList(p[1])
+
+        else:
+            p[0] = SynonymList()
+            p[0].fields = list(p[1]) + p[2].fields
+
+    def p_SynonymDefinition(self,p):
+        """ SynonymDefinition : IdentifierList Mode EQUAL Expression
+                              | IdentifierList EQUAL Expression """
+        if len(p) == 4:
+            p[0] = SynonymDefinition(p[1], None, p[3])
+        else:
+            p[0] = SynonymDefinition(p[1], p[2], p[4])
+
     # TODO Expand
     def p_Mode(self,p):
         """ Mode :  ID 
-                 | DiscreteMode """
+                 | DiscreteMode
+                 | ReferenceMode """
 
         p[0] = Mode(p[1])
 
@@ -135,7 +162,7 @@ class Parser():
     def p_ExpressionList(self,p):
         """ ExpressionList : ExpressionList COMMA Expression 
                            | Expression"""
-        if (len(p) == 2):
+        if len(p) == 2:
             p[0] = ExpressionList(p[1])
         else:
             p[0] = ExpressionList
@@ -216,6 +243,7 @@ class Parser():
 
         p[0] = DereferencedReference(p[1])
 
+
     def p_StringElement(self,p):
         """ StringElement : ID LBRACKET Operand1 RBRACKET"""
 
@@ -228,6 +256,7 @@ class Parser():
     def p_ArrayElement(self,p):
         """ ArrayElement : Location LBRACKET ExpressionList RBRACKET """
         p[0] = ArrayElement(p[1],p[3])
+
 
     def p_ArraySlice(self,p):
         """ ArraySlice : Location LBRACKET Operand1 COLON Operand1 RBRACKET """
