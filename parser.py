@@ -73,10 +73,16 @@ class Parser():
 
     # TODO Expand
     def p_DiscreteMode(self,p):
-        """DiscreteMode :  INT
-                        |  BOOL
-                        |  CHAR """
+        """DiscreteMode : INT
+                        | BOOL
+                        | CHAR 
+                        | DiscreteRangeMode"""
         p[0] = DiscreteMode(p[1])
+
+    def p_DiscreteRangeMode(self,p):
+
+    # <DiscreteRangeMode> ::= <DiscreteModeName> ( <LiteralRange> )
+    #                  | <DiscreteMode> ( <LiteralRange> )
 
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression 
