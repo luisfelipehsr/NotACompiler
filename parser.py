@@ -80,9 +80,13 @@ class Parser():
         p[0] = DiscreteMode(p[1])
 
     def p_DiscreteRangeMode(self,p):
+        #DiscreteModeName == ID
+        """ DiscreteRangeMode : ID LPRAREN LiteralRange RPAREN
+                              | DiscreteMode LPAREN LiteralRange RPAREN """
+        p[0] = DiscreteRangeMode(p[1],p[3])
 
-    # <DiscreteRangeMode> ::= <DiscreteModeName> ( <LiteralRange> )
-    #                  | <DiscreteMode> ( <LiteralRange> )
+    def p_LiteralRange(self,p):
+
 
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression 
