@@ -80,6 +80,7 @@ class Declaration(AST):
 
 class Initialization(AST):
     # <Initialization> ::= ATRIB <Expression>
+
     _fields = ['Expression']
 
 

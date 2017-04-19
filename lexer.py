@@ -16,7 +16,7 @@ class Lexer():
             'do'      : 'DO',
             'down'    : 'DOWN',
             'else'    : 'ELSE',
-            'elseif'  : 'ELSEIF',
+            'elsif'   : 'ELSIF',
             'end'     : 'END',
             'exit'    : 'EXIT',
             'fi'      : 'FI',

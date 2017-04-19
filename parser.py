@@ -78,10 +78,18 @@ class Parser():
                         |  CHAR """
         p[0] = DiscreteMode(p[1])
 
-    # TODO Expand
     def p_Initialization(self,p):
-        """ Initialization : ATRIB Expression """
-        p[0] = Initialization(p[2])
+        """ Initialization : ATRIB Expression 
+                           | PLUS ATRIB Expression
+                           | MINUS ATRIB Expression
+                           | STRCAT ATRIB Expression
+                           | MUL ATRIB Expression
+                           | DIV ATRIB Expression
+                           | MOD ATRIB Expression"""
+        if len(p) == 3:
+            p[0] = Initialization(p[2])
+        else:
+            p[0] = Initialization(p[1],p[3])
 
     def p_Expression(self,p):
         """ Expression : Operand0
@@ -89,12 +97,30 @@ class Parser():
         p[0] = Expression(p[1])
 
     def p_ConditionalExpression(self,p):
-        """ ConditionalExpression : IF BooleanExpression ThenExpression ElseExpression FI
-                                  | IF BooleanExpression ThenExpression ElsifExpression ElseExpression FI """
+        # Boolean Expression == Expression
+        """ ConditionalExpression : IF Expression ThenExpression ElseExpression FI
+                                  | IF Expression ThenExpression ElsifExpression ElseExpression FI """
         if len(p) == 6:
             p[0] = ConditionalExpression(p[2],p[3],p[4])
         else:
             p[0] = ConditionalExpression(p[2], p[3], p[4],p[5])
+
+    def p_ThenExpression(self,p):
+        """ ThenExpression : THEN Expression """
+        p[0] = ThenExpression(p[2])
+
+    def p_ElseExpression(self,p):
+        """ ElseExpression : ELSE Expression """
+        p[0] = ElseExpression(p[2])
+
+    def p_ElsifExpression(self,p):
+        #Boolean Expression == Expression
+        """ ElsifExpression : ELSIF Expression ThenExpression
+                            | ElsifExpression ELSIF Expression ThenExpression """
+        if len(p) == 4:
+            p[0] = ElsifExpression(p[2],p[3])
+        else:
+            p[0] = ElsifExpression(p[1],p[3],p[4])
 
     def p_ExpressionList(self,p):
         """ ExpressionList : ExpressionList COMMA Expression 
