@@ -3,7 +3,7 @@ from parserClasses import *
 import ply.yacc as yacc
 
 
-class Parser:
+class Parser():
 
     def __init__(self):
         self.lexerHandle = LexerHandle()
@@ -27,8 +27,7 @@ class Parser:
             p[0].fields = p[1].fields + list(p[2])
 
     def p_Statement(self,p):
-        """ Statement : DeclarationStatement
-                      | SynonymStatement """
+        """ Statement : DeclarationStatement """
         p[0] = Statement(p[1])
 
     def p_DeclarationStatement(self,p):
@@ -64,32 +63,7 @@ class Parser:
     def p_Identifier(self,p):
         """ Identifier : ID """
         p[0] = p[1]
-        
 
-    def p_SynonymStatement(self,p):
-        """ SynonymStatement : SYN SynonymList """
-
-        p[0] = SynonymStatement(p[2])
-
-
-    def p_SynonymList(self,p):
-        """ SynonymList : SynonymDefinition SynonymList
-                        | SynonymDefinition """
-
-        if len(p) == 2:
-            p[0] = SynonymList(p[1])
-
-        else:
-            p[0] = SynonymList()
-            p[0].fields = list(p[1]) + p[2].fields
-
-    def p_SynonymDefinition(self,p):
-        """ SynonymDefinition : IdentifierList Mode EQUAL Expression
-                              | IdentifierList EQUAL Expression """
-        if len(p) == 4:
-            p[0] = SynonymDefinition(p[1], p[3])
-        else:
-            p[0] = SynonymDefinition(p[1], p[2], p[4])
 
     # TODO Expand
     def p_Mode(self,p):
@@ -108,10 +82,21 @@ class Parser:
 
     # TODO Expand
     def p_DiscreteMode(self,p):
-        """DiscreteMode :  INT
-                        |  BOOL
-                        |  CHAR """
+        """DiscreteMode : INT
+                        | BOOL
+                        | CHAR 
+                        | DiscreteRangeMode"""
         p[0] = DiscreteMode(p[1])
+
+    def p_DiscreteRangeMode(self,p):
+        #DiscreteModeName == ID
+        """ DiscreteRangeMode : ID LPRAREN LiteralRange RPAREN
+                              | DiscreteMode LBRACKET LiteralRange RBRACKET """
+        p[0] = DiscreteRangeMode(p[1],p[3])
+
+    def p_LiteralRange(self,p):
+        """ LiteralRange : Operand0 COLON Operand0 """
+        p[0] = LiteraRange(p[1],p[3])
 
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression 
@@ -229,13 +214,11 @@ class Parser:
     def p_Location(self,p):
         """ Location : ID 
                      | DereferencedReference
-                     | ArrayElement
                      | StringElement
                      | StringSlice
                      | ArraySlice
                      | CallAction """
         p[0] = Location(p[1])
-
 
     def p_DereferencedReference(self,p):
         """ DereferencedReference : Location ARROW """
@@ -244,21 +227,21 @@ class Parser:
 
 
     def p_StringElement(self,p):
-        """ StringElement : ID LBRACKET Operand1"""
+        """ StringElement : ID LBRACKET Operand1 RBRACKET"""
 
         p[0] = StringElement(p[1],p[3])
 
     def p_StringSlice(self,p):
-        """ StringSlice : ID LBRACKET Operand1 COLON Operand1"""
+        """ StringSlice : ID LBRACKET Operand1 COLON Operand1 RBRACKET"""
         p[0] = StringSlice(p[1],p[3],p[5])
 
     def p_ArrayElement(self,p):
-        """ ArrayElement : Location LBRACKET ExpressionList"""
+        """ ArrayElement : Location LBRACKET ExpressionList RBRACKET """
         p[0] = ArrayElement(p[1],p[3])
 
 
     def p_ArraySlice(self,p):
-        """ ArraySlice : Location LBRACKET Operand1 COLON Operand1"""
+        """ ArraySlice : Location LBRACKET Operand1 COLON Operand1 RBRACKET """
         p[0] = ArraySlice(p[1],p[3],p[5])
 
     def p_CallAction(self,p):
@@ -336,7 +319,7 @@ class Parser:
 
 a = Parser()
 a.parse("dcl i int = 10*i ;")
-# a.ast.buildGraph()
+a.ast.buildGraph()
 
 
 
