@@ -90,7 +90,7 @@ class Parser():
 
     def p_DiscreteRangeMode(self,p):
         #DiscreteModeName == ID
-        """ DiscreteRangeMode : ID LPRAREN LiteralRange RPAREN
+        """ DiscreteRangeMode : ID LPAREN LiteralRange RPAREN
                               | DiscreteMode LBRACKET LiteralRange RBRACKET """
         p[0] = DiscreteRangeMode(p[1],p[3])
 
@@ -216,6 +216,7 @@ class Parser():
                      | DereferencedReference
                      | StringElement
                      | StringSlice
+                     | ArrayElement
                      | ArraySlice
                      | CallAction """
         p[0] = Location(p[1])
