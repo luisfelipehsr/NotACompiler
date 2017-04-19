@@ -1,4 +1,4 @@
-#import pydot as dot
+import pydot as dot
 import uuid
 
 class AST(object):
@@ -117,7 +117,7 @@ class ConstantExpression(AST):
 
 
 class NewModeStatement(AST):
-    # <NewModeStatement> ::= TYPE <NewModeList> ;
+    # <NewModeStatement> ::= TYPE <NewModeList>
     _fields = ['NewModeList']
 
 

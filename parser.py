@@ -28,8 +28,88 @@ class Parser:
 
     def p_Statement(self,p):
         """ Statement : DeclarationStatement
-                      | SynonymStatement """
+                      | SynonymStatement 
+                      | NewModeStatement
+                      | ProcedureStatement 
+                      | ActionStatement """
         p[0] = Statement(p[1])
+
+    def p_ActionStatement(self,p):
+        """ ActionStatement : Action SEMICOLON
+                            | ID COLON Action SEMICOLON"""
+        if len(p) == 3:
+            p[0] = ActionStatement(p[1])
+        else:
+            p[0] = ActionStatement(p[1],p[3])
+    #TODO
+    def p_Action(self,p):
+        """Action : BracketedAction
+                  | AssignmentAction
+                  | CallAction
+                  | ExitAction
+                  | ReturnAction
+                  | ResultAction """
+        p[0] = Action(p[1])
+
+    def p_ProcedureStatement(self,p):
+        """ ProcedureStatement : ID COMMA ProcedureDefinition SEMICOLON """
+        p[0] = ProcedureStatement(p[1],p[3])
+
+    def p_ProcedureDefinition(self,p):
+        """ ProcedureDefinition : PROC LPAREN RPAREN SEMICOLON StatementList END
+                                | PROC LPAREN RPAREN ResultSpec SEMICOLON StatementList END
+                                | PROC LPAREN FormalParameterList RPAREN SEMICOLON StatementList END
+                                | PROC LPAREN FormalParameterList RPAREN ResultSpec SEMICOLON StatementList END"""
+
+        if len(p) == 7:
+            p[0] = ProcedureDefinition(p[5])
+        elif len(p) == 8:
+            if p[4] == 'LPAREN':
+                p[0] = ProcedureDefinition(p[4],p[6])
+            else:
+                p[0] = ProcedureDefinition(p[3],p[6])
+        else:
+            p[0] = ProcedureDefinition(p[3],p[5],p[7])
+
+    def p_ResultSpec(self,p):
+        """ ResultSpec : RETURNS LPAREN Mode RPAREN 
+                       | RETURNS LPAREN Mode LOC RPAREN """
+        p[0] = ResultSpec(p[3])
+
+    def p_FormalParameterList(self,p):
+        """ FormalParameterList : FormalParameter COMMA FormalParameterList
+                                | FormalParameter """
+        if len(p) == 2:
+            p[0] = FormalParameterList(p[1])
+        else:
+            p[0] = FormalParameterList()
+            p[0].fields = p[1].fields + list(p[2])
+
+    def p_FormalParameter(self,p):
+        """ FormalParameter : IdentifierList ParameterSpec """
+        p[0] = FormalParameter(p[1],p[2])
+
+    def p_ParameterSpec(self,p):
+        """ ParameterSpec : Mode 
+                          | Mode LOC """
+        p[0] = ParameterSpec(p[1])
+
+    def p_NewModeStatement(self,p):
+        """ NewModeStatement : TYPE NewModeList """
+        p[0] = NewModeStatement(p[2])
+
+    def p_NewModeList(self,p):
+        """ NewModeList : ModeDefinition COMMA NewModeList
+                        | ModeDefinition """
+        if len(p) == 2:
+            p[0] = NewModeList(p[1])
+        else:
+            p[0] = NewModeList()
+            p[0].fields = p[1].fields + list(p[2])
+
+    def p_ModeDefinition(self,p):
+        """ ModeDefinition : IdentifierList ATRIB Mode"""
+        p[0] = ModeDefinition(p[1],p[3])
 
     def p_DeclarationStatement(self,p):
         """ DeclarationStatement : DCL DeclarationList SEMICOLON """
@@ -70,7 +150,6 @@ class Parser:
 
         p[0] = SynonymStatement(p[2])
 
-
     def p_SynonymList(self,p):
         """ SynonymList : SynonymDefinition SynonymList
                         | SynonymDefinition """
@@ -90,13 +169,31 @@ class Parser:
         else:
             p[0] = SynonymDefinition(p[1], p[2], p[4])
 
-    # TODO Expand
     def p_Mode(self,p):
         """ Mode :  ID 
+                 | CompositeMode
                  | DiscreteMode
                  | ReferenceMode """
 
         p[0] = Mode(p[1])
+
+    def p_CompositeMode(self,p):
+        """ CompositeMode : StringMode
+                          | ArrayMode """
+        p[0] = CompositeMode(p[1])
+
+    def p_StringMode(self,p):
+        """ StringMode ::= CHARS LBRACKET ICONST RBRACKET """
+        p[0] = StringMode(p[3])
+
+    def p_ArrayMode(self,p):
+        #ElementMode == Mode
+        """ ArrayMode : ARRAY LBRACKET IndexModeList RBRACKET Mode """
+        p[0] = ArrayMode(p[3],p[5])
+
+    def p_ReferenceMode(self,p):
+        """ ReferenceMode : REF Mode """
+        p[0] = ReferenceMode(p[2])
 
     def p_DiscreteMode(self,p):
         """DiscreteMode : INT
@@ -104,6 +201,20 @@ class Parser:
                         | CHAR 
                         | DiscreteRangeMode"""
         p[0] = DiscreteMode(p[1])
+
+    def p_IndexModeList(self,p):
+        """ IndexModeList : IndexMode COMMA IndexModeList
+                        | IndexMode"""
+        if len(p) == 2:
+            p[0] = IndexModeList(p[1])
+        else:
+            p[0] = IndexModeList()
+            p[0].fields = p[1].fields + list(p[2])
+
+    def p_IndexMode(self,p):
+        """ IndexMode  : DiscreteMode 
+                       | LiteralRange """
+        p[0] = IndexMode(p[1])
 
     def p_DiscreteRangeMode(self,p):
         #DiscreteModeName == ID
@@ -243,7 +354,6 @@ class Parser:
 
         p[0] = DereferencedReference(p[1])
 
-
     def p_StringElement(self,p):
         """ StringElement : ID LBRACKET Operand1 RBRACKET"""
 
@@ -256,7 +366,6 @@ class Parser:
     def p_ArrayElement(self,p):
         """ ArrayElement : Location LBRACKET ExpressionList RBRACKET """
         p[0] = ArrayElement(p[1],p[3])
-
 
     def p_ArraySlice(self,p):
         """ ArraySlice : Location LBRACKET Operand1 COLON Operand1 RBRACKET """
