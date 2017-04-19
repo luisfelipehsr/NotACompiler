@@ -5,3 +5,11 @@ perand0 inclui a mais somente operações que resultam em booleano)
     SYN e DCL podem ser resolvidos usando a ideia a cima, trocando por operand0 ao invés de EXPRESSION
 
     location_name é um IDENTIFICADOR.
+
+
+
+
+
+    Ver com professor se precisa compilar o máximo que pode e dar warnings ou travar.
+
+    Tentar resolver o conflito de shift reduce T -> T e T -> T bla/
