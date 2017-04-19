@@ -71,7 +71,6 @@ class Parser():
 
         p[0] = Mode(p[1])
 
-    # TODO Expand
     def p_DiscreteMode(self,p):
         """DiscreteMode : INT
                         | BOOL
@@ -86,7 +85,8 @@ class Parser():
         p[0] = DiscreteRangeMode(p[1],p[3])
 
     def p_LiteralRange(self,p):
-
+        """ LiteralRange : LowerBound COLON UpperBound """
+        p[0] = LiteraRange(p[1],p[3])
 
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression 
