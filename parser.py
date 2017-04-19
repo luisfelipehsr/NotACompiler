@@ -81,11 +81,11 @@ class Parser():
     def p_DiscreteRangeMode(self,p):
         #DiscreteModeName == ID
         """ DiscreteRangeMode : ID LPRAREN LiteralRange RPAREN
-                              | DiscreteMode LPAREN LiteralRange RPAREN """
+                              | DiscreteMode LBRACKET LiteralRange RBRACKET """
         p[0] = DiscreteRangeMode(p[1],p[3])
 
     def p_LiteralRange(self,p):
-        """ LiteralRange : LowerBound COLON UpperBound """
+        """ LiteralRange : Operand0 COLON Operand0 """
         p[0] = LiteraRange(p[1],p[3])
 
     def p_Initialization(self,p):
