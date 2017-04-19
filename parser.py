@@ -83,10 +83,18 @@ class Parser():
         """ Initialization : ATRIB Expression """
         p[0] = Initialization(p[2])
 
-    #TODO Expand
     def p_Expression(self,p):
-        """ Expression : Operand0"""
+        """ Expression : Operand0
+                       | ConditionalExpression """
         p[0] = Expression(p[1])
+
+    def p_ConditionalExpression(self,p):
+        """ ConditionalExpression : IF BooleanExpression ThenExpression ElseExpression FI
+                                  | IF BooleanExpression ThenExpression ElsifExpression ElseExpression FI """
+        if len(p) == 6:
+            p[0] = ConditionalExpression(p[2],p[3],p[4])
+        else:
+            p[0] = ConditionalExpression(p[2], p[3], p[4],p[5])
 
     def p_ExpressionList(self,p):
         """ ExpressionList : ExpressionList COMMA Expression 
@@ -157,7 +165,6 @@ class Parser():
         """ ValueArraySlice : PrimitiveValue LBRACKET Operand1 COLON Operand1 RBRACKET"""
         p[0] = ValueArraySlice(p[1], p[3], p[4])
 
-    #TODO expand
     def p_Location(self,p):
         """ Location : ID 
                      | DereferencedReference
