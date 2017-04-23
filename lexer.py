@@ -56,7 +56,7 @@ class Lexer():
                   'RBRACKET'  ,'ARROW'  ,'ICONST'  ,'AND'       ,'OR'      ,
                   'EQUAL'     ,'NEQUAL' ,'MORETHEN','EQMORETHEN','LESSTHEN',
                   'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
-                  'ATRIB'     ,'STR'    ,'COMMENT' ,'NOTEQUAL'  ,'COMMA'   ,
+                  'ATRIB'     ,'STR'    ,'COMMENT' ,'COMMA'   ,
                   'SEMICOLON' ,'COLON'  ,'CHALIT'  ,'LPAREN'    ,
                   'RPAREN'  ] + list(self.reserved.values())
 
@@ -82,7 +82,6 @@ class Lexer():
         self.t_MOD = r'%'
         self.t_NOT = r'!'
         self.t_ATRIB = r'='
-        self.t_NOTEQUAL = r'!='
         self.t_COLON = r':'
         self.t_COMMA = r','
         self.t_SEMICOLON = r';'

@@ -107,10 +107,10 @@ class Parser:
         p[0] = Iteration(p[1])
 
     def p_StepEnumeration(self,p):
-        """ StepEnumeration :  ID ATRIB Operand0 Operand0
-                            |  ID ATRIB Operand0 Operand1 Operand0
-                            |  ID ATRIB Operand0 DOWN Operand0
-                            |  ID ATRIB Operand0 Operand1 DOWN Operand0 """
+        """ StepEnumeration :  ID ATRIB Operand0 TO Operand0
+                            |  ID ATRIB Operand0 BY Operand1 TO Operand0
+                            |  ID ATRIB Operand0 DOWN TO Operand0
+                            |  ID ATRIB Operand0 BY Operand1 DOWN TO Operand0 """
         if len(p) == 4:
             p[0] = StepEnumeration(p[3],p[4])
         elif len(p) == 6:
