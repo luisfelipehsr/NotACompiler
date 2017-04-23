@@ -605,8 +605,8 @@ class ProcedureName(AST):
     _fields = ['Identifier']
 
 
-class ExitActiom(AST):
-    # <ExitActiom> ::= EXIT ID
+class ExitAction(AST):
+    # <ExitAction> ::= EXIT ID
     _fields = ['Id']
 
 

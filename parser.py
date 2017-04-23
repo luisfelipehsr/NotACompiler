@@ -51,9 +51,129 @@ class Parser:
                   | ResultAction """
         p[0] = Action(p[1])
 
+    def p_AssignmentAction(self,p):
+        """ AssignmentAction : Location ATRIB Expression 
+                             | Location PLUS ATRIB Expression
+                             | Location MINUS ATRIB Expression
+                             | Location MUL ATRIB Expression
+                             | Location DIV ATRIB Expression
+                             | Location MOD ATRIB Expression
+                             | Location STRCAT ATRIB Expression"""
+        if len(p) == 4:
+            p[0] = AssignmentAction(p[1],p[2])
+        else:
+            p[0] = AssignmentAction(p[1],p[2],p[4])
+
+    def p_ExitAction(self,p):
+        """ ExitAction : EXIT ID """
+        p[0] = ExitActiom(p[2])
+
+    def p_ReturnAction(self,p):
+        """ReturnAction : RETURN 
+                        | RETURN Expression """
+        if len(p) == 2:
+            p[0] = ReturnAction()
+        else:
+            p[0] = ReturnAction(p[2])
+
+    def p_BracketedAction(self,p):
+        """ BracketedAction : IfAction 
+                            | DoAction """
+        p[0] = BracketedAction(p[1])
+
+    def p_ResultAction(self,p):
+        """ResultAction : RESULT Expression"""
+        p[0] = ResultAction(p[2])
+
+    def p_ControlPart(self,p):
+        """ ControlPart : ForControl 
+                        | ForControl WhileControl    
+                        | WhileControl """
+        if isinstance(p[1],ForControl):
+            if len(p) == 2:
+                p[0] = ControlPart(p[1])
+            else:
+                p[0] = ControlPart(p[1],p[2])
+        else:
+            p[0] = ControlPart(p[1])
+
+    def p_ForControl(self,p):
+        """ ForControl : FOR Iteration"""
+        p[0] = ForControl(p[2])
+
+    def p_Iteration(self,p):
+        """Iteration : StepEnumeration 
+                     | RangeEnumeration"""
+        p[0] = Iteration(p[1])
+
+    def p_StepEnumeration(self,p):
+        """ StepEnumeration :  ID ATRIB Operand0 Operand0
+                            |  ID ATRIB Operand0 Operand1 Operand0
+                            |  ID ATRIB Operand0 DOWN Operand0
+                            |  ID ATRIB Operand0 Operand1 DOWN Operand0 """
+        if len(p) == 4:
+            p[0] = StepEnumeration(p[3],p[4])
+        elif len(p) == 6:
+            p[0] = StepEnumeration(p[3],p[4],p[5])
+        else:
+            p[0] = StepEnumeration(p[3],p[4],p[5],p[6])
+
+    def p_RangeEnumeration(self,p):
+        """ RangeEnumeration : ID IN DiscreteMode 
+                             | ID DOWN IN DiscreteMode"""
+        if len(p) == 4:
+            p[0] = RangeEnumeration(p[1],p[3])
+        else:
+            p[0] = RangeEnumeration(p[1],p[2],p[4])
+
+    def p_WhileControl(self,p):
+        """ WhileControl : WHILE Operand0 """
+        p[0] = WhileControl(p[1])
+
+    def p_DoAction(self,p):
+        """DoAction : DO ActionStatementList OD
+                    | DO ControlPart SEMICOLON  ActionStatementList OD"""
+        if len(p) == 4:
+            p[0] = DoAction(p[2])
+        else:
+            p[0] = DoAction(p[2],p[4])
+
+    def p_IfAction(self,p):
+        """ IfAction : IF Operand0 ThenClause FI
+                     | IF Operand0 ThenClause ElseClause FI"""
+        if len(p) == 5:
+            p[0] = IfAction(p[2],p[3])
+        else:
+            p[0] = IfAction(p[2],p[3],p[4])
+
+    def p_ThenClause(self,p):
+        """ ThenClause : THEN ActionStatementList """
+        p[0] = ThenClause(p[2])
+
+    def p_ActionStatementList(self,p):
+        """ActionStatementList : ActionStatementList ActionStatement 
+                               | ActionStatement """
+
+        if len(p) == 2:
+            p[0] = ActionStatementList(p[1])
+        else:
+            p[0] = ActionStatementList()
+            p[0].fields = p[1].fields + list(p[2])
+
     def p_ProcedureStatement(self,p):
         """ ProcedureStatement : ID COMMA ProcedureDefinition SEMICOLON """
         p[0] = ProcedureStatement(p[1],p[3])
+
+    def p_ElseClause(self,p):
+        """ ElseClause : ELSE ActionStatementList
+                       | ELSIF Operand0 ThenClause
+                       | ELSIF Operand0 ThenClause ElseClause """
+        if len(p) == 3:
+            p[0] = ElseClause(p[2])
+        elif len(p) == 4:
+            p[0] = ElseClause(p[2],p[3])
+        else:
+            p[0] = ElseClause(p[2],p[3],p[4])
 
     def p_ProcedureDefinition(self,p):
         """ ProcedureDefinition : PROC LPAREN RPAREN SEMICOLON StatementList END
