@@ -4,8 +4,10 @@ import uuid
 class AST(object):
     
 
-    def __init__(self, *args):
+    def __init__(self,line=0, *args):
         self.fields = list(args)
+        self.type = None
+        self.line = line
 
     def removeChanel(self):
         while len(self.fields) == 1:
@@ -40,6 +42,12 @@ class AST(object):
         #self.removeChanel()
         self.build(graph)
         graph.write_png('ast.png')
+
+    def propagateType(self):
+        self.type = self.type
+
+    def checkTypes(self):
+        return True
 
 
 class Program(AST):
