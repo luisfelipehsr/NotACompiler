@@ -1,6 +1,7 @@
 from lexer import Lexer as LexerHandle
 from parserClasses import *
 import ply.yacc as yacc
+from os import walk
 
 
 class Parser:
@@ -15,6 +16,7 @@ class Parser:
     def p_Program(self,p):
         """ Program : StatementList """
         p[0] = Program(p[1])
+        print(p[1])
         self.ast = AST(p[0])
 
     def p_StatementList(self,p):
@@ -24,7 +26,7 @@ class Parser:
             p[0] = StatementList(p[1])
         else:
             p[0] = StatementList()
-            p[0].fields = p[1].fields + list(p[2])
+            p[0].fields = p[1].fields + [p[2]]
 
     def p_Statement(self,p):
         """ Statement : DeclarationStatement
@@ -111,12 +113,14 @@ class Parser:
                             |  ID ATRIB Operand0 BY Operand1 TO Operand0
                             |  ID ATRIB Operand0 DOWN TO Operand0
                             |  ID ATRIB Operand0 BY Operand1 DOWN TO Operand0 """
-        if len(p) == 4:
-            p[0] = StepEnumeration(p[3],p[4])
-        elif len(p) == 6:
-            p[0] = StepEnumeration(p[3],p[4],p[5])
+        if len(p) == 6:
+            p[0] = StepEnumeration(p[3],p[5])
+        elif len(p) == 7:
+            p[0] = StepEnumeration(p[3],p[4],p[6])
+        elif len(p) == 8:
+            p[0] = StepEnumeration(p[3],p[5],p[7])
         else:
-            p[0] = StepEnumeration(p[3],p[4],p[5],p[6])
+            p[0] = StepEnumeration(p[3],p[5],p[6],p[8])
 
     def p_RangeEnumeration(self,p):
         """ RangeEnumeration : ID IN DiscreteMode 
@@ -158,7 +162,7 @@ class Parser:
             p[0] = ActionStatementList(p[1])
         else:
             p[0] = ActionStatementList()
-            p[0].fields = p[1].fields + list(p[2])
+            p[0].fields = p[1].fields + [p[2]]
 
     def p_ProcedureStatement(self,p):
         """ ProcedureStatement : ID COMMA ProcedureDefinition SEMICOLON """
@@ -242,7 +246,7 @@ class Parser:
             p[0] = DeclarationList(p[1])
         else:
             p[0] = DeclarationList()
-            p[0].fields = p[1].fields + list(p[3])
+            p[0].fields = p[1].fields + [p[3]]
 
     def p_Declaration(self,p):
         """ Declaration : IdentifierList Mode 
@@ -282,10 +286,10 @@ class Parser:
             p[0].fields = list(p[1]) + p[2].fields
 
     def p_SynonymDefinition(self,p):
-        """ SynonymDefinition : IdentifierList Mode EQUAL Expression
-                              | IdentifierList EQUAL Expression """
+        """ SynonymDefinition : IdentifierList EQUAL Expression
+                              | IdentifierList Mode EQUAL Expression """
         if len(p) == 4:
-            p[0] = SynonymDefinition(p[1], None, p[3])
+            p[0] = SynonymDefinition(p[1],p[3])
         else:
             p[0] = SynonymDefinition(p[1], p[2], p[4])
 
@@ -343,7 +347,7 @@ class Parser:
         p[0] = DiscreteRangeMode(p[1],p[3])
 
     def p_LiteralRange(self,p):
-        """ LiteralRange : Operand0 COLON Operand0 """
+        """ LiteralRange : Operand1 COLON Operand1 """
         p[0] = LiteraRange(p[1],p[3])
 
     def p_Initialization(self,p):
@@ -396,8 +400,8 @@ class Parser:
         if len(p) == 2:
             p[0] = ExpressionList(p[1])
         else:
-            p[0] = ExpressionList
-            p[0].fields = p[1].fields + list(p[3])
+            p[0] = ExpressionList()
+            p[0].fields = p[1].fields + [p[3]]
 
     def p_Operand0(self,p):
         """Operand0 : Operand1
@@ -564,9 +568,14 @@ class Parser:
 
 
 
-a = Parser()
-a.parse("dcl i int = 10*i ;")
-a.ast.buildGraph()
+def main():
+    a = Parser()
+    tstList = ['Example1','Example2']
+    for f in tstList:
+        file = open(f,'r')
+        a.parse(file.read())
+        a.ast.buildGraph(f)
+if __name__ == '__main__':main()
 
 
 

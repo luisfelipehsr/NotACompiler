@@ -4,11 +4,10 @@ import uuid
 class AST(object):
     
 
-    def __init__(self,line = 0,type = None,isTypeCorrect = True, *args):
+    def __init__(self, *args):
         self.fields = list(args)
         self.type = type
-        self.line = line
-        self.isTypeCorrect = isTypeCorrect
+        #self.line = line
 
     def removeChanel(self):
         while len(self.fields) == 1:
@@ -24,6 +23,7 @@ class AST(object):
                 n.removeChanel()
 
     def build(self,graph):
+        print(self.__class__.__name__)
         #self.removeLists()
         myId = id(self)
         graph.add_node(dot.Node(myId,label = self.__class__.__name__))
@@ -38,20 +38,25 @@ class AST(object):
                 graph.add_node(dot.Node(nId, label=str(n)))
                 graph.add_edge(dot.Edge(myId, nId))
 
-    def buildGraph(self):
+    def buildGraph(self,name):
         graph = dot.Dot(graph_type='graph')
         #self.removeChanel()
         self.build(graph)
-        graph.write_png('ast.png')
+        graph.write_png(name+'.png')
 
+    def typeCheck(self):
+        return True
+
+    def propType(self):
+        return
 
 class Program(AST):
     # <Program> ::= <StatementList>
     _fields = ['StatementList']
 
 class StatementList(AST):
-    # <StatementList> ::= <StatemenList> <Statement>
-    #                  | <Statement>
+    # <StatementList> ::= <Statement>
+    #                  | <StatemenList> <Statement>
     _fields = ['StatementList']
 
 class Statement(AST):
@@ -75,10 +80,18 @@ class Declaration(AST):
     # <Declaration> ::= <IdentifierList> <Mode> [ <Initialization> ]
     _fields = ['IdentifierList', 'Mode', 'Initialization']
 
-class Initialization(AST):
-    # <Initialization> ::= ATRIB <Expression>
+    def typeCheck(self):
+        if self.ruleNumber == 1:
+            return self.fields[1].type == self.fields[2]
+        else:
+            return True
 
-    _fields = ['Expression']
+    def propType(self):
+        self.type = fields[1].type
+
+class Initialization(AST):
+    def propType(self):
+        self.type = self.fields[0].type
 
 class IdentifierList(AST):
     # <IdentifierList> ::= <IdentifierList> ,<Identifier>
@@ -93,10 +106,14 @@ class SynonymList(AST):
     # <SynonymList> ::= <SynonymDefinition> , <SynonymList>
     #                | <SynonymDefinition>
     _fields = ['synonymDefinition', 'synonymList']
-
+#Todo check for constant?
 class SynonymDefinition(AST):
     # <SynonymDefinition> ::= <IdentifierList> [ <Mode> ] = <ConstantExpression>
-    _fields = ['IdentifierList', 'Mode', 'ConstantExpression']
+    def typeCheck(self):
+        if len(self.fields) is not 4:
+            return self.fields[1].type == self.fields[2].type
+        else:
+            return True
 
 class NewModeStatement(AST):
     # <NewModeStatement> ::= TYPE <NewModeList>
@@ -105,10 +122,14 @@ class NewModeStatement(AST):
 class NewModeList(AST):
     # <NewModeList> ::= <ModeDefinition> , <NewModeList>
     #                | <ModeDefinition>
+
     _fields = ['ModeDefinition', 'NewModeList']
 
 class ModeDefinition(AST):
     # <ModeDefinition> ::= <IdentifierList> = <Mode>
+
+    def propType(self):
+        self.type = self.fields[1]
     _fields = ['IdentifierList', 'Mode']
 
 class Mode(AST):
@@ -116,6 +137,9 @@ class Mode(AST):
     #   | <DiscreteMode>
     #   | <ReferenceMode>
     #   | <CompositeMode>
+
+    def propType(self):
+        self.type = self.fields[0].type
     _fields = ['ModeName']
 
 class DiscreteMode(AST):
@@ -123,31 +147,63 @@ class DiscreteMode(AST):
     #            | <BooleanMode>
     #            | <CharacterMode>
     #            | <DiscreteRangeMode>
-    _fields = ['integerMode']
+
+    def propType(self):
+        #Se não for instancia de AST estamos em uma folha
+        if not isIsntance(self.fields[0],AST):
+            self.type = str(self.fields[0])
+        #Se for pegamos o tipo vindo de DiscreteRange
+        else:
+            self.type = self.fields[0].type
 
 class DiscreteRangeMode(AST):
     # <DiscreteRangeMode> ::= <DiscreteModeName> ( <LiteralRange> )
     #                  | <DiscreteMode> ( <LiteralRange> )
-    _fields = ['DiscreteModeName', 'LiteralRange']
+
+    def propType(self):
+        #Prefixo
+        self.type = 'discreterange_'
+        # Se não for instancia de AST o tipo é definido por um ID
+        if not isInstance(self.fields[0],AST):
+            self.type += str(self.fields[0])
+        #Se for pegamos o tipo do modo
+        else:
+            self.type += self.fields[0].type
 
 class LiteralRange(AST):
     # <LiteralRange> ::= <LowerBound> : <UpperBound>
+
+    def typeCheck(self):
+        return self.fields[0].type == self.fields[1].type and self.fields[0].type == 'int'
     _fields = ['lowerBound', 'UpperBound']
 
 class ReferenceMode(AST):
     # <ReferenceMode> ::= REF <Mode>
+    def propType(self):
+        # Take type from mode and add prefix ref
+        self.type = 'ref_'+self.fields[0].type
     _fields = ['Mode']
 
 class CompositeMode(AST):
     # <CompositeMode> ::= <StringMode> | <ArrayMode>
+    def propType(self):
+        # Get the type from ArrayMode or StringMode
+        self.type = self.fields[0].type
     _fields = ['StringMode']
 
 class StringMode(AST):
     # <StringMode> ::= CHARS LBRACKET <StringLength> RBRACKET
+    def propType(self):
+        self.type = 'chars'
+    #No typecheck needed, lenght is defined at compilationtime
     _fields = ['Chars', 'StringLenght']
 
 class ArrayMode(AST):
     # <ArrayMode> ::= ARRAY LBRACKET <IndexModeList> RBRACKET <ElementMode>
+    # Pegamos o tipo do element mode e adicionamos o prefixo array
+    def propType(self):
+        self.type = 'array_' + self.fields[1].type
+
     _fields = ['IndexModeList']
 
 class IndexModeList(AST):
@@ -157,8 +213,10 @@ class IndexModeList(AST):
 
 class IndexMode(AST):
     # <IndexMode> ::= <DiscreteMode> | <LiteralRange>
+    def typeCheck(self):
+        return isIstance(self.fields[0],LiteralRange) or (self.fields[0].type is 'int','discreterange_int')
     _fields = ['DiscreteMode']
-
+#Todo type  daki pra baixo
 class Location(AST):
     # <Location> ::=  <LocationName>
     #       | <DereferencedReference>
