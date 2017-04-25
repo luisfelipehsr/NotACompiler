@@ -10,13 +10,12 @@ class Parser:
         self.lexerHandle = LexerHandle()
         self.lexer = self.lexerHandle.lexer
         self.tokens = self.lexerHandle.tokens
-        self.parser = yacc.yacc(module=self, start='Program')
+        self.parser = yacc.yacc(module=self, start='Program',debug=True)
         self.ast = 0
 
     def p_Program(self,p):
         """ Program : StatementList """
         p[0] = Program(p[1])
-        print(p[1])
         self.ast = AST(p[0])
 
     def p_StatementList(self,p):
@@ -165,7 +164,7 @@ class Parser:
             p[0].fields = p[1].fields + [p[2]]
 
     def p_ProcedureStatement(self,p):
-        """ ProcedureStatement : ID COMMA ProcedureDefinition SEMICOLON """
+        """ ProcedureStatement : ID COLON ProcedureDefinition SEMICOLON """
         p[0] = ProcedureStatement(p[1],p[3])
 
     def p_ElseClause(self,p):
@@ -188,10 +187,10 @@ class Parser:
         if len(p) == 7:
             p[0] = ProcedureDefinition(p[5])
         elif len(p) == 8:
-            if p[4] == 'LPAREN':
-                p[0] = ProcedureDefinition(p[4],p[6])
-            else:
+            if isInstance(p[3],FormalParameterList) :
                 p[0] = ProcedureDefinition(p[3],p[6])
+            else:
+                p[0] = ProcedureDefinition(p[4],p[6])
         else:
             p[0] = ProcedureDefinition(p[3],p[5],p[7])
 
@@ -201,13 +200,13 @@ class Parser:
         p[0] = ResultSpec(p[3])
 
     def p_FormalParameterList(self,p):
-        """ FormalParameterList : FormalParameter COMMA FormalParameterList
+        """ FormalParameterList : FormalParameterList COMMA FormalParameter  
                                 | FormalParameter """
         if len(p) == 2:
             p[0] = FormalParameterList(p[1])
         else:
             p[0] = FormalParameterList()
-            p[0].fields = p[1].fields + list(p[2])
+            p[0].fields = p[1].fields + [p[3]]
 
     def p_FormalParameter(self,p):
         """ FormalParameter : IdentifierList ParameterSpec """
@@ -229,7 +228,7 @@ class Parser:
             p[0] = NewModeList(p[1])
         else:
             p[0] = NewModeList()
-            p[0].fields = p[1].fields + list(p[2])
+            p[0].fields = p[1].fields + [p[2]]
 
     def p_ModeDefinition(self,p):
         """ ModeDefinition : IdentifierList ATRIB Mode"""
@@ -263,7 +262,7 @@ class Parser:
             p[0] = IdentifierList(p[1])
         else:
             p[0] = IdentifierList()
-            p[0].fields = p[1].fields + list(p[3])
+            p[0].fields = p[1].fields + [p[3]]
 
     def p_Identifier(self,p):
         """ Identifier : ID """
@@ -283,7 +282,7 @@ class Parser:
 
         else:
             p[0] = SynonymList()
-            p[0].fields = list(p[1]) + p[2].fields
+            p[0].fields = [p[1]] + p[2].fields
 
     def p_SynonymDefinition(self,p):
         """ SynonymDefinition : IdentifierList EQUAL Expression
@@ -333,7 +332,7 @@ class Parser:
             p[0] = IndexModeList(p[1])
         else:
             p[0] = IndexModeList()
-            p[0].fields = p[1].fields + list(p[2])
+            p[0].fields = p[1].fields + [p[2]]
 
     def p_IndexMode(self,p):
         """ IndexMode  : DiscreteMode 
@@ -561,7 +560,8 @@ class Parser:
         p[0] = Operand2(p[1])
 
     def p_error(self, p):
-            print("Systax error in input()")
+            print("Systax error in input(%s) at line (%s)" %(p,p.lexer.lineno))
+            self.parser.errok()
 
     def parse(self, text):
         self.parser.parse(text)
@@ -572,6 +572,7 @@ def main():
     a = Parser()
     tstList = ['Example1','Example2']
     for f in tstList:
+        print(f)
         file = open(f,'r')
         a.parse(file.read())
         a.ast.buildGraph(f)

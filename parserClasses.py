@@ -11,7 +11,6 @@ class AST(object):
 
     def removeChanel(self):
         while len(self.fields) == 1:
-            print(self)
             aux = self.fields[0]
             if(isinstance(aux,AST)):
                 self.fields = aux.fields
@@ -23,7 +22,7 @@ class AST(object):
                 n.removeChanel()
 
     def build(self,graph):
-        print(self.__class__.__name__)
+        #print(self.__class__.__name__)
         #self.removeLists()
         myId = id(self)
         graph.add_node(dot.Node(myId,label = self.__class__.__name__))
@@ -34,7 +33,7 @@ class AST(object):
                 graph.add_edge(dot.Edge(myId,nId))
                 n.build(graph)
             else:
-                nId += + uuid.uuid4().int & (1<<64)-1
+                nId += uuid.uuid4().int & (1<<64)-1
                 graph.add_node(dot.Node(nId, label=str(n)))
                 graph.add_edge(dot.Edge(myId, nId))
 
@@ -42,7 +41,9 @@ class AST(object):
         graph = dot.Dot(graph_type='graph')
         #self.removeChanel()
         self.build(graph)
-        graph.write_png(name+'.png')
+        with open(name+'.dot','w') as textFile:
+            textFile.write(graph.to_string())
+        graph.write_png(name +'.png')
 
     def typeCheck(self):
         return True

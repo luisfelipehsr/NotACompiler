@@ -115,6 +115,7 @@ class Lexer():
 
     def t_COMMENT(self,t):
         r'(\/\*.*\*\/)|(\/\/.*)'
+        pass
 
     def t_newline(self,t):
         r'\n+'
