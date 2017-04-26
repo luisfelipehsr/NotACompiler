@@ -576,6 +576,7 @@ def main():
         file = open(f,'r')
         a.parse(file.read())
         a.ast.buildGraph(f)
+
 if __name__ == '__main__':main()
 
 
