@@ -6,7 +6,7 @@ class AST(object):
 
     def __init__(self, *args):
         self.fields = list(args)
-        self.type = type
+        self.type = []
         #self.line = line
 
     def removeChanel(self):
@@ -77,22 +77,24 @@ class DeclarationList(AST):
     #                   | <Declaration>
     _fields = ['DeclarationList']
 
+#Typed
 class Declaration(AST):
     # <Declaration> ::= <IdentifierList> <Mode> [ <Initialization> ]
     _fields = ['IdentifierList', 'Mode', 'Initialization']
 
     def typeCheck(self):
-        if self.ruleNumber == 1:
+        if len(self.fields) == 3:
             return self.fields[1].type == self.fields[2]
         else:
             return True
 
     def propType(self):
-        self.type = fields[1].type
+        self.type = fields[1].type[:]
 
+#Typed
 class Initialization(AST):
     def propType(self):
-        self.type = self.fields[0].type
+        self.type = self.fields[:-1].type[:]
 
 class IdentifierList(AST):
     # <IdentifierList> ::= <IdentifierList> ,<Identifier>
@@ -107,14 +109,18 @@ class SynonymList(AST):
     # <SynonymList> ::= <SynonymDefinition> , <SynonymList>
     #                | <SynonymDefinition>
     _fields = ['synonymDefinition', 'synonymList']
-#Todo check for constant?
+
+#Typed
 class SynonymDefinition(AST):
     # <SynonymDefinition> ::= <IdentifierList> [ <Mode> ] = <ConstantExpression>
     def typeCheck(self):
-        if len(self.fields) is not 4:
+        if len(self.fields) == 3:
             return self.fields[1].type == self.fields[2].type
         else:
             return True
+
+    def propType(self):
+        self.type = self.fields[:-1].type[:]
 
 class NewModeStatement(AST):
     # <NewModeStatement> ::= TYPE <NewModeList>
@@ -126,6 +132,7 @@ class NewModeList(AST):
 
     _fields = ['ModeDefinition', 'NewModeList']
 
+#Typed
 class ModeDefinition(AST):
     # <ModeDefinition> ::= <IdentifierList> = <Mode>
 
@@ -133,6 +140,7 @@ class ModeDefinition(AST):
         self.type = self.fields[1]
     _fields = ['IdentifierList', 'Mode']
 
+#Typed
 class Mode(AST):
     # <Mode> ::=  <ModeName>
     #   | <DiscreteMode>
@@ -143,6 +151,7 @@ class Mode(AST):
         self.type = self.fields[0].type
     _fields = ['ModeName']
 
+#Typed
 class DiscreteMode(AST):
     # <DiscreteMode> ::=  <IntegerMode>
     #            | <BooleanMode>
@@ -152,25 +161,31 @@ class DiscreteMode(AST):
     def propType(self):
         #Se não for instancia de AST estamos em uma folha
         if not isIsntance(self.fields[0],AST):
-            self.type = str(self.fields[0])
+            self.type = [str(self.fields[0])]
         #Se for pegamos o tipo vindo de DiscreteRange
         else:
-            self.type = self.fields[0].type
+            self.type = self.fields[0].type[:]
 
+#Typed
+#TODO
 class DiscreteRangeMode(AST):
     # <DiscreteRangeMode> ::= <DiscreteModeName> ( <LiteralRange> )
     #                  | <DiscreteMode> ( <LiteralRange> )
 
+    def typeCheck(self):
+
+
     def propType(self):
         #Prefixo
-        self.type = 'discreterange_'
+        self.type = ['discreterange']
         # Se não for instancia de AST o tipo é definido por um ID
         if not isInstance(self.fields[0],AST):
             self.type += str(self.fields[0])
         #Se for pegamos o tipo do modo
         else:
-            self.type += self.fields[0].type
+            self.type += self.fields[0].type[:]
 
+#Typed
 class LiteralRange(AST):
     # <LiteralRange> ::= <LowerBound> : <UpperBound>
 
@@ -178,32 +193,36 @@ class LiteralRange(AST):
         return self.fields[0].type == self.fields[1].type and self.fields[0].type == 'int'
     _fields = ['lowerBound', 'UpperBound']
 
+#Typed
 class ReferenceMode(AST):
     # <ReferenceMode> ::= REF <Mode>
     def propType(self):
         # Take type from mode and add prefix ref
-        self.type = 'ref_'+self.fields[0].type
+        self.type = ['ref']+self.fields[0].type[:]
     _fields = ['Mode']
 
+#Typed
 class CompositeMode(AST):
     # <CompositeMode> ::= <StringMode> | <ArrayMode>
     def propType(self):
         # Get the type from ArrayMode or StringMode
-        self.type = self.fields[0].type
+        self.type = self.fields[0].type[:]
     _fields = ['StringMode']
 
+#Typed
 class StringMode(AST):
     # <StringMode> ::= CHARS LBRACKET <StringLength> RBRACKET
     def propType(self):
-        self.type = 'chars'
-    #No typecheck needed, lenght is defined at compilationtime
+        self.type = ['chars']
+    #No typecheck needed, lenght is Iconst
     _fields = ['Chars', 'StringLenght']
 
+#Typed
 class ArrayMode(AST):
     # <ArrayMode> ::= ARRAY LBRACKET <IndexModeList> RBRACKET <ElementMode>
     # Pegamos o tipo do element mode e adicionamos o prefixo array
     def propType(self):
-        self.type = 'array_' + self.fields[1].type
+        self.type = ['array'] + self.fields[1].type[:]
 
     _fields = ['IndexModeList']
 
@@ -217,7 +236,8 @@ class IndexMode(AST):
     def typeCheck(self):
         return isIstance(self.fields[0],LiteralRange) or (self.fields[0].type is 'int','discreterange_int')
     _fields = ['DiscreteMode']
-#Todo type  daki pra baixo
+
+#Typed
 class Location(AST):
     # <Location> ::=  <LocationName>
     #       | <DereferencedReference>
@@ -226,6 +246,9 @@ class Location(AST):
     #       | <ArrayElement>
     #       | <ArraySlice>
     #       | <CallAction>
+
+    def propType(self):
+        self.type = self.fields[0].type[:]
     _fields = ['LocationName']
 
 class DereferencedReference(AST):
