@@ -172,8 +172,6 @@ class DiscreteRangeMode(AST):
     # <DiscreteRangeMode> ::= <DiscreteModeName> ( <LiteralRange> )
     #                  | <DiscreteMode> ( <LiteralRange> )
 
-    def typeCheck(self):
-
 
     def propType(self):
         #Prefixo
@@ -231,10 +229,16 @@ class IndexModeList(AST):
     #               | <IndexMode>
     _fields = ['IndexMode', 'IndexModeList']
 
+#Typed
+#Duvida!
 class IndexMode(AST):
     # <IndexMode> ::= <DiscreteMode> | <LiteralRange>
     def typeCheck(self):
         return isIstance(self.fields[0],LiteralRange) or (self.fields[0].type is 'int','discreterange_int')
+
+    def propType(self):
+        self.type = self.fields[0].type[:]
+
     _fields = ['DiscreteMode']
 
 #Typed
@@ -251,18 +255,38 @@ class Location(AST):
         self.type = self.fields[0].type[:]
     _fields = ['LocationName']
 
+#Typed
 class DereferencedReference(AST):
     # <DereferencedReference> ::= <Location> ARROW
+
+    def  typeCheck(self):
+        return self.fields[0].type[0] == 'ref'
+
+    def propType(self):
+        self.type = self.fields[0].type[1:]
     _fields = ['Location']
 
+#Typed
 class StringElement(AST):
     # <StringElement> ::= <StringLocation> LBRACKET <StartElement> RBRACKET
+    def typeCheck(self):
+        return self.fields[0].type == ['chars']
+    def propType(self):
+        self.type = ['char']
     _fields = ['StringLocation', 'StartElement']
 
+#Typed
 class StringSlice(AST):
     # <StringSlice> ::= <StringLocation> LBRACKET <LeftElement> : <RightElement> RBRACKET
     _fields = ['StringLocation', 'LeftElement', 'RightElement']
 
+    def typeCheck(self):
+        return self.fields[0].type == ['chars'] and self.fields[1].type == ['int'] and self.fields[2].type == ['int']
+
+    def propType(self):
+        self.type = self.fields[0].type[:]
+#TODO
+#Typed
 class ArrayElement(AST):
     # <ArrayElement> ::= <ArrayLocation> LBRACKET <ExpressionList> RBRACKET
     _fields = ['ArrayLocation', 'ExpressionList']
