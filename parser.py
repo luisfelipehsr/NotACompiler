@@ -508,7 +508,7 @@ class Parser:
         else:
             p[0] = ProcedureCall(p[1],p[3])
 
-    def p_BuilinCall(self,p):
+    def p_BuiltinCall(self,p):
         #ParameterList === ExpressionList
         """ BuiltinCall : BuiltinName LPAREN RPAREN
                         | BuiltinName LPAREN ExpressionList RPAREN"""
