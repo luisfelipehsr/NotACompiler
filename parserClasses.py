@@ -1,9 +1,11 @@
 import pydot as dot
 import uuid
 
+
+
+
 class AST(object):
     
-
     def __init__(self, *args):
         self.fields = list(args)
         self.type = []
@@ -50,6 +52,20 @@ class AST(object):
 
     def propType(self):
         return
+
+    def permTypes(self,types,slice):
+        for type,element in types,slice:
+            if element.type == type:
+                return True
+        else:
+            return False
+
+    def areEquals(self,sliceA,sliceB):
+        for a,b in sliceA,sliceB:
+            if a.type != b.type:
+                return False
+        return True
+
 
 class Program(AST):
     # <Program> ::= <StatementList>
@@ -285,21 +301,49 @@ class StringSlice(AST):
 
     def propType(self):
         self.type = self.fields[0].type[:]
-#TODO
+
 #Typed
 class ArrayElement(AST):
+
     # <ArrayElement> ::= <ArrayLocation> LBRACKET <ExpressionList> RBRACKET
+
+    def typeCheck(self):
+        return self.fields[1].type == ['int'] and self.fields[0].type[0] == 'array'
+
+    # Se tivermos so uma expressão retornamos o valor nao um array
+    def propType(self):
+        if len(self.fields[1].fields) == 1:
+            self.type = self.fields[0].type[1:]
+        else:
+            self.type = self.fields[0].type[:]
     _fields = ['ArrayLocation', 'ExpressionList']
 
+#Typed
 class ExpressionList(AST):
     # <ExpressionList> ::= <Expression> , <ExpressionList>
     #               | <Expression>
+    def propType(self):
+        type = self.fields[0].type[:]
+        for t in self.fields:
+            if type != t.type:
+                self.type =  None
+                return
+        self.type = type
+
     _fields = ['Expression', 'ExpressionList']
 
+#Typed
 class ArraySlice(AST):
     # <ArraySlice> ::= <ArrayLocation> LBRACKET <LowerBound> : <UpperBound> RBRACKET
     _fields = ['ArrayLocation', 'LowerBound', 'UpperBound']
 
+    def typeCheck(self):
+        return self.fields[0].type[0] == 'array' and self.fields[1].type == ['int'] and self.fields[2].type == ['int']
+
+    def propType(self):
+        self.type = self.fields[0].type[:]
+
+#Typed
 class PrimitiveValue(AST):
     # <primitive_value> ::=  <Literal>
     #              | <ValueArrayElement>
@@ -307,6 +351,10 @@ class PrimitiveValue(AST):
     #              | <ParenthesizedExpression>
     _fields = ['Literal']
 
+    def propType(self):
+        self.type = self.fields[0].type[:]
+
+#Typed
 class Literal(AST):
     # <Literal> ::=  <IntegerLiteral>
     #     | <BooleanLiteral>
@@ -315,62 +363,140 @@ class Literal(AST):
     #     | <CharacterStringLiteral>
     _fields = ['IntegerLiteral']
 
+    def propType(self):
+        self.type = self.fields[0].type[:]
+
+#Typed
 class ValueArrayElement(AST):
     # <ValueArrayElement> ::= <ArrayPrimitiveValue> LBRACKET <ExpressionList> RBRACKET
     _fields = ['ArrayPrimitiveValue', 'ExpressionList']
 
+    def typeCheck(self):
+        return  self.fields[1].type == ['int'] and self.fields[0].type[0] == 'array'
+
+    # Se tivermos so uma expressão retornamos o valor nao um array
+    def propType(self):
+        if len(self.fields[1].fields) == 1:
+            self.type = self.fields[0].type[1:]
+        else:
+            self.type = self.fields[0].type[:]
+
+#Typed
 class ValueArraySlice(AST):
     # <ValueArraySlice> ::= <ArrayPrimitiveValue> LBRACKET <LowerElement> : <UpperElement> RBRACKET
     _fields = ['ArrayPrimitiveValue', 'LowerElement', 'UpperElement']
 
+    def typeCheck(self):
+        return self.fields[0].type[0] == 'array' and self.fields[1].type == ['int'] and self.fields[2].type == ['int']
+
+    def propType(self):
+        self.type = self.fields[0].type[:]
+
+#Typed
 class Expression(AST):
     # <Expression> ::= <Operand0> | <ConditionalExpression>
     _fields = ['Operand0']
 
+    def propType(self):
+        self.type = self.fields[0].type[:]
+
+#Typed
 class ConditionalExpression(AST):
     # <ConditionalExpression> ::=  IF <BooleanExpression> <ThenExpression> <ElseExpression> FI
     #                     | IF <BooleanExpression> <ThenExpression> <ElsifExpression> <ElseExpression> FI
     _fields = ['BooleanExpression', 'ThenExpression', 'ElsifExpression',
                'ElseExpression']
+    def typeCheck(self):
+        return self.fields[0].type == ['bool']
 
+    def propType(self):
+        aux = self.fields[0].type[:]
+        for f in self.fields:
+            if aux != f.type:
+                self.type = None
+                return
+        self.type = aux
+
+#Typed
 class ThenExpression(AST):
     # <ThenExpression> ::= THEN <Expression>
     _fields = ['Expression']
+    def propType(self):
+        self.type = self.fields[0].type[:]
 
+#Typed
 class ElseExpression(AST):
     # <ElseExpression> ::= ELSE <Expression>
     _fields = ['Expression']
+    def propType(self):
+        self.type = self.fields[0].type[:]
 
+#Typed
 class ElsifExpression(AST):
     # <ElsifExpression> ::=  ELSIF <BooleanExpression> <ThenExpression>
     #                | <ElsifExpression> ELSIF <BooleanExpression> <ThenExpression>
     _fields = ['ElsifExpression', 'BooleanExpression', 'ThenExpression']
+    def typeCheck(self):
+        if len(self.fields) == 2:
+            return self.fields[0].type == ['bool']
+        else:
+            return self.fields[1].type == ['bool']
 
+#Typed
 class Operand0(AST):
     # <Operand0> ::=  <Operand1>
     #        | <Operand0> <Operator1> <Operand1>
     _fields = ['Operand0', 'Operator1', 'Operand1']
 
+    def typeCheck(self):
+        if len(self.fields) == 1:
+            return True
+        else:
+            if isInstance(self.fields[1],RelationalOperator):
+                return self.fields[0].type == self.fields[2].type
+            else:
+                return self.fields[2].type[0] == 'array' or self.fields[2].type[0] == 'chars'
+
+    def propType(self):
+        if len(self.fields) == 1:
+            self.type = self.fields[0].type[:]
+        else:
+            self.type = ['bool']
+
+#NotTyped
 class Operator1(AST):
     # <Operator1> ::=  <RelationalOperator>
     #         | IN
     _fields = ['Operator']
 
+#NotTyped
 class RelationalOperator(AST):
     # <RelationalOperator> ::=  AND | OR | EQUAL | NEQUAL | MORETHEN | EQMORETHEN | LESSTHEN | EQLESSTHEN
     _fields = ['RelationalOperator']
 
+#Typed
 class Operand1(AST):
     # <Operand1> ::=  <Operand2>
     #        | <Operand1> <Operator2> <Operand2>
     _fields = ['Operand1', 'Operator2', 'Operand2']
 
+    def typeCheck(self):
+        if len(self.fields) == 1:
+            return True
+        else:
+            return  self.fields[0].type == self.fields[2].type
+
+    def propType(self):
+        self.type = self.fields[0].type[:]
+
+#NotTyped
 class Operator2(AST):
     # <Operator2> ::=  PLUS
     #         | STRCAT
     #         | MINUS
     _fields = ['AddOperator']
 
+#Typed
 class Operand2(AST):
     # <Operand2> ::=  <Operand3>
     #        | <Operand2> MUL <Operand3>
@@ -378,16 +504,45 @@ class Operand2(AST):
     #        | <Operand2> MOD <Operand3>
     _fields = ['Operand2', 'MultiOperation', 'Operand3']
 
+    def typeCheck(self):
+        if len(self.fields) == 1:
+            return True
+        else:
+            return self.fields[0].type == self.fields[2].type
+
+    def propType(self):
+        self.type = self.fields[0].type[:]
+
+#Typed
 class Operand3(AST):
     # <Operand3> ::=  [ MINUS ] <Operand4>
     #        | [ NOT ] <Operand4>
-    #        | <Integer_Literal>
+    #        | <Operand4>
     _fields = ['MonoOperation', 'Operand4']
+    def typeCheck(self):
+        if len(self.fields) == 1:
+            return True
+        else:
+            if str(self.fields[0]) == 'minus':
+                return self.fields[1].type in [['int'],['float'],['char']]
+            else:
+                return self.fields[1].type == ['bool']
 
+    def propType(self):
+        if len(self.fields) == 1:
+            self.type = self.fields[0].type[:]
+        else:
+            self.type = self.fields[1].type[:]
+
+#Typed
 class Operand4(AST):
     # <Operand4> ::=  <Location> | <ReferencedLocation> | <PrimitiveValue>
-    _fields = ['Location']
 
+    def propType(self):
+        self.type = self.fields[0].type[:]
+    _fields = ['Location']
+#TODO
+#Typed
 class ReferencedLocation(AST):
     # <ReferencedLocation> ::= ARROW <Location>
     _fields = ['Location']
