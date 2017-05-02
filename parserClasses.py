@@ -403,39 +403,49 @@ class StringSlice(AST):
         return self.fields[0].propType() == ['chars'] and self.fields[1].propType() == ['int'] and self.fields[2].propType() == ['int']
 
     def propType(self):
-        if len(self.fields) > 0:
-            return self.type
+        if len(self.type) > 0:
+            return self.type[:]
         else:
             self.type = self.fields[0].propType()
-            return self.fields
-# Todo
+            return self.type[:]
+
 #Typed
 class ArrayElement(AST):
 
     # <ArrayElement> ::= <ArrayLocation> LBRACKET <ExpressionList> RBRACKET
+    _fields = ['ArrayLocation', 'ExpressionList']
 
     def typeCheck(self):
-        return self.fields[1].type == ['int'] and self.fields[0].type[0] == 'array'
+        return self.fields[1].propType() == ['int'] and self.fields[0].propType()[0] == 'array'
 
-    # Se tivermos so uma expressão retornamos o valor nao um array
     def propType(self):
-        if len(self.fields[1].fields) == 1:
-            self.type = self.fields[0].type[1:]
+        if len(self.type) > 0:
+            return self.type[:]
+        # Se tivermos so uma expressão retornamos o valor nao um array
+        elif len(self.fields[1].fields) == 1:
+            self.type = self.fields[0].propType()[1:]
+            return self.type[:]
         else:
-            self.type = self.fields[0].type[:]
-    _fields = ['ArrayLocation', 'ExpressionList']
+            self.type = self.fields[0].propType()
+            return self.type[:]
+
 
 #Typed
 class ExpressionList(AST):
     # <ExpressionList> ::= <Expression> , <ExpressionList>
     #               | <Expression>
+
+    #If all expressions have the same type the list has a type
     def propType(self):
-        type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        type = self.fields[0].propType()
         for t in self.fields:
-            if type != t.type:
-                self.type =  None
+            if type != t.propType():
+                self.type = []
                 return
         self.type = type
+        return self.type[:]
 
     _fields = ['Expression', 'ExpressionList']
 
@@ -445,11 +455,14 @@ class ArraySlice(AST):
     _fields = ['ArrayLocation', 'LowerBound', 'UpperBound']
 
     def typeCheck(self):
-        return self.fields[0].type[0] == 'array' and self.fields[1].type == ['int'] and self.fields[2].type == ['int']
+        return self.fields[0].propType()[0] == 'array' and self.fields[1].propType() == ['int'] and self.fields[2].propType() == ['int']
 
     def propType(self):
-        self.type = self.fields[0].type[:]
-
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+# Todo
 #Typed
 class PrimitiveValue(AST):
     # <primitive_value> ::=  <Literal>
