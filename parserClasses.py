@@ -614,7 +614,6 @@ class ElsifExpression(AST):
             else:
                 return []
 
-# Todo
 #Typed
 class Operand0(AST):
     # <Operand0> ::=  <Operand1>
@@ -626,15 +625,19 @@ class Operand0(AST):
             return True
         else:
             if isInstance(self.fields[1],RelationalOperator):
-                return self.fields[0].type == self.fields[2].type
+                return self.fields[0].propType() == self.fields[2].propType()
             else:
-                return self.fields[2].type[0] == 'array' or self.fields[2].type[0] == 'chars'
+                return self.fields[2].propType()[0] == 'array' or self.fields[2].propType()[0] == 'chars'
 
     def propType(self):
-        if len(self.fields) == 1:
-            self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        elif len(self.fields) == 1:
+            self.type = self.fields[0].propType()
+            return self.type[:]
         else:
             self.type = ['bool']
+            return self.type[:]
 
 #NotTyped
 class Operator1(AST):
@@ -657,10 +660,14 @@ class Operand1(AST):
         if len(self.fields) == 1:
             return True
         else:
-            return  self.fields[0].type == self.fields[2].type
+            return  self.fields[0].propType() == self.fields[2].propType()
 
     def propType(self):
-        self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
 #NotTyped
 class Operator2(AST):
@@ -681,10 +688,14 @@ class Operand2(AST):
         if len(self.fields) == 1:
             return True
         else:
-            return self.fields[0].type == self.fields[2].type
+            return self.fields[0].propType() == self.fields[2].propType()
 
     def propType(self):
-        self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
 #Typed
 class Operand3(AST):
@@ -696,25 +707,33 @@ class Operand3(AST):
         if len(self.fields) == 1:
             return True
         else:
-            if str(self.fields[0]) == 'minus':
-                return self.fields[1].type in [['int'],['float'],['char']]
+            if self.fields[0].type == 'MINUS':
+                return self.fields[1].propType() in [['int'],['char']]
             else:
-                return self.fields[1].type == ['bool']
+                return self.fields[1].propType() == ['bool']
 
     def propType(self):
-        if len(self.fields) == 1:
-            self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        elif len(self.fields) == 1:
+            self.type = self.fields[0].propType()
+            return self.type[:]
         else:
-            self.type = self.fields[1].type[:]
+            self.type = self.fields[1].propType()
+            return self.type[:]
 
 #Typed
 class Operand4(AST):
     # <Operand4> ::=  <Location> | <ReferencedLocation> | <PrimitiveValue>
-
-    def propType(self):
-        self.type = self.fields[0].type[:]
     _fields = ['Location']
+    def propType(self):
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
+#TODO
 #Typed
 class ReferencedLocation(AST):
     # <ReferencedLocation> ::= ARROW <Location>
