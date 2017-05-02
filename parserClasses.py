@@ -112,7 +112,7 @@ class Declaration(AST):
 
     def typeCheck(self):
         if len(self.fields) == 3:
-            return self.fields[1].type == self.fields[2]
+            return self.fields[1].propType() == self.fields[2].propType()
         else:
             return True
 
@@ -154,7 +154,7 @@ class SynonymDefinition(AST):
     # <SynonymDefinition> ::= <IdentifierList> [ <Mode> ] = <ConstantExpression>
     def typeCheck(self):
         if len(self.fields) == 3:
-            return self.fields[1].type == self.fields[2].type
+            return self.fields[1].propType() == self.fields[2].propType()
         else:
             return True
 
@@ -204,7 +204,7 @@ class Mode(AST):
         if isInstance(self.fields[0],AST):
             return True
         else:
-            return self.fields[0].type[0] == 'mode'
+            return self.fields[0].propType()[0] == 'mode'
 
     # The idea is, if we already have a type use that one,
     # if our son is a node from the AST get from him,
@@ -273,7 +273,7 @@ class LiteralRange(AST):
     # <LiteralRange> ::= <LowerBound> : <UpperBound>
 
     def typeCheck(self):
-        return self.fields[0].type == self.fields[1].type and self.fields[0].type == 'int'
+        return self.fields[0].propType() == self.fields[1].propType() and self.fields[0].propType() == ['int']
     _fields = ['lowerBound', 'UpperBound']
 
 #Typed
@@ -332,7 +332,7 @@ class IndexModeList(AST):
 class IndexMode(AST):
     # <IndexMode> ::= <DiscreteMode> | <LiteralRange>
     def typeCheck(self):
-        return isIstance(self.fields[0],LiteralRange) or (self.fields[0].type is 'int','discreterange_int')
+        return isIstance(self.fields[0],LiteralRange) or (self.fields[0].propType() is 'int','discreterange_int')
 
     def propType(self):
         if len(self.type) > 0:
@@ -368,25 +368,30 @@ class Location(AST):
                 self.type = fromContext
                 return self.type[:]
     _fields = ['LocationName']
-#Todo
+
 #Typed
 class DereferencedReference(AST):
     # <DereferencedReference> ::= <Location> ARROW
 
     def  typeCheck(self):
-        return self.fields[0].type[0] == 'ref'
+        return self.fields[0].propType()[0] == 'ref'
 
     def propType(self):
-        self.type = self.fields[0].type[1:]
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType[1:]
+            return self.type[:]
     _fields = ['Location']
 
 #Typed
 class StringElement(AST):
     # <StringElement> ::= <StringLocation> LBRACKET <StartElement> RBRACKET
     def typeCheck(self):
-        return self.fields[0].type == ['chars']
+        return self.fields[0].propType() == ['chars']
     def propType(self):
         self.type = ['char']
+        return self.type[:]
     _fields = ['StringLocation', 'StartElement']
 
 #Typed
@@ -395,11 +400,15 @@ class StringSlice(AST):
     _fields = ['StringLocation', 'LeftElement', 'RightElement']
 
     def typeCheck(self):
-        return self.fields[0].type == ['chars'] and self.fields[1].type == ['int'] and self.fields[2].type == ['int']
+        return self.fields[0].propType() == ['chars'] and self.fields[1].propType() == ['int'] and self.fields[2].propType() == ['int']
 
     def propType(self):
-        self.type = self.fields[0].type[:]
-
+        if len(self.fields) > 0:
+            return self.type
+        else:
+            self.type = self.fields[0].propType()
+            return self.fields
+# Todo
 #Typed
 class ArrayElement(AST):
 
