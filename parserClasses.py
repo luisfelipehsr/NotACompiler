@@ -462,7 +462,7 @@ class ArraySlice(AST):
             return self.type[:]
         else:
             self.type = self.fields[0].propType()
-# Todo
+
 #Typed
 class PrimitiveValue(AST):
     # <primitive_value> ::=  <Literal>
@@ -472,8 +472,13 @@ class PrimitiveValue(AST):
     _fields = ['Literal']
 
     def propType(self):
-        self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
+#Test
 #Typed
 class Literal(AST):
     # <Literal> ::=  <IntegerLiteral>
@@ -484,7 +489,18 @@ class Literal(AST):
     _fields = ['IntegerLiteral']
 
     def propType(self):
-        self.type = self.fields[0].type[:]
+        token = self.fields[0]
+        if token.type == 'ICONST':
+            self.type = ['int']
+        elif token.type == 'FALSE'or token.type == 'TRUE':
+            self.type = ['bool']
+        elif token.type == 'CHALIT':
+            self.type = ['char']
+        elif token.type == 'NULL':
+            self.type = ['null']
+        else:
+            self.type = ['chars']
+        return self.type[:]
 
 #Typed
 class ValueArrayElement(AST):
@@ -492,14 +508,18 @@ class ValueArrayElement(AST):
     _fields = ['ArrayPrimitiveValue', 'ExpressionList']
 
     def typeCheck(self):
-        return  self.fields[1].type == ['int'] and self.fields[0].type[0] == 'array'
+        return  self.fields[1].propType() == ['int'] and self.fields[0].propType()[0] == 'array'
 
     # Se tivermos so uma expressão retornamos o valor nao um array
     def propType(self):
-        if len(self.fields[1].fields) == 1:
-            self.type = self.fields[0].type[1:]
+        if len(self.type) > 0:
+            return self.type[:]
+        elif len(self.fields[1].fields) == 1:
+            self.type = self.fields[0].propType()[1:]
+            return self.type[:]
         else:
-            self.type = self.fields[0].type[:]
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
 #Typed
 class ValueArraySlice(AST):
@@ -507,10 +527,14 @@ class ValueArraySlice(AST):
     _fields = ['ArrayPrimitiveValue', 'LowerElement', 'UpperElement']
 
     def typeCheck(self):
-        return self.fields[0].type[0] == 'array' and self.fields[1].type == ['int'] and self.fields[2].type == ['int']
+        return self.fields[0].propType()[0] == 'array' and self.fields[1].propType() == ['int'] and self.fields[2].propType() == ['int']
 
     def propType(self):
-        self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
 #Typed
 class Expression(AST):
@@ -518,7 +542,11 @@ class Expression(AST):
     _fields = ['Operand0']
 
     def propType(self):
-        self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
 #Typed
 class ConditionalExpression(AST):
@@ -527,29 +555,41 @@ class ConditionalExpression(AST):
     _fields = ['BooleanExpression', 'ThenExpression', 'ElsifExpression',
                'ElseExpression']
     def typeCheck(self):
-        return self.fields[0].type == ['bool']
+        return self.fields[0].propType() == ['bool']
 
     def propType(self):
-        aux = self.fields[0].type[:]
-        for f in self.fields:
-            if aux != f.type:
-                self.type = None
-                return
-        self.type = aux
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            aux = self.fields[1].propType()
+            for f in self.fields[1:]:
+                if aux != f.propType():
+                    self.type = []
+                    return self.type[:]
+            self.type = aux
+            return self.type[:]
 
 #Typed
 class ThenExpression(AST):
     # <ThenExpression> ::= THEN <Expression>
     _fields = ['Expression']
     def propType(self):
-        self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
 #Typed
 class ElseExpression(AST):
     # <ElseExpression> ::= ELSE <Expression>
     _fields = ['Expression']
     def propType(self):
-        self.type = self.fields[0].type[:]
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
 #Typed
 class ElsifExpression(AST):
@@ -558,10 +598,23 @@ class ElsifExpression(AST):
     _fields = ['ElsifExpression', 'BooleanExpression', 'ThenExpression']
     def typeCheck(self):
         if len(self.fields) == 2:
-            return self.fields[0].type == ['bool']
+            return self.fields[0].propType() == ['bool']
         else:
-            return self.fields[1].type == ['bool']
+            return self.fields[1].propType() == ['bool']
 
+    def propType(self):
+        if len(self.type) > 0:
+            return self.type[:]
+        elif len(self.fields) == 2:
+            self.type = self.fields[1].propType()
+        else:
+            if self.fields[0].propType() == self.fields[2].propType():
+                self.type = self.fields[0].propType()
+                return self.type[:]
+            else:
+                return []
+
+# Todo
 #Typed
 class Operand0(AST):
     # <Operand0> ::=  <Operand1>
