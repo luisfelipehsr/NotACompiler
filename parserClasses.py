@@ -733,21 +733,33 @@ class Operand4(AST):
             self.type = self.fields[0].propType()
             return self.type[:]
 
-#TODO
 #Typed
 class ReferencedLocation(AST):
     # <ReferencedLocation> ::= ARROW <Location>
-
-    def propType(self):
-        self.type = ['ref'] + self.fields[0].type[:]
     _fields = ['Location']
+    def propType(self):
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = ['ref'] + self.fields[0].propType()
+            return self.type[:]
 
+# TODO
 #Typed
 class ActionStatement(AST):
     # <ActionStatement> ::= [ ID: ] <Action> ;
     _fields = ['Id', 'Action']
+
     def propType(self):
-        self.typeCopy(len(self.fields)-1)
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = ['action'] + self.fields[len(self.fields)-1].propType()
+            return self.type[:]
+
+    def updateContext(self):
+        if len(self.fields) == 2:
+            self.context.addToContext(self.fields[0].value,self.type)
 
 #Typed
 class Action(AST):
