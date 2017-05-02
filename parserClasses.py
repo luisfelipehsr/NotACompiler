@@ -50,6 +50,22 @@ class AST(object):
             textFile.write(graph.to_string())
         graph.write_png(name +'.png')
 
+    def recursiveTypeCheck(self):
+        ret = self.typeCheck()
+        if not ret:
+            print('Type Error at %s' % (self.__class__.__name__))
+            return
+        else:
+            for n in self.fields:
+                n.recursiveTypeCheck()
+
+    def recursiveBuildContext(self):
+        cont = self.context.getCurrent()
+        self.updateContext()
+        for a in self.fields():
+            self.recursiveBuildContext()
+        self.context.setCurrent(cont)
+
     def typeCheck(self):
         return True
 
@@ -59,22 +75,6 @@ class AST(object):
     def updateContext(self):
         return
 
-    def permTypes(self,types,range):
-        for ind in range:
-            if self.fields[ind].type not in types:
-                return False
-        else:
-            return True
-
-    def areEquals(self,rangeA,rangeB):
-        for a in rangeA:
-            for b in rangeB:
-                if self.fields[a].type != self.fields[b].type:
-                    return False
-        return True
-
-    def typeCopy(self,pos):
-        self.type = self.fields[pos].type[:]
 
 #Context
 class Program(AST):
@@ -1040,7 +1040,6 @@ class ProcedureDefinition(AST):
         else:
             self.type = (self.fields[0].propType(),self.fields[1].propType())
         return self.type[:]
-
 
 #Typed
 class FormalParameterList(AST):

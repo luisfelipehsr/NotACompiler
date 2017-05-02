@@ -1,14 +1,16 @@
-class Context(Object):
+class Context(object):
 
-    def __init__(self,tree):
+    def __init__(self):
         self.contextList =[]
         self.currentContext = 0
 
     def newContext(self):
+        print('Creating new context')
         self.contextList.append(dict())
 
     def addToContext(self,id,type):
-        if not isIntance(id,List):
+        print('Adding %s of type %s to context %d' %(id,type,self.currentContext))
+        if not isIntance(id,list):
             self.contextList[self.currentContext][id] = type
         else:
             for i in id:
@@ -19,12 +21,11 @@ class Context(Object):
 
     def pushContext(self):
         self.currentContext += 1
+        print('Current Context is now %d' % (self.currentContext))
 
     def popContext(self):
         self.currentContext -= 1
-
-    def CreateSymbolTable(self):
-        return
+        print('Current Context is now %d' % (self.currentContext))
 
     def lookInContexts(self,id):
         for a in reversed(range(self.currentContext)):
@@ -34,3 +35,9 @@ class Context(Object):
                 continue
         return []
 
+    def getCurrent(self):
+        return self.currentContext
+
+    def setCurrent(self,ct):
+        self.currentContext = ct
+        print('Current Context is now %d' % (self.currentContext))
