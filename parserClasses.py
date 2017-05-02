@@ -744,7 +744,6 @@ class ReferencedLocation(AST):
             self.type = ['ref'] + self.fields[0].propType()
             return self.type[:]
 
-# TODO
 #Typed
 class ActionStatement(AST):
     # <ActionStatement> ::= [ ID: ] <Action> ;
@@ -773,7 +772,11 @@ class Action(AST):
 
 
     def propType(self):
-        self.typeCopy(0)
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
 #NotTyped
 class BracketedAction(AST):
@@ -786,14 +789,17 @@ class AssignmentAction(AST):
     _fields = ['Location', 'AssigningOperator', 'Expression']
 
     def typeCheck(self):
-        return self.areEquals([1],[2])
+        if len(self.fields) == 2:
+            return self.fields[0].propType() == self.fields[1].propType()
+        else:
+            return self.fields[0].propType() == self.fields[2].propType()
 
 #Typed
 class IfAction(AST):
     # <IfAction> ::= IF <BooleanExpression> <ThenClause> [ <ElseClause> ] FI
     _fields = ['BooleanExpression', 'ThenClause', 'ElseClause']
     def typeCheck(self):
-        return self.permTypes(['bool'],[0])
+        return self.fields[0].propType() == ['bool']
 
 #NotTyped
 class ActionStatementList(AST):
@@ -815,12 +821,16 @@ class ElseClause(AST):
 
     def typeCheck(self):
         if len(self.fields) != 1:
-            return self.permTypes(['bool'],[0])
+            return self.fields[0].propType() == ['bool']
 
-#NotTyped
+#Context
 class DoAction(AST):
     # <DoAction> ::= DO [ <ControlPart> ; ] <ActionStatementList> OD
     _fields = ['ControlPart', 'ActionStatementList']
+
+    def updateContext(self):
+        self.context.newContext()
+        self.context.pushContext()
 
 #NotTyped
 class ControlPart(AST):
@@ -845,48 +855,81 @@ class StepEnumeration(AST):
                'EndValue']
 
     def typeCheck(self):
-        if len(self.fields) == 2:
-            return self.permTypes(['int'],[0,1])
-        elif len(self.fields) == 3:
-            if isInstance(self.fields[1],AST):
-                return self.permTypes(['int'],[0,1,2])
+        if len(self.fields) == 3:
+            return self.fields[1].propType() == self.fields[2].propType() \
+                   and self.fields[1].propType() == ['int']
+        elif len(self.fields) == 4:
+            if isInstance(self.fields[2],AST):
+                return self.fields[1].propType() == self.fields[2].propType() \
+                       and self.fields[2].propType() == self.fields[3].propType() \
+                       and self.fields[1].propType() == ['int']
             else:
-                return self.permTypes(['int'],[0,2])
+                return self.fields[1].propType() == self.fields[3].propType() \
+                       and self.fields[1].propType() == ['int']
         else:
-            return self.permTypes(['int'],[0,1,3])
+            return self.fields[1].propType() == self.fields[2].propType() \
+                   and self.fields[2].propType() == self.fields[4].propType() \
+                   and self.fields[1].propType() == ['int']
 
-#NotTyped
+    def updateContext(self):
+        self.context.addToContext(self.fields[0],['int'])
+
+#Context + ? DiscreteMode ->DiscreteRangeMode?
 class RangeEnumeration(AST):
     # <RangeEnumeration> ::= <LoopCounter> [ DOWN ] IN <DiscreteMode>
     _fields = ['LoopCounter', 'DiscreteMode']
+
+    def updateContext(self):
+        self.context.addToContext(self.fields[0],['int'])
 
 #Typed
 class WhileControl(AST):
     # <WhileControl> ::= WHILE <BooleanExpression>
     _fields = ['BooleanExpression']
     def typeCheck(self):
-        return self.permTypes(['bool'],[0])
+        return self.fields[0].typeProp() == ['bool']
 
 #Typed
 class CallAction(AST):
     # <CallAction> ::=  <ProcedureCall> | <BuiltinCall>
     _fields = ['ProcedureCall']
     def propType(self):
-        self.typeCopy(0)
-
-#Typed
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
+#Todo Error
+#Typed & Context
 class ProcedureCall(AST):
     # <ProcedureCall> ::= <ProcedureName> ( [ <ParameterList> ] )
     _fields = ['ProcedureName', 'ParameterList']
-    def propType(self):
-        self.typeCopy(0)
+    def typeCheck(self):
+        fromContext = self.context.lookInContexts(self.fields[0])
+        fromCall = []
+        if len(self.fields) == 2:
+            fromCall = self.fields[1].propType()
+        return fromCall == fromContext
 
-#Typed
+
+    def propType(self):
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            #The return type is saved with a list with 'ret' as a prefix
+            self.type = self.context.lookInContexts(['ret'] + [self.fields[0]])
+            return self.type[:]
+#Todo Error
+#Typed Context maybe create check context function
 class ExitAction(AST):
     # <ExitAction> ::= EXIT ID
 
     def propType(self):
-        self.typeCopy(0)
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.context.lookInContexts(self.fields[0])
+            return self.type[:]
     _fields = ['Id']
 
 #Typed
@@ -895,10 +938,14 @@ class ReturnAction(AST):
     _fields = ['Result']
 
     def propType(self):
+        if len(self.type) > 0:
+            return self.type[:]
         if len(self.fields) == 1:
-            self.type = None
+            self.type = []
+            return self.type[:]
         else:
-            self.typeCopy(1)
+            self.type = self.fields[1].propType()
+            return self.type[:]
 
 #Typed
 class ResultAction(AST):
@@ -906,30 +953,74 @@ class ResultAction(AST):
     _fields = ['Result']
 
     def propType(self):
-        self.typeCopy(0)
-
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
+#TODO UPPER LOWER
 #Typed
 class BuiltinCall(AST):
     # <BuiltinCall> ::= <BuiltinName> ( [ <ParameterList> ] )
     _fields = ['BuiltinName', 'ParameterList']
     def propType(self):
-        if len(self.fields) == 1:
-            self.type = None
+        if len(self.type) > 0:
+            return self.type[:]
         else:
-            self.typeCopy(1)
+            self.type = self.fields[0].propType()
+            return self.type[:]
 
-#NotTyped
+    def typeCheck(self):
+        ret = False
+        t = self.fields[0].fields[0].type
+        if t == 'READ':
+            ret = len(self.fields) == 1
+        elif len(self.fields) == 2:
+            if t == 'ABS':
+                ret = self.fields[1].propType() == ['int']
+            elif t == 'LENGTH':
+                ret = self.fields[1].propType() == ['int']
+            elif t == 'PRINT':
+                ret = self.fields[1].propType() == ['chars']
+            elif t == 'ASC':
+                ret = self.fields[1].propType() == ['int']
+            elif t == 'NUM':
+                ret = self.fields[1].propType() == ['char']
+
+        return true
+
+#TODO UPPER LOWER
+#Typed
 class BuiltinName(AST):
     # <BuiltinName> ::= ABS | ASC | NUM | UPPER | LOWER | LENGTH | READ | PRINT
     _fields = ['BuiltinName']
+    def propType(self):
+        t = self.fields[0].type
+        if t == 'ABS':
+            self.type = ['int']
+        elif t == 'READ':
+            self.type = ['chars']
+        elif t == 'LENGTH':
+            self.type = ['int']
+        elif t == 'PRINT':
+            self.type = []
+        elif t == 'ASC':
+            self.type = ['char']
+        elif t == 'NUM':
+            self.type = ['int']
+        return self.type[:]
 
-#Typed
+#Context
 class ProcedureStatement(AST):
     # <ProcedureStatement> ::= ID : <ProcedureDefinition> ;
     _fields = ['Id', 'ProcedureDefinition']
 
-    def propType(self):
-        self.typeCopy(1)
+    def updateContext(self):
+        paran,ret = self.fields[1].propType()
+        self.context.addToContext(self.fields[0],paran)
+        self.context.addToContext(['ret'] + [self.fields[0]],ret)
+        self.context.newContext()
+        self.context.pushContext()
 
 #Typed
 class ProcedureDefinition(AST):
@@ -937,34 +1028,63 @@ class ProcedureDefinition(AST):
     _fields = ['FormalParameterList', 'ResultSpec', 'StatementList']
 
     def propType(self):
-        if len(self.fields) == 2 and isInstance(self.fields[0],ResultSpec):
-            self.typeCopy(0)
+        if len(self.type) > 0:
+            return self.type[:]
+        elif  len(self.fields) == 1:
+            self.type = ([],[])
+        elif len(self.fields) == 2:
+            if isInstance(self.fields[0],FormalParameterList):
+                self.type = (self.fields[0].propType(),[])
+            else:
+                self.type = ([],self.fields[0].propType())
         else:
-            self.typeCopy(1)
+            self.type = (self.fields[0].propType(),self.fields[1].propType())
+        return self.type[:]
 
-#NotTyped
+
+#Typed
 class FormalParameterList(AST):
     # <FormalParameterList> ::= <FormalParameter> , <FormalParameterList>
     #                        | <FormalParameter>
     _fields = ['FormalParameter', 'FormalParameterList']
+
+    def propType(self):
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = [x.propType() for x in self.fields]
+            return self.type[:]
 
 #Typed
 class FormalParameter(AST):
     # <FormalParameter> ::= <IdentifierList> <ParameterSpec>
     _fields = ['IdentifierList', 'ParameterSpec']
     def propType(self):
-        self.typeCopy(1)
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            for i in self.fields[0].fields:
+                self.type += self.fields[1].propType()
+            return self.type[:]
 
 #Typed
 class ParameterSpec(AST):
     # <ParameterSpec> ::=  <Mode> [ <ParameterAttribute> ]
     _fields = ['Mode', 'ParameterAttribute']
     def propType(self):
-        self.typeCopy(0)
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.fields[:]
 
 #Typed
 class ResultSpec(AST):
     # <ResultSpec> ::= RETURNS ( <Mode> [ <ResultAttribute> ] )
     _fields = ['Mode', 'ResultAttribute']
     def propType(self):
-        self.typeCopy(0)
+        if len(self.type)>0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.fields[:]

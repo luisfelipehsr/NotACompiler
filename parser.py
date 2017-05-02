@@ -113,13 +113,13 @@ class Parser:
                             |  ID ATRIB Operand0 DOWN TO Operand0
                             |  ID ATRIB Operand0 BY Operand1 DOWN TO Operand0 """
         if len(p) == 6:
-            p[0] = StepEnumeration(p[3],p[5])
+            p[0] = StepEnumeration(p[1],p[3],p[5])
         elif len(p) == 7:
-            p[0] = StepEnumeration(p[3],p[4],p[6])
+            p[0] = StepEnumeration(p[1],p[3],p[4],p[6])
         elif len(p) == 8:
-            p[0] = StepEnumeration(p[3],p[5],p[7])
+            p[0] = StepEnumeration(p[1],p[3],p[5],p[7])
         else:
-            p[0] = StepEnumeration(p[3],p[5],p[6],p[8])
+            p[0] = StepEnumeration(p[1],p[3],p[5],p[6],p[8])
 
     def p_RangeEnumeration(self,p):
         """ RangeEnumeration : ID IN DiscreteMode 
