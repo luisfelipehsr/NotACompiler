@@ -573,13 +573,14 @@ class Parser(object):
 
 def main():
     a = Parser()
-    tstList = ['Example1.lya','Example2.lya']
+    r = range(1,7)
+    tstList = ["Example%s.lya"%(i) for i in r]
     for f in tstList:
         print(f)
         file = open(f,'r')
         AST.context = Context()
         a.parse(file.read())
-        #a.ast.buildGraph(f)
+        a.ast.buildGraph(f)
         a.ast.recursiveTypeCheck()
 
 

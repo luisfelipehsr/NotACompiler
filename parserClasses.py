@@ -130,7 +130,7 @@ class Initialization(AST):
         if len(self.type) > 0:
             return self.type[:]
         else:
-            self.type = self.fields[:-1].propType()
+            self.type = self.fields[-1].propType()
             return self.type[:]
 
 class IdentifierList(AST):
