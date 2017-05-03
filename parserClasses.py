@@ -2,9 +2,6 @@ import pydot as dot
 import uuid
 
 
-
-
-
 class AST(object):
     context = None
 
@@ -383,14 +380,17 @@ class DereferencedReference(AST):
     _fields = ['Location']
 
 #Typed
-class StringElement(AST):
-    # <StringElement> ::= <StringLocation> LBRACKET <StartElement> RBRACKET
-    def typeCheck(self):
-        return self.fields[0].propType() == ['chars']
-    def propType(self):
-        self.type = ['char']
-        return self.type[:]
-    _fields = ['StringLocation', 'StartElement']
+# class StringElement(AST):
+#     # <StringElement> ::= <StringLocation> LBRACKET <StartElement> RBRACKET
+#     def typeCheck(self):
+#         if isinstance(self.fields[0],AST):
+#             return self.fields[0].propType() == ['chars']
+#         else:
+#
+#     def propType(self):
+#         self.type = ['char']
+#         return self.type[:]
+#     _fields = ['StringLocation', 'StartElement']
 
 #Typed
 class StringSlice(AST):
@@ -408,6 +408,7 @@ class StringSlice(AST):
             return self.type[:]
 
 #Typed
+#Todo typeCheck
 class ArrayElement(AST):
 
     # <ArrayElement> ::= <ArrayLocation> LBRACKET <ExpressionList> RBRACKET

@@ -468,8 +468,6 @@ class Parser(object):
     def p_Location(self,p):
         """ Location : ID 
                      | DereferencedReference
-                     | StringElement
-                     | StringSlice
                      | ArrayElement
                      | ArraySlice
                      | CallAction """
@@ -477,17 +475,16 @@ class Parser(object):
 
     def p_DereferencedReference(self,p):
         """ DereferencedReference : Location ARROW """
-
         p[0] = DereferencedReference(p[1])
 
-    def p_StringElement(self,p):
-        """ StringElement : ID LBRACKET Operand1 RBRACKET"""
+    # def p_StringElement(self,p):
+    #     """ StringElement : ID LBRACKET Operand1 RBRACKET"""
+    #
+    #     p[0] = StringElement(p[1],p[3])
 
-        p[0] = StringElement(p[1],p[3])
-
-    def p_StringSlice(self,p):
-        """ StringSlice : ID LBRACKET Operand1 COLON Operand1 RBRACKET"""
-        p[0] = StringSlice(p[1],p[3],p[5])
+    # def p_StringSlice(self,p):
+    #     """ StringSlice : ID LBRACKET Operand1 COLON Operand1 RBRACKET"""
+    #     p[0] = StringSlice(p[1],p[3],p[5])
 
     def p_ArrayElement(self,p):
         """ ArrayElement : Location LBRACKET ExpressionList RBRACKET """
@@ -580,7 +577,7 @@ def main():
         file = open(f,'r')
         AST.context = Context()
         a.parse(file.read())
-        #a.ast.buildGraph(f)
+        a.ast.buildGraph(f)
         a.ast.recursiveTypeCheck()
 
 

@@ -13,3 +13,5 @@ perand0 inclui a mais somente operações que resultam em booleano)
     Ver com professor se precisa compilar o máximo que pode e dar warnings ou travar.
 
     Tentar resolver o conflito de shift reduce T -> T e T -> T bla/
+
+    Removemos de Location StringElement Q agora se resolve por array Element
