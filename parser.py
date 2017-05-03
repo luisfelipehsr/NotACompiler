@@ -573,7 +573,7 @@ class Parser(object):
 
 def main():
     a = Parser()
-    tstList = ['Example1']
+    tstList = ['Example1.lya','Example2.lya']
     for f in tstList:
         print(f)
         file = open(f,'r')

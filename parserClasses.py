@@ -788,8 +788,6 @@ class AssignmentAction(AST):
         else:
             return self.fields[0].propType() == self.fields[2].propType() and self.fields[0].propType() == ['int']
 
-
-
 #Typed
 class IfAction(AST):
     # <IfAction> ::= IF <BooleanExpression> <ThenClause> [ <ElseClause> ] FI

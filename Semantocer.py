@@ -3,7 +3,6 @@ class Context(object):
     def __init__(self):
         self.contextList =[]
 
-
     def addToContext(self,id,type):
         print('Adding %s of type %s to context %d' %(id,type,len(self.contextList)))
         if not isinstance(id,list):
