@@ -215,7 +215,7 @@ class Mode(AST):
     # otherwise it must be in the context
     def propType(self):
          if len(self.type) > 0:
-             return self.type
+             return self.type[:]
          elif isinstance(self.fields[0],AST):
             self.type = self.fields[0].propType()
             return self.type[:]
@@ -1055,7 +1055,8 @@ class FormalParameterList(AST):
         if len(self.type) > 0:
             return self.type[:]
         else:
-            self.type = [x.propType() for x in self.fields]
+            for x in self.fields:
+                self.type += x.propType()
             return self.type[:]
 
 #Typed
@@ -1079,7 +1080,7 @@ class ParameterSpec(AST):
             return self.type[:]
         else:
             self.type = self.fields[0].propType()
-            return self.fields[:]
+            return self.type[:]
 
 #Typed
 class ResultSpec(AST):
@@ -1090,4 +1091,4 @@ class ResultSpec(AST):
             return self.type[:]
         else:
             self.type = self.fields[0].propType()
-            return self.fields[:]
+            return self.type[:]
