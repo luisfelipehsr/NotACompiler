@@ -2,9 +2,12 @@ from lexer import Lexer as LexerHandle
 from parserClasses import *
 import ply.yacc as yacc
 from os import walk
+from Semantocer import Context
 
 
-class Parser:
+
+class Parser(object):
+
 
     def __init__(self):
         self.lexerHandle = LexerHandle()
@@ -574,8 +577,11 @@ def main():
     for f in tstList:
         print(f)
         file = open(f,'r')
+        AST.context = Context()
         a.parse(file.read())
         a.ast.buildGraph(f)
+        a.ast.recursiveBuildContext()
+        a.ast.context.printContext()
 
 if __name__ == '__main__':main()
 

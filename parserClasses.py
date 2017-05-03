@@ -1,18 +1,19 @@
 import pydot as dot
 import uuid
-from Semantocer import Context
 
-con = Context()
+
+
 
 
 class AST(object):
-    
+    context = None
+
     def __init__(self, *args):
         self.fields = list(args)
         self.type = []
         self.isNewContext = False
         self.Declarations = []
-        self.context = con
+        self.context = AST.context
 
     def removeChanel(self):
         while len(self.fields) == 1:
@@ -62,8 +63,11 @@ class AST(object):
     def recursiveBuildContext(self):
         cont = self.context.getCurrent()
         self.updateContext()
-        for a in self.fields():
-            self.recursiveBuildContext()
+        for a in self.fields:
+            if isinstance(a,AST):
+                a.recursiveBuildContext()
+            else:
+                continue
         self.context.setCurrent(cont)
 
     def typeCheck(self):
@@ -124,7 +128,7 @@ class Declaration(AST):
                 return self.type[:]
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0].fields,self.type)
+        self.context.addToContext(self.fields[0].fields,self.fields[1].propType())
 
 #Typed
 class Initialization(AST):
@@ -201,7 +205,7 @@ class Mode(AST):
     #   | <CompositeMode>
 
     def typeCheck(self):
-        if isInstance(self.fields[0],AST):
+        if isinstance(self.fields[0],AST):
             return True
         else:
             return self.fields[0].propType()[0] == 'mode'
@@ -212,7 +216,7 @@ class Mode(AST):
     def propType(self):
          if len(self.type) > 0:
              return self.type
-         elif isInstance(self.fields[0],AST):
+         elif isinstance(self.fields[0],AST):
             self.type = self.fields[0].propType()
             return self.type[:]
          else:
@@ -236,7 +240,7 @@ class DiscreteMode(AST):
     def propType(self):
         if len(self.type) > 0:
             return self.type[:]
-        if isIsntance(self.fields[0],AST):
+        if isinstance(self.fields[0],AST):
             self.type = self.fields[0].propType()
             return self.type[:]
         else:
@@ -255,7 +259,7 @@ class DiscreteRangeMode(AST):
         if len(self.type) > 0:
             return self.type[:]
 
-        elif isInstance(self.fields[0],AST):
+        elif isinstance(self.fields[0],AST):
             self.type = prefix + self.fields[0].propType()
             return self.type[:]
         else:
@@ -624,7 +628,7 @@ class Operand0(AST):
         if len(self.fields) == 1:
             return True
         else:
-            if isInstance(self.fields[1],RelationalOperator):
+            if isinstance(self.fields[1],RelationalOperator):
                 return self.fields[0].propType() == self.fields[2].propType()
             else:
                 return self.fields[2].propType()[0] == 'array' or self.fields[2].propType()[0] == 'chars'
@@ -859,7 +863,7 @@ class StepEnumeration(AST):
             return self.fields[1].propType() == self.fields[2].propType() \
                    and self.fields[1].propType() == ['int']
         elif len(self.fields) == 4:
-            if isInstance(self.fields[2],AST):
+            if isinstance(self.fields[2],AST):
                 return self.fields[1].propType() == self.fields[2].propType() \
                        and self.fields[2].propType() == self.fields[3].propType() \
                        and self.fields[1].propType() == ['int']
@@ -1033,7 +1037,7 @@ class ProcedureDefinition(AST):
         elif  len(self.fields) == 1:
             self.type = ([],[])
         elif len(self.fields) == 2:
-            if isInstance(self.fields[0],FormalParameterList):
+            if isinstance(self.fields[0],FormalParameterList):
                 self.type = (self.fields[0].propType(),[])
             else:
                 self.type = ([],self.fields[0].propType())
