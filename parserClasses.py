@@ -921,7 +921,7 @@ class ProcedureCall(AST):
             return self.type[:]
         else:
             #The return type is saved with a list with 'ret' as a prefix
-            self.type = self.context.lookInContexts(['ret'] + [self.fields[0]])
+            self.type = self.context.lookInContexts(('ret',self.fields[0]))
             return self.type[:]
 #Todo Error
 #Typed Context maybe create check context function
@@ -1071,6 +1071,8 @@ class FormalParameter(AST):
                 self.type += self.fields[1].propType()
             return self.type[:]
 
+    def updateContext(self):
+        self.context.addToContext(self.fields[0].fields,self.fields[1].propType())
 #Typed
 class ParameterSpec(AST):
     # <ParameterSpec> ::=  <Mode> [ <ParameterAttribute> ]
