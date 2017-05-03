@@ -285,8 +285,8 @@ class Parser:
             p[0].fields = [p[1]] + p[2].fields
 
     def p_SynonymDefinition(self,p):
-        """ SynonymDefinition : IdentifierList EQUAL Expression
-                              | IdentifierList Mode EQUAL Expression """
+        """ SynonymDefinition : IdentifierList ATRIB Expression
+                              | IdentifierList Mode ATRIB Expression """
         if len(p) == 4:
             p[0] = SynonymDefinition(p[1],p[3])
         else:
