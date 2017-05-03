@@ -134,7 +134,7 @@ class Parser(object):
 
     def p_WhileControl(self,p):
         """ WhileControl : WHILE Operand0 """
-        p[0] = WhileControl(p[1])
+        p[0] = WhileControl(p[2])
 
     def p_DoAction(self,p):
         """DoAction : DO ActionStatementList OD
@@ -573,15 +573,15 @@ class Parser(object):
 
 def main():
     a = Parser()
-    tstList = ['Example1','Example2']
+    tstList = ['Example1']
     for f in tstList:
         print(f)
         file = open(f,'r')
         AST.context = Context()
         a.parse(file.read())
         #a.ast.buildGraph(f)
-        a.ast.recursiveBuildContext()
-        a.ast.context.printContext()
+        a.ast.recursiveTypeCheck()
+
 
 if __name__ == '__main__':main()
 

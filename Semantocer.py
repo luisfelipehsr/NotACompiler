@@ -2,33 +2,29 @@ class Context(object):
 
     def __init__(self):
         self.contextList =[]
-        self.currentContext = 0
 
-    def newContext(self):
-        #print('Creating new context')
-        self.contextList.append(dict())
 
     def addToContext(self,id,type):
-        #print('Adding %s of type %s to context %d' %(id,type,self.currentContext))
+        print('Adding %s of type %s to context %d' %(id,type,len(self.contextList)))
         if not isinstance(id,list):
-            self.contextList[self.currentContext][id] = type
+            self.contextList[-1][id] = type
         else:
             for i in id:
-                self.contextList[self.currentContext][i] = type
+                self.contextList[-1][i] = type
 
     def getFromContext(self,id):
-        return self.contextList[self.currentContext][id]
+        return self.contextList[-1][id]
 
     def pushContext(self):
-        self.currentContext += 1
-        #print('Current Context is now %d' % (self.currentContext))
+        self.contextList.append(dict())
+        print('Pushed New Context')
 
     def popContext(self):
-        self.currentContext -= 1
-        #print('Current Context is now %d' % (self.currentContext))
+        self.contextList.pop()
+        print('Poped Context')
 
     def lookInContexts(self,id):
-        for a in reversed(range(self.currentContext)):
+        for a in reversed(range(len(self.contextList))):
             if id in self.contextList[a]:
                 return self.contextList[a][id]
             else:
@@ -36,7 +32,10 @@ class Context(object):
         return []
 
     def getCurrent(self):
-        return self.currentContext
+        if len(self.contextList)>0:
+            return self.contextList[-1]
+        else:
+            return None
 
     def setCurrent(self,ct):
         self.currentContext = ct
@@ -46,3 +45,11 @@ class Context(object):
         for id in range(len(self.contextList)):
             for item in self.contextList[id]:
                 print('%s of type %s in context %d' %(str(item),self.contextList[id][item],id))
+
+    def contextLen(self):
+        return len(self.contextList)
+
+    def trimToLen(self,l):
+        size = len(self.contextList) - l
+        for a in range(size):
+            self.popContext()

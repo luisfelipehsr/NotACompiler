@@ -39,15 +39,15 @@ class Lexer():
             'asc'     : 'ASC',
             'bool'    : 'BOOL',
             'char'    : 'CHAR',
-            'false'   : 'FALSE',
+            ('false','bool')   : 'FALSE',
             'int'     : 'INT',
             'length'  : 'LENGHT',
             'lower'   : 'LOWER',
-            'null'    : 'NULL',
+            ('null','null')    : 'NULL',
             'num'     : 'NUM',
             'print'   : 'PRINT',
             'read'    : 'READ',
-            'true'    : 'TRUE',
+            ('true','bool')    : 'TRUE',
             'upper'   : 'UPPER'
 }
 
@@ -91,12 +91,12 @@ class Lexer():
 
     def t_STR(self,t):
         r'"([^\n\r\"]|(\\n)|(\\t)|(\\")|(\\))*"'
-        t.value = t.value[1:-1]
+        t.value = (t.value[1:-1],'str')
         return t
 
     def t_CHALIT(self,t):
         r'(\'[0-9]\')|(\'[A-Za-z]\')'
-        t.value = ord(t.value[1:-1])
+        t.value = (ord(t.value[1:-1]),'char')
         return t
 
     def t_ID(self,t):
@@ -107,7 +107,7 @@ class Lexer():
     def t_ICONST(self,t):
         r'[0-9]+'
         try:
-            t.value = int(t.value)
+            t.value = (int(t.value),'int')
         except ValueError:
             print("Integer value too large %d", t.value)
             t.value = 0

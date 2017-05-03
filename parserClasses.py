@@ -52,23 +52,17 @@ class AST(object):
         graph.write_png(name +'.png')
 
     def recursiveTypeCheck(self):
+        len = self.context.contextLen()
+        self.updateContext()
         ret = self.typeCheck()
         if not ret:
             print('Type Error at %s' % (self.__class__.__name__))
             return
         else:
             for n in self.fields:
-                n.recursiveTypeCheck()
-
-    def recursiveBuildContext(self):
-        cont = self.context.getCurrent()
-        self.updateContext()
-        for a in self.fields:
-            if isinstance(a,AST):
-                a.recursiveBuildContext()
-            else:
-                continue
-        self.context.setCurrent(cont)
+                if isinstance(n,AST):
+                    n.recursiveTypeCheck()
+        self.context.trimToLen(len)
 
     def typeCheck(self):
         return True
@@ -84,7 +78,7 @@ class AST(object):
 class Program(AST):
     # <Program> ::= <StatementList>
     def updateContext(self):
-        self.context.newContext()
+        self.context.pushContext()
     _fields = ['StatementList']
 
 class StatementList(AST):
@@ -366,7 +360,7 @@ class Location(AST):
         else:
             fromContext = self.context.lookInContexts(self.fields[0])[:]
             if len(fromContext) == 0:
-                self.type = None
+                self.type = []
                 return self.type
             else:
                 self.type = fromContext
@@ -494,16 +488,8 @@ class Literal(AST):
 
     def propType(self):
         token = self.fields[0]
-        if token.type == 'ICONST':
-            self.type = ['int']
-        elif token.type == 'FALSE'or token.type == 'TRUE':
-            self.type = ['bool']
-        elif token.type == 'CHALIT':
-            self.type = ['char']
-        elif token.type == 'NULL':
-            self.type = ['null']
-        else:
-            self.type = ['chars']
+        _,self.type = token
+        self.type = [self.type]
         return self.type[:]
 
 #Typed
@@ -628,7 +614,7 @@ class Operand0(AST):
         if len(self.fields) == 1:
             return True
         else:
-            if isinstance(self.fields[1],RelationalOperator):
+            if isinstance(self.fields[1].fields[0],RelationalOperator):
                 return self.fields[0].propType() == self.fields[2].propType()
             else:
                 return self.fields[2].propType()[0] == 'array' or self.fields[2].propType()[0] == 'chars'
@@ -793,10 +779,16 @@ class AssignmentAction(AST):
     _fields = ['Location', 'AssigningOperator', 'Expression']
 
     def typeCheck(self):
+
         if len(self.fields) == 2:
             return self.fields[0].propType() == self.fields[1].propType()
+        elif self.fields[1] == '&':
+                return (self.fields[0].propType() == ['chars'] and self.fields[1].propType() == ['chars']) or \
+                       (self.fields[0].propType() == ['chars'] and self.fields[1].propType() == ['char'])
         else:
-            return self.fields[0].propType() == self.fields[2].propType()
+            return self.fields[0].propType() == self.fields[2].propType() and self.fields[0].propType() == ['int']
+
+
 
 #Typed
 class IfAction(AST):
@@ -833,7 +825,6 @@ class DoAction(AST):
     _fields = ['ControlPart', 'ActionStatementList']
 
     def updateContext(self):
-        self.context.newContext()
         self.context.pushContext()
 
 #NotTyped
@@ -891,7 +882,7 @@ class WhileControl(AST):
     # <WhileControl> ::= WHILE <BooleanExpression>
     _fields = ['BooleanExpression']
     def typeCheck(self):
-        return self.fields[0].typeProp() == ['bool']
+        return self.fields[0].propType() == ['bool']
 
 #Typed
 class CallAction(AST):
@@ -976,7 +967,7 @@ class BuiltinCall(AST):
 
     def typeCheck(self):
         ret = False
-        t = self.fields[0].fields[0].type
+        t = self.fields[0].fields[0]
         if t == 'READ':
             ret = len(self.fields) == 1
         elif len(self.fields) == 2:
@@ -1019,11 +1010,11 @@ class ProcedureStatement(AST):
     # <ProcedureStatement> ::= ID : <ProcedureDefinition> ;
     _fields = ['Id', 'ProcedureDefinition']
 
+
     def updateContext(self):
         paran,ret = self.fields[1].propType()
         self.context.addToContext(self.fields[0],paran)
         self.context.addToContext(('ret',self.fields[0]),ret)
-        self.context.newContext()
         self.context.pushContext()
 
 #Typed
