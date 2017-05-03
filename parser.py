@@ -577,8 +577,10 @@ def main():
         file = open(f,'r')
         AST.context = Context()
         a.parse(file.read())
-        a.ast.buildGraph(f)
         a.ast.recursiveTypeCheck()
+        a.ast.removeChanel()
+        a.ast.buildGraph(f)
+
 
 
 if __name__ == '__main__':main()

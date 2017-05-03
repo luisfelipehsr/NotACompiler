@@ -91,7 +91,7 @@ class Lexer():
 
     def t_STR(self,t):
         r'"([^\n\r\"]|(\\n)|(\\t)|(\\")|(\\))*"'
-        t.value = (t.value[1:-1],'str')
+        t.value = (t.value[1:-1],'chars')
         return t
 
     def t_CHALIT(self,t):

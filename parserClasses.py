@@ -15,7 +15,7 @@ class AST(object):
     def removeChanel(self):
         while len(self.fields) == 1:
             aux = self.fields[0]
-            if(isinstance(aux,AST)):
+            if isinstance(aux,AST):
                 self.fields = aux.fields
             else:
                 return
@@ -28,11 +28,13 @@ class AST(object):
         #print(self.__class__.__name__)
         #self.removeLists()
         myId = id(self)
-        graph.add_node(dot.Node(myId,label = self.__class__.__name__))
+        graph.add_node(dot.Node(myId,label = self.__class__.__name__ +
+                                             ' '+str(self.type) ))
         for n in self.fields:
             nId = id(n)
             if isinstance(n,AST):
-                graph.add_node(dot.Node(nId, label=n.__class__.__name__))
+                graph.add_node(dot.Node(nId, label=self.__class__.__name__ +
+                                                    ' ' + str(self.type)))
                 graph.add_edge(dot.Edge(myId,nId))
                 n.build(graph)
             else:
@@ -46,7 +48,7 @@ class AST(object):
         self.build(graph)
         with open(name+'.dot','w') as textFile:
             textFile.write(graph.to_string())
-        graph.write_png(name +'.png')
+        #graph.write_png(name +'.png')
 
     def recursiveTypeCheck(self):
         len = self.context.contextLen()
@@ -415,14 +417,25 @@ class ArrayElement(AST):
     _fields = ['ArrayLocation', 'ExpressionList']
 
     def typeCheck(self):
-        return self.fields[1].propType() == ['int'] and (self.fields[0].propType()[0] == 'array' or self.fields[0].propType() == ['chars'])
+
+        ret = True
+        for parameter in self.fields[1].propType():
+            if parameter not in [['int']]:
+                ret = False
+
+        if self.fields[0].propType() != ['chars'] and \
+            self.fields[0].propType()[0] != 'array':
+            ret = False
+
+        return ret
 
     def propType(self):
         if len(self.type) > 0:
             return self.type[:]
+
         # Se tivermos so uma expressão retornamos o valor nao um array
         elif len(self.fields[1].fields) == 1:
-            if(self.fields[0].propType() == ['chars']):
+            if self.fields[0].propType() == ['chars']:
                 self.type = ['char']
             else:
                 self.type = self.fields[0].propType()[1:]
@@ -443,7 +456,7 @@ class ExpressionList(AST):
             return self.type[:]
         else:
             for f in self.fields:
-                self.type += f.propType()
+                self.type += [f.propType()]
             return self.type[:]
 
     _fields = ['Expression', 'ExpressionList']
@@ -615,10 +628,71 @@ class Operand0(AST):
         if len(self.fields) == 1:
             return True
         else:
-            if isinstance(self.fields[1].fields[0],RelationalOperator):
-                return self.fields[0].propType() == self.fields[2].propType()
+
+            operand0Type = self.fields[0].propType()
+            operand1Type = self.fields[2].propType()
+
+            operatorType = self.fields[1].fields[0]
+            isRelational = isinstance(operatorType,RelationalOperator)
+
+            if isRelational:
+
+                if operand0Type == operand1Type:
+
+                    operator = operatorType.fields[0]
+
+                    if operator in ['&&', '||']:
+                        if operand0Type == ['bool']:
+                            return True
+                        else:
+                            print('Operands must be of type bool. Got %s'
+                                  %(operand0Type))
+                            return False
+
+                    elif operator in ['==','!=']:
+                        if operand0Type in [['int'],['bool']]:
+                            return True
+                        else:
+                            print('Operands must be of type bool or int. Got' +
+                                  '%s' %(operand0Type))
+                            return False
+
+                    else:
+                        if operand0Type == ['int']:
+                            return True
+                        else:
+                            print('Operands must be of type int. Got %s'
+                                  %(operand0Type))
+                            return False
+
+                else:
+                    print('Both operands must be of same type')
+                    return False
+
             else:
-                return self.fields[2].propType()[0] == 'array' or self.fields[2].propType()[0] == 'chars'
+
+                if operand1Type[0] == 'array':
+                    if operand1Type[1:] == operand0Type:
+                        return True
+                    else:
+                        print('Expected first operand of type %s. Got %s'
+                               %(operand1Type[1:],operand0Type))
+                        return False
+
+                elif operand1Type == ['chars']:
+                    if operand0Type == ['char']:
+                        return True
+                    else:
+                        print('Expected first operand of type char. Got %s'
+                              %(operand0Type))
+                        return False
+
+                else:
+                    print ('On IN operation, second operand must be string or'+
+                           ' array. Got %s' %(operand1Type))
+                    return False
+
+        return False
 
     def propType(self):
         if len(self.type) > 0:
@@ -633,7 +707,7 @@ class Operand0(AST):
 #NotTyped
 class Operator1(AST):
     # <Operator1> ::=  <RelationalOperator>
-    #         | IN
+    #                | IN
     _fields = ['Operator']
 
 #NotTyped
@@ -900,6 +974,7 @@ class CallAction(AST):
 class ProcedureCall(AST):
     # <ProcedureCall> ::= <ProcedureName> ( [ <ParameterList> ] )
     _fields = ['ProcedureName', 'ParameterList']
+
     def typeCheck(self):
         fromContext = self.context.lookInContexts(self.fields[0])
         fromCall = []
@@ -961,6 +1036,7 @@ class ResultAction(AST):
 class BuiltinCall(AST):
     # <BuiltinCall> ::= <BuiltinName> ( [ <ParameterList> ] )
     _fields = ['BuiltinName', 'ParameterList']
+
     def propType(self):
         if len(self.type) > 0:
             return self.type[:]
@@ -971,21 +1047,33 @@ class BuiltinCall(AST):
     def typeCheck(self):
         ret = False
         t = self.fields[0].fields[0]
-        if t == 'READ':
-            ret = len(self.fields) == 1
-        elif len(self.fields) == 2:
-            if t == 'ABS':
-                ret = self.fields[1].propType() == ['int']
-            elif t == 'LENGTH':
-                ret = self.fields[1].propType() == ['int']
-            elif t == 'PRINT':
-                ret = self.fields[1].propType() == ['chars']
-            elif t == 'ASC':
-                ret = self.fields[1].propType() == ['int']
-            elif t == 'NUM':
-                ret = self.fields[1].propType() == ['char']
 
-        return True
+        if t == 'abs':
+            ret = self.fields[1].propType() == ['int']
+
+        elif t == 'length':
+            ret = self.fields[1].propType()[0] = 'array'
+
+        elif t == 'asc':
+            ret = self.fields[1].propType() == ['int']
+
+        elif t == 'num':
+            ret = self.fields[1].propType() == ['char']
+
+        elif t == 'print' or 'read':
+
+            ret = True
+            for parameter in self.fields[1].propType():
+
+                if parameter not in [['chars'], ['char'], ['bool'],
+                                     ['int']]:
+                    ret = False
+
+        else:
+            print('Invalid BuiltInCall')
+
+
+        return ret
 
 #TODO UPPER LOWER
 #Typed
@@ -997,13 +1085,17 @@ class BuiltinName(AST):
         if t == 'ABS':
             self.type = ['int']
         elif t == 'READ':
-            self.type = ['chars']
+            self.type = []
         elif t == 'LENGTH':
             self.type = ['int']
         elif t == 'PRINT':
             self.type = []
         elif t == 'ASC':
             self.type = ['char']
+        elif t == 'UPPER':
+            self.type = ['int']
+        elif t == 'LOWER':
+            self.type = ['int']
         elif t == 'NUM':
             self.type = ['int']
         return self.type[:]
@@ -1050,7 +1142,7 @@ class FormalParameterList(AST):
             return self.type[:]
         else:
             for x in self.fields:
-                self.type += x.propType()
+                self.type += [x.propType()]
             return self.type[:]
 
 #Typed
