@@ -70,7 +70,7 @@ class Parser(object):
 
     def p_ExitAction(self,p):
         """ ExitAction : EXIT ID """
-        p[0] = ExitActiom(p[2])
+        p[0] = ExitAction(p[2])
 
     def p_ReturnAction(self,p):
         """ReturnAction : RETURN 
@@ -190,7 +190,7 @@ class Parser(object):
         if len(p) == 7:
             p[0] = ProcedureDefinition(p[5])
         elif len(p) == 8:
-            if isInstance(p[3],FormalParameterList) :
+            if isinstance(p[3],FormalParameterList) :
                 p[0] = ProcedureDefinition(p[3],p[6])
             else:
                 p[0] = ProcedureDefinition(p[4],p[6])
@@ -350,7 +350,7 @@ class Parser(object):
 
     def p_LiteralRange(self,p):
         """ LiteralRange : Operand1 COLON Operand1 """
-        p[0] = LiteraRange(p[1],p[3])
+        p[0] = LiteralRange(p[1],p[3])
 
     def p_Initialization(self,p):
         """ Initialization : ATRIB Expression 
@@ -579,9 +579,9 @@ def main():
         file = open(f,'r')
         AST.context = Context()
         a.parse(file.read())
-        a.ast.buildGraph(f)
-        a.ast.recursiveBuildContext()
-        a.ast.context.printContext()
+        #a.ast.buildGraph(f)
+        #a.ast.recursiveBuildContext()
+        #a.ast.context.printContext()
 
 if __name__ == '__main__':main()
 

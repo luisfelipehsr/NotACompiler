@@ -336,7 +336,7 @@ class IndexModeList(AST):
 class IndexMode(AST):
     # <IndexMode> ::= <DiscreteMode> | <LiteralRange>
     def typeCheck(self):
-        return isIstance(self.fields[0],LiteralRange) or (self.fields[0].propType() is 'int','discreterange_int')
+        return isinstance(self.fields[0],LiteralRange) or (self.fields[0].propType() is 'int','discreterange_int')
 
     def propType(self):
         if len(self.type) > 0:
@@ -360,7 +360,7 @@ class Location(AST):
     def propType(self):
         if len(self.type) > 0:
             return self.type[:]
-        elif isIntance(self.fields[0],AST):
+        elif isinstance(self.fields[0],AST):
             self.type = self.fields[0].propType()
             return self.type[:]
         else:
@@ -991,7 +991,7 @@ class BuiltinCall(AST):
             elif t == 'NUM':
                 ret = self.fields[1].propType() == ['char']
 
-        return true
+        return True
 
 #TODO UPPER LOWER
 #Typed
