@@ -1022,7 +1022,7 @@ class ProcedureStatement(AST):
     def updateContext(self):
         paran,ret = self.fields[1].propType()
         self.context.addToContext(self.fields[0],paran)
-        self.context.addToContext(['ret'] + [self.fields[0]],ret)
+        self.context.addToContext((['ret'],[self.fields[0]]),ret)
         self.context.newContext()
         self.context.pushContext()
 

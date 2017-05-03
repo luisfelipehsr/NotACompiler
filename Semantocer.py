@@ -45,4 +45,4 @@ class Context(object):
     def printContext(self):
         for id in range(len(self.contextList)):
             for item in self.contextList[id]:
-                print('%s of type %s in context %d' %(item,self.contextList[id][item],id))
+                print('%s of type %s in context %d' %(str(item),self.contextList[id][item],id))
