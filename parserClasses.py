@@ -408,21 +408,24 @@ class StringSlice(AST):
             return self.type[:]
 
 #Typed
-#Todo typeCheck
+
 class ArrayElement(AST):
 
     # <ArrayElement> ::= <ArrayLocation> LBRACKET <ExpressionList> RBRACKET
     _fields = ['ArrayLocation', 'ExpressionList']
 
     def typeCheck(self):
-        return self.fields[1].propType() == ['int'] and self.fields[0].propType()[0] == 'array'
+        return self.fields[1].propType() == ['int'] and (self.fields[0].propType()[0] == 'array' or self.fields[0].propType() == ['chars'])
 
     def propType(self):
         if len(self.type) > 0:
             return self.type[:]
         # Se tivermos so uma expressão retornamos o valor nao um array
         elif len(self.fields[1].fields) == 1:
-            self.type = self.fields[0].propType()[1:]
+            if(self.fields[0].propType() == ['chars']):
+                self.type = ['char']
+            else:
+                self.type = self.fields[0].propType()[1:]
             return self.type[:]
         else:
             self.type = self.fields[0].propType()
