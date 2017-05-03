@@ -437,13 +437,10 @@ class ExpressionList(AST):
     def propType(self):
         if len(self.type) > 0:
             return self.type[:]
-        type = self.fields[0].propType()
-        for t in self.fields:
-            if type != t.propType():
-                self.type = []
-                return
-        self.type = type
-        return self.type[:]
+        else:
+            for f in self.fields:
+                self.type += f.propType()
+            return self.type[:]
 
     _fields = ['Expression', 'ExpressionList']
 
@@ -697,7 +694,7 @@ class Operand3(AST):
         if len(self.fields) == 1:
             return True
         else:
-            if self.fields[0].type == 'MINUS':
+            if self.fields[0] == '-':
                 return self.fields[1].propType() in [['int'],['char']]
             else:
                 return self.fields[1].propType() == ['bool']
@@ -816,6 +813,8 @@ class ElseClause(AST):
     def typeCheck(self):
         if len(self.fields) != 1:
             return self.fields[0].propType() == ['bool']
+        else:
+            return True
 
 #Context
 class DoAction(AST):
@@ -901,6 +900,8 @@ class ProcedureCall(AST):
         fromContext = self.context.lookInContexts(self.fields[0])
         fromCall = []
         if len(self.fields) == 2:
+            #print(fromContext)
+            #print(self.fields[1].propType())
             fromCall = self.fields[1].propType()
         return fromCall == fromContext
 

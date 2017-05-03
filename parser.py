@@ -563,8 +563,8 @@ class Parser(object):
         p[0] = Operand2(p[1])
 
     def p_error(self, p):
-            print("Systax error in input(%s) at line (%s)" %(p,p.lexer.lineno))
-            self.parser.errok()
+        print("Systax error in input(%s) at line (%s)" %(p,p.lexer.lineno))
+        self.parser.errok()
 
     def parse(self, text):
         self.parser.parse(text)
@@ -573,14 +573,14 @@ class Parser(object):
 
 def main():
     a = Parser()
-    r = range(1,7)
+    r = range(1,8)
     tstList = ["Example%s.lya"%(i) for i in r]
     for f in tstList:
         print(f)
         file = open(f,'r')
         AST.context = Context()
         a.parse(file.read())
-        a.ast.buildGraph(f)
+        #a.ast.buildGraph(f)
         a.ast.recursiveTypeCheck()
 
 
