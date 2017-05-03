@@ -64,7 +64,7 @@ class Parser(object):
                              | Location MOD ATRIB Expression
                              | Location STRCAT ATRIB Expression"""
         if len(p) == 4:
-            p[0] = AssignmentAction(p[1],p[2])
+            p[0] = AssignmentAction(p[1],p[3])
         else:
             p[0] = AssignmentAction(p[1],p[2],p[4])
 
@@ -580,8 +580,8 @@ def main():
         AST.context = Context()
         a.parse(file.read())
         #a.ast.buildGraph(f)
-        #a.ast.recursiveBuildContext()
-        #a.ast.context.printContext()
+        a.ast.recursiveBuildContext()
+        a.ast.context.printContext()
 
 if __name__ == '__main__':main()
 
