@@ -1,0 +1,14 @@
+/* Compute the fatorial of an integer */
+
+fat: proc (n int) returns (int);
+  if n==0 then
+    return 1;
+  else
+    return n * fat (n-1);
+  fi;
+end;
+
+dcl x int;
+print("give-me a positive integer:");
+read(x);
+print("fatorial of ", x, " = ", fat(x));

@@ -1,0 +1,17 @@
+/* example3: */
+
+dcl m int;
+
+f: proc (n int, k int loc) returns (int);
+  dcl p,q,t int;
+  if n<2 then
+    k = 0;
+    result n;
+  else
+    t = f(n-1,p) + f(n-2,q);
+    k = p + q + 1;
+    result t;
+  fi;
+end;
+
+print(f(3,m), m);
