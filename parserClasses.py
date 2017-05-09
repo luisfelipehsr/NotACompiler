@@ -25,8 +25,6 @@ class AST(object):
                 n.removeChanel()
 
     def build(self,graph):
-        #print(self.__class__.__name__)
-        #self.removeLists()
         myId = id(self)
         graph.add_node(dot.Node(myId,label = self.__class__.__name__ +
                                              ' '+str(self.type) ))
@@ -215,9 +213,9 @@ class Mode(AST):
          else:
             self.type = self.context.lookInContexts(self.fields[0])[:]
             if len(self.type) == 0:
-                self.type = None
+                self.type = []
                 print('Type Error %s not found in context' % (id))
-                return None
+                return []
             else:
                 return self.type[:]
 
@@ -258,7 +256,7 @@ class DiscreteRangeMode(AST):
         else:
             fromContext = self.context.lookInContexts(self.fields[0])[:]
             if len(fromContext) == 0:
-                self.type = None
+                self.type = []
                 print('Type Error %s not found in context' % (id))
                 return self.type
             else:
@@ -358,6 +356,7 @@ class Location(AST):
             return self.type[:]
         else:
             fromContext = self.context.lookInContexts(self.fields[0])[:]
+
             if len(fromContext) == 0:
                 self.type = []
                 return self.type
@@ -470,10 +469,12 @@ class ArraySlice(AST):
         return self.fields[0].propType()[0] == 'array' and self.fields[1].propType() == ['int'] and self.fields[2].propType() == ['int']
 
     def propType(self):
+
         if len(self.type) > 0:
             return self.type[:]
         else:
             self.type = self.fields[0].propType()
+            return self.type[:]
 
 #Typed
 class PrimitiveValue(AST):
@@ -631,7 +632,6 @@ class Operand0(AST):
 
             operand0Type = self.fields[0].propType()
             operand1Type = self.fields[2].propType()
-
             operatorType = self.fields[1].fields[0]
             isRelational = isinstance(operatorType,RelationalOperator)
 
@@ -979,8 +979,6 @@ class ProcedureCall(AST):
         fromContext = self.context.lookInContexts(self.fields[0])
         fromCall = []
         if len(self.fields) == 2:
-            #print(fromContext)
-            #print(self.fields[1].propType())
             fromCall = self.fields[1].propType()
         return fromCall == fromContext
 
