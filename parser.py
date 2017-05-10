@@ -574,7 +574,7 @@ def main():
     tstList = ["Example%s.lya"%(i) for i in r]
     for f in tstList:
         a = Parser()
-        print(f)
+        print('\n' + f )
         file = open(f,'r')
         AST.context = Context()
         a.parse(file.read())

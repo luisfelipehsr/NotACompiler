@@ -199,7 +199,6 @@ class Mode(AST):
         if isinstance(self.fields[0],AST):
             return True
         else:
-            print(self.type)
             return self.type[0] == 'mode'
 
     # The idea is, if we already have a type use that one,
