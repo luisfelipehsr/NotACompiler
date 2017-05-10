@@ -4,7 +4,7 @@ class Context(object):
         self.contextList =[]
 
     def addToContext(self,id,type):
-        print('Adding %s of type %s to context %d' %(id,type,len(self.contextList)))
+        #print('Adding %s of type %s to context %d' %(id,type,len(self.contextList)))
         if not isinstance(id,list):
             self.contextList[-1][id] = type
         else:
@@ -16,11 +16,11 @@ class Context(object):
 
     def pushContext(self):
         self.contextList.append(dict())
-        print('Pushed New Context')
+        #print('Pushed New Context')
 
     def popContext(self):
         self.contextList.pop()
-        print('Poped Context')
+        #print('Poped Context')
 
     def lookInContexts(self,id):
         for a in reversed(range(len(self.contextList))):
@@ -38,7 +38,6 @@ class Context(object):
 
     def setCurrent(self,ct):
         self.currentContext = ct
-        #print('Current Context is now %d' % (self.currentContext))
 
     def printContext(self):
         for id in range(len(self.contextList)):
