@@ -1,10 +1,7 @@
 from lexer import Lexer as LexerHandle
 from parserClasses import *
 import ply.yacc as yacc
-from os import walk
 from Semantocer import Context
-
-
 
 class Parser(object):
 
@@ -14,7 +11,7 @@ class Parser(object):
         self.lexer = self.lexerHandle.lexer
         self.tokens = self.lexerHandle.tokens
         self.parser = yacc.yacc(module=self, start='Program',debug=True)
-        self.ast = 0
+        self.ast = None
 
     def p_Program(self,p):
         """ Program : StatementList """
@@ -294,7 +291,7 @@ class Parser(object):
     def p_DeclarationList(self,p):
         """DeclarationList : DeclarationList COMMA Declaration
                           | Declaration """
-        if(len(p) == 2):
+        if len(p) == 2:
             p[0] = DeclarationList(p[1])
             p[0].setLinespan(p, 1, 1)
         else:
@@ -549,8 +546,12 @@ class Parser(object):
                            | ValueArrayElement
                            | ValueArraySlice
                            | LPAREN Expression RPAREN """
-        p[0] = PrimitiveValue(p[1])
-        p[0].setLinespan(p, 1, 1)
+        if len(p) == 2:
+            p[0] = PrimitiveValue(p[1])
+            p[0].setLinespan(p, 1, 1)
+        else:
+            p[0] = PrimitiveValue(p[2])
+            p[0].setLinespan(p, 2, 2)
 
     def p_ValueArrayElement(self,p):
         """ ValueArrayElement : PrimitiveValue LPAREN ExpressionList RPAREN """
@@ -674,7 +675,7 @@ class Parser(object):
 def main():
 
     r = range(1,9)
-    tstList = ["Example%s.lya"%(i) for i in r]
+    tstList = ["Example%s.lya" %i for i in r]
     for f in tstList:
         a = Parser()
         print('\n' + f )

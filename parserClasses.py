@@ -1,6 +1,10 @@
 import pydot as dot
 import uuid
 
+class tColors:
+    RED = "\033[1;31m"
+    YELLOW = '\033[93m'
+    RESET = '\033[0m'
 
 class AST(object):
     context = None
@@ -61,12 +65,13 @@ class AST(object):
         ret = self.typeCheck()
         if not ret:
             if self.linespan[0] == self.linespan[1]:
-                print('Type Error on %s at line %s'
-                      % (self.__class__.__name__,self.linespan[0]))
+                print(tColors.RED + 'Type Error on %s at '
+                      %(self.__class__.__name__) + tColors.RESET + 'line %s'
+                      %(self.linespan[0]))
             else:
-                print('Type Error on %s between lines %s and %s'
-                      % (self.__class__.__name__,self.linespan[0],
-                         self.linespan[1]))
+                print(tColors.RED + 'Type Error on %s between '
+                      %(self.__class__.__name__) + tColors.RESET + 'lines %s'
+                      % (self.linespan[0]) + ' and %s' % (self.linespan[1]))
             return
 
         else:
@@ -213,7 +218,7 @@ class Mode(AST):
         if isinstance(self.fields[0],AST):
             return True
         else:
-            return self.type[0] == 'mode'
+            return self.type == ['mode']
 
     # The idea is, if we already have a type use that one,
     # if our son is a node from the AST get from him,
@@ -228,8 +233,8 @@ class Mode(AST):
             self.type = self.context.lookInContexts(self.fields[0])[:]
             if len(self.type) == 0:
                 self.type = []
-                print('Type Error: %s not found in context at %s'
-                      % (id,self.linespan[0]))
+                print(tColors.RED + 'Error: unresolved reference: %s' %(id) +
+                      'not found in context' + tColors.RESET)
                 return []
             else:
                 return self.type[:]
@@ -272,8 +277,8 @@ class DiscreteRangeMode(AST):
             fromContext = self.context.lookInContexts(self.fields[0])[:]
             if len(fromContext) == 0:
                 self.type = []
-                print('Type Error %s not found in context at %s'
-                      % (id,self.linespan[0]))
+                print(tColors.RED + 'Type Error %s not found in context'
+                      % (id))
                 return self.type
             else:
                 self.type = prefix + fromContext
@@ -661,7 +666,7 @@ class Operand0(AST):
                         if operand0Type == ['bool']:
                             return True
                         else:
-                            print('Operands must be of type bool. Got %s'
+                            print('Operands must be of type bool. Got %s:'
                                   %(operand0Type))
                             return False
 
@@ -670,28 +675,32 @@ class Operand0(AST):
                             return True
                         else:
                             print('Operands must be of type bool or int. Got' +
-                                  '%s' %(operand0Type))
+                                  '%s:' %(operand0Type))
                             return False
 
                     else:
                         if operand0Type == ['int']:
                             return True
                         else:
-                            print('Operands must be of type int. Got %s'
+                            print('Operands must be of type int. Got %s:'
                                   %(operand0Type))
                             return False
 
                 else:
-                    print('Both operands must be of same type')
+                    print('Both operands must be of same type:')
                     return False
 
             else:
+                if operand1Type == []:
+                    print(tColors.RED + 'ERROR: reference not found in ' +
+                          'context')
+                    return False
 
                 if operand1Type[0] == 'array':
                     if operand1Type[1:] == operand0Type:
                         return True
                     else:
-                        print('Expected first operand of type %s. Got %s'
+                        print('Expected first operand of type %s. Got %s:'
                                %(operand1Type[1:],operand0Type))
                         return False
 
@@ -700,17 +709,15 @@ class Operand0(AST):
                         return True
                     else:
                         print('Expected first operand of type char.' +
-                              'Got %s'
+                              'Got %s:'
                               %(operand0Type))
                         return False
 
                 else:
                     print ('On IN operation, second operand must be string or'+
-                           ' array. Got %s'
+                           ' array. Got %s:'
                            %(operand1Type))
                     return False
-
-        return False
 
     def propType(self):
         if len(self.type) > 0:
@@ -876,10 +883,13 @@ class AssignmentAction(AST):
         if len(self.fields) == 2:
             return self.fields[0].propType() == self.fields[1].propType()
         elif self.fields[1] == '&':
-                return (self.fields[0].propType() == ['chars'] and self.fields[1].propType() == ['chars']) or \
-                       (self.fields[0].propType() == ['chars'] and self.fields[1].propType() == ['char'])
+                return (self.fields[0].propType() == ['chars']
+                        and self.fields[1].propType() == ['chars']) or \
+                       (self.fields[0].propType() == ['chars']
+                        and self.fields[1].propType() == ['char'])
         else:
-            return self.fields[0].propType() == self.fields[2].propType() and self.fields[0].propType() == ['int']
+            return self.fields[0].propType() == self.fields[2].propType() and \
+                   self.fields[0].propType() == ['int']
 
 #Typed
 class IfAction(AST):
@@ -938,7 +948,8 @@ class Iteration(AST):
 
 #Typed
 class StepEnumeration(AST):
-    # <StepEnumeration> ::=  <LoopCounter> <AssignmentSymbol> <StartValue> [ <StepValue> ] [ DOWN ] <EndValue>
+    # <StepEnumeration> ::=  <LoopCounter> <AssignmentSymbol> <StartValue>
+    #                        [ <StepValue> ] [ DOWN ] <EndValue>
     _fields = ['LoopCounter', 'AssignmentSymbol', 'StartValue', 'StepValue',
                'EndValue']
 
@@ -1130,7 +1141,8 @@ class ProcedureStatement(AST):
 
 #Typed
 class ProcedureDefinition(AST):
-    # <ProcedureDefinition> ::= PROC ( [ <FormalParameterList> ] ) [ <ResultSpec> ]; <StatementList> END
+    # <ProcedureDefinition> ::= PROC ( [ <FormalParameterList> ] )
+    #                           [ <ResultSpec> ]; <StatementList> END
     _fields = ['FormalParameterList', 'ResultSpec', 'StatementList']
 
     def propType(self):
@@ -1174,7 +1186,8 @@ class FormalParameter(AST):
             return self.type[:]
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0].fields,self.fields[1].propType())
+        self.context.addToContext(self.fields[0].fields,
+                                  self.fields[1].propType())
 #Typed
 class ParameterSpec(AST):
     # <ParameterSpec> ::=  <Mode> [ <ParameterAttribute> ]
