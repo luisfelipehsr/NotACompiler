@@ -676,8 +676,10 @@ def main():
 
     r = range(1,9)
     tstList = ["Example%s.lya" %i for i in r]
+    a = Parser()
     for f in tstList:
-        a = Parser()
+
+        a.lexer.lineno = 1;
         print('\n' + f )
         file = open(f,'r')
         AST.context = Context()

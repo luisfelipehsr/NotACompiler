@@ -233,9 +233,10 @@ class Mode(AST):
             self.type = self.context.lookInContexts(self.fields[0])[:]
             if len(self.type) == 0:
                 self.type = []
-                print(tColors.RED + 'Error: unresolved reference: ' +
-                      '%s ' %(self.fields[0]) + 'not found in context'
-                      + tColors.RESET)
+                print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
+                      % (
+                      self.fields[0]) + tColors.RED + 'not found in context ' +
+                      'at ' + tColors.RESET + 'line %s' % (self.linespan[0]))
                 return []
             else:
                 return self.type[:]
@@ -278,8 +279,10 @@ class DiscreteRangeMode(AST):
             fromContext = self.context.lookInContexts(self.fields[0])[:]
             if len(fromContext) == 0:
                 self.type = []
-                print(tColors.RED + 'Type Error %s not found in context'
-                      % (self.fields[0]))
+                print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
+                      % (
+                      self.fields[0]) + tColors.RED + 'not found in context ' +
+                      'at ' + tColors.RESET + 'line %s' % (self.linespan[0]))
                 return self.type
             else:
                 self.type = prefix + fromContext
@@ -381,6 +384,12 @@ class Location(AST):
 
             if len(fromContext) == 0:
                 self.type = []
+
+                print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
+                      % (self.fields[0]) + tColors.RED + 'not found in' +
+                      'context at ' + tColors.RESET + 'line %s'
+                      % (self.linespan[0]))
+
                 return self.type
             else:
                 self.type = fromContext
@@ -692,9 +701,8 @@ class Operand0(AST):
                     return False
 
             else:
+
                 if operand1Type == []:
-                    print(tColors.RED + 'ERROR: reference not found in ' +
-                          'context')
                     return False
 
                 if operand1Type[0] == 'array':
@@ -999,7 +1007,7 @@ class CallAction(AST):
         else:
             self.type = self.fields[0].propType()
             return self.type[:]
-#Todo Error
+
 #Typed & Context
 class ProcedureCall(AST):
     # <ProcedureCall> ::= <ProcedureName> ( [ <ParameterList> ] )
@@ -1019,8 +1027,13 @@ class ProcedureCall(AST):
         else:
             #The return type is saved with a list with 'ret' as a prefix
             self.type = self.context.lookInContexts(('ret',self.fields[0]))
+            if (self.type == []):
+                print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
+                      % (self.fields[0]) + tColors.RED + 'not found in' +
+                      ' context at ' + tColors.RESET + 'line %s'
+                      % (self.linespan[0]))
             return self.type[:]
-#Todo Error
+
 #Typed Context maybe create check context function
 class ExitAction(AST):
     # <ExitAction> ::= EXIT ID
@@ -1030,6 +1043,11 @@ class ExitAction(AST):
             return self.type[:]
         else:
             self.type = self.context.lookInContexts(self.fields[0])
+            if (self.type == []):
+                print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
+                      % (self.fields[0]) + tColors.RED + 'not found in ' +
+                      'context at ' + tColors.RESET + 'line %s'
+                      % (self.linespan[0]))
             return self.type[:]
     _fields = ['Id']
 
@@ -1059,8 +1077,7 @@ class ResultAction(AST):
         else:
             self.type = self.fields[0].propType()
             return self.type[:]
-#TODO UPPER LOWER
-#Typed
+
 class BuiltinCall(AST):
     # <BuiltinCall> ::= <BuiltinName> ( [ <ParameterList> ] )
     _fields = ['BuiltinName', 'ParameterList']
@@ -1103,8 +1120,7 @@ class BuiltinCall(AST):
 
         return ret
 
-#TODO UPPER LOWER
-#Typed
+
 class BuiltinName(AST):
     # <BuiltinName> ::= ABS | ASC | NUM | UPPER | LOWER | LENGTH | READ | PRINT
     _fields = ['BuiltinName']
@@ -1128,7 +1144,7 @@ class BuiltinName(AST):
             self.type = ['int']
         return self.type[:]
 
-#Context
+# Updates context
 class ProcedureStatement(AST):
     # <ProcedureStatement> ::= ID : <ProcedureDefinition> ;
     _fields = ['Id', 'ProcedureDefinition']
@@ -1140,7 +1156,7 @@ class ProcedureStatement(AST):
         self.context.addToContext(('ret',self.fields[0]),ret)
         self.context.pushContext()
 
-#Typed
+
 class ProcedureDefinition(AST):
     # <ProcedureDefinition> ::= PROC ( [ <FormalParameterList> ] )
     #                           [ <ResultSpec> ]; <StatementList> END
@@ -1160,7 +1176,6 @@ class ProcedureDefinition(AST):
             self.type = (self.fields[0].propType(),self.fields[1].propType())
         return self.type[:]
 
-#Typed
 class FormalParameterList(AST):
     # <FormalParameterList> ::= <FormalParameter> , <FormalParameterList>
     #                        | <FormalParameter>
@@ -1174,7 +1189,6 @@ class FormalParameterList(AST):
                 self.type += [x.propType()]
             return self.type[:]
 
-#Typed
 class FormalParameter(AST):
     # <FormalParameter> ::= <IdentifierList> <ParameterSpec>
     _fields = ['IdentifierList', 'ParameterSpec']
@@ -1189,7 +1203,7 @@ class FormalParameter(AST):
     def updateContext(self):
         self.context.addToContext(self.fields[0].fields,
                                   self.fields[1].propType())
-#Typed
+
 class ParameterSpec(AST):
     # <ParameterSpec> ::=  <Mode> [ <ParameterAttribute> ]
     _fields = ['Mode', 'ParameterAttribute']
@@ -1200,7 +1214,6 @@ class ParameterSpec(AST):
             self.type = self.fields[0].propType()
             return self.type[:]
 
-#Typed
 class ResultSpec(AST):
     # <ResultSpec> ::= RETURNS ( <Mode> [ <ResultAttribute> ] )
     _fields = ['Mode', 'ResultAttribute']
