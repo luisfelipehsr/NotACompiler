@@ -233,8 +233,9 @@ class Mode(AST):
             self.type = self.context.lookInContexts(self.fields[0])[:]
             if len(self.type) == 0:
                 self.type = []
-                print(tColors.RED + 'Error: unresolved reference: %s' %(self.fields[0]) +
-                      'not found in context' + tColors.RESET)
+                print(tColors.RED + 'Error: unresolved reference: ' +
+                      '%s ' %(self.fields[0]) + 'not found in context'
+                      + tColors.RESET)
                 return []
             else:
                 return self.type[:]
