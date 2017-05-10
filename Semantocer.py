@@ -28,7 +28,7 @@ class Context(object):
                 return self.contextList[a][id]
             else:
                 continue
-        return []
+        return None
 
     def getCurrent(self):
         if len(self.contextList)>0:

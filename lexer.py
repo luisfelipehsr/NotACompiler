@@ -39,15 +39,12 @@ class Lexer():
             'asc'     : 'ASC',
             'bool'    : 'BOOL',
             'char'    : 'CHAR',
-            ('false','bool')   : 'FALSE',
             'int'     : 'INT',
             'length'  : 'LENGHT',
             'lower'   : 'LOWER',
-            ('null','null')    : 'NULL',
             'num'     : 'NUM',
             'print'   : 'PRINT',
             'read'    : 'READ',
-            ('true','bool')    : 'TRUE',
             'upper'   : 'UPPER'
 }
 
@@ -58,7 +55,8 @@ class Lexer():
                   'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
                   'ATRIB'     ,'STR'    ,'COMMENT' ,'COMMA'   ,
                   'SEMICOLON' ,'COLON'  ,'CHALIT'  ,'LPAREN'    ,
-                  'RPAREN'  ] + list(self.reserved.values())
+                  'RPAREN'    ,'FALSE'  ,'TRUE'    ,'NULL' ]\
+                      + list(self.reserved.values())
 
         # Regular expression rules for simple tokens
         self.t_PLUS = r'\+'
@@ -89,6 +87,21 @@ class Lexer():
         # Build the lexer
         self.lexer = lex.lex(module=self)
 
+    def t_FALSE(self, t):
+        r'false'
+        t.value = ('FALSE', 'bool')
+        return t
+
+    def t_NULL(self, t):
+        r'null'
+        t.value = ('NULL', 'char')
+        return t
+
+    def t_TRUE(self, t):
+        r'true'
+        t.value = ('TRUE', 'bool')
+        return t
+
     def t_STR(self,t):
         r'"([^\n\r\"]|(\\n)|(\\t)|(\\")|(\\))*"'
         t.value = (t.value[1:-1],'chars')
@@ -114,7 +127,8 @@ class Lexer():
         return t
 
     def t_COMMENT(self,t):
-        r'(\/\*.*\*\/)|(\/\/.*)'
+        r'(\/\*(.|\n)*\*\/)|(\/\/.*)'
+        t.lineno += t.value.count(r'\n')
         pass
 
     def t_newline(self,t):

@@ -84,7 +84,7 @@ class AST(object):
         return True
 
     def propType(self):
-        return
+        return self.type[:]
 
     def updateContext(self):
         return
@@ -138,7 +138,10 @@ class Declaration(AST):
                 return self.type[:]
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0].fields,self.fields[1].propType())
+        mode = self.fields[1].propType()
+        if mode[0] == 'mode':
+            mode = mode[1:]
+        self.context.addToContext(self.fields[0].fields,mode)
 
 #Typed
 class Initialization(AST):
@@ -180,7 +183,7 @@ class SynonymDefinition(AST):
             return self.type[:]
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0].fields,self.type)
+        self.context.addToContext(self.fields[0].fields,self.fields[1].propType())
 
 class NewModeStatement(AST):
     # <NewModeStatement> ::= TYPE <NewModeList>
@@ -218,7 +221,19 @@ class Mode(AST):
         if isinstance(self.fields[0],AST):
             return True
         else:
-            return self.type == ['mode']
+            aux = self.context.lookInContexts(self.fields[0])[:]
+            if len(self.type) == 0:
+                self.type = []
+                print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
+                      % (
+                          self.fields[
+                              0]) + tColors.RED + 'not found in context ' +
+                      'at ' + tColors.RESET + 'line %s' % (self.linespan[0]))
+                return False
+            elif aux[0] != 'mode':
+                return False
+            else:
+                return True
 
     # The idea is, if we already have a type use that one,
     # if our son is a node from the AST get from him,
@@ -239,6 +254,8 @@ class Mode(AST):
                       'at ' + tColors.RESET + 'line %s' % (self.linespan[0]))
                 return []
             else:
+                if self.type[0] == 'mode':
+                    self.type = self.type[1:]
                 return self.type[:]
 
     _fields = ['ModeName']
@@ -380,13 +397,14 @@ class Location(AST):
             self.type = self.fields[0].propType()
             return self.type[:]
         else:
-            fromContext = self.context.lookInContexts(self.fields[0])[:]
 
-            if len(fromContext) == 0:
+
+            fromContext = self.context.lookInContexts(self.fields[0])
+            if fromContext == None:
                 self.type = []
 
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
-                      % (self.fields[0]) + tColors.RED + 'not found in' +
+                      % (self.fields[0]) + tColors.RED + 'not found in ' +
                       'context at ' + tColors.RESET + 'line %s'
                       % (self.linespan[0]))
 
@@ -591,18 +609,24 @@ class ConditionalExpression(AST):
     _fields = ['BooleanExpression', 'ThenExpression', 'ElsifExpression',
                'ElseExpression']
     def typeCheck(self):
-        return self.fields[0].propType() == ['bool']
+        if self.fields[0].propType() == ['bool']:
+            if len(self.fields) == 3:
+                return self.fields[1].propType() == self.fields[2].propType()
+            else:
+                a = self.fields[1].propType()
+                b = self.fields[2].propType()
+                c = self.fields[3].propType()
+
+                return  a==b==c
+        else:
+            return False
+
 
     def propType(self):
         if len(self.type) > 0:
             return self.type[:]
         else:
-            aux = self.fields[1].propType()
-            for f in self.fields[1:]:
-                if aux != f.propType():
-                    self.type = []
-                    return self.type[:]
-            self.type = aux
+            self.type = self.fields[1].propType()
             return self.type[:]
 
 #Typed
@@ -643,6 +667,7 @@ class ElsifExpression(AST):
             return self.type[:]
         elif len(self.fields) == 2:
             self.type = self.fields[1].propType()
+            return self.type[:]
         else:
             if self.fields[0].propType() == self.fields[2].propType():
                 self.type = self.fields[0].propType()
@@ -852,12 +877,12 @@ class ActionStatement(AST):
         if len(self.type) > 0:
             return self.type[:]
         else:
-            self.type = ['action'] + self.fields[len(self.fields)-1].propType()
+            self.type = self.fields[-1].propType()
             return self.type[:]
 
     def updateContext(self):
         if len(self.fields) == 2:
-            self.context.addToContext(self.fields[0].value,self.type)
+            self.context.addToContext(self.fields[0],self.type)
 
 #Typed
 class Action(AST):
@@ -897,6 +922,7 @@ class AssignmentAction(AST):
                        (self.fields[0].propType() == ['chars']
                         and self.fields[1].propType() == ['char'])
         else:
+
             return self.fields[0].propType() == self.fields[2].propType() and \
                    self.fields[0].propType() == ['int']
 
@@ -905,18 +931,43 @@ class IfAction(AST):
     # <IfAction> ::= IF <BooleanExpression> <ThenClause> [ <ElseClause> ] FI
     _fields = ['BooleanExpression', 'ThenClause', 'ElseClause']
     def typeCheck(self):
-        return self.fields[0].propType() == ['bool']
+        if len(self.fields) == 2:
+            return self.fields[0].propType() == ['bool']
+        else:
+            return self.fields[0].propType() == ['bool']
+
+    def propType(self):
+        self.type = self.fields[1].propType()
+        if len (self.fields) == 3:
+            self.type += self.fields[2].propType()
+        return self.type[:]
 
 #NotTyped
 class ActionStatementList(AST):
     # <ActionStatementList> ::= <ActionStatement> <ActionStatementList>
     #                   | <ActionStatement>
     _fields = ['ActionStatement', 'ActionStatementList']
+    def propType(self):
+        if len(self.type) >0:
+            return self.type[:]
+        else:
+            for stmt in self.fields:
+                print(self.type)
+                self.type += [stmt.propType()]
+            return self.type[:]
 
 #NotTyped
 class ThenClause(AST):
     # <ThenClause> ::= THEN <ActionStatementList>
     _fields = ['ActionStatementList']
+    def propType(self):
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            self.type = self.fields[0].propType()
+            return self.type[:]
+
+
 
 #Typed
 class ElseClause(AST):
@@ -930,6 +981,17 @@ class ElseClause(AST):
             return self.fields[0].propType() == ['bool']
         else:
             return True
+
+    def propType(self):
+        if len(self.type) > 0:
+            return self.type[:]
+        else:
+            if len(self.fields) == 1:
+                self.type = self.fields[0].propType()
+            else:
+                self.type = self.fields[1].propType() + self.fields[2].propType()
+            return self.type[:]
+
 
 #Context
 class DoAction(AST):
@@ -1018,6 +1080,9 @@ class ProcedureCall(AST):
         fromCall = []
         if len(self.fields) == 2:
             fromCall = self.fields[1].propType()
+            for i in range(len(fromCall)):
+                if fromCall[i][0] == 'mode':
+                    fromCall[i] = fromCall[i][1:]
         return fromCall == fromContext
 
 
@@ -1027,7 +1092,7 @@ class ProcedureCall(AST):
         else:
             #The return type is saved with a list with 'ret' as a prefix
             self.type = self.context.lookInContexts(('ret',self.fields[0]))
-            if (self.type == []):
+            if (self.type == None):
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in' +
                       ' context at ' + tColors.RESET + 'line %s'
@@ -1043,7 +1108,7 @@ class ExitAction(AST):
             return self.type[:]
         else:
             self.type = self.context.lookInContexts(self.fields[0])
-            if (self.type == []):
+            if (self.type == None):
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in ' +
                       'context at ' + tColors.RESET + 'line %s'
@@ -1125,22 +1190,22 @@ class BuiltinName(AST):
     # <BuiltinName> ::= ABS | ASC | NUM | UPPER | LOWER | LENGTH | READ | PRINT
     _fields = ['BuiltinName']
     def propType(self):
-        t = self.fields[0].type
-        if t == 'ABS':
+        t = self.fields[0]
+        if t == 'abs':
             self.type = ['int']
-        elif t == 'READ':
+        elif t == 'read':
             self.type = []
-        elif t == 'LENGTH':
+        elif t == 'length':
             self.type = ['int']
-        elif t == 'PRINT':
+        elif t == 'print':
             self.type = []
-        elif t == 'ASC':
+        elif t == 'asc':
             self.type = ['char']
-        elif t == 'UPPER':
+        elif t == 'upper':
             self.type = ['int']
-        elif t == 'LOWER':
+        elif t == 'lower':
             self.type = ['int']
-        elif t == 'NUM':
+        elif t == 'num':
             self.type = ['int']
         return self.type[:]
 
@@ -1212,6 +1277,8 @@ class ParameterSpec(AST):
             return self.type[:]
         else:
             self.type = self.fields[0].propType()
+            if self.type[0] == 'mode':
+                self.type = self.type[1:]
             return self.type[:]
 
 class ResultSpec(AST):

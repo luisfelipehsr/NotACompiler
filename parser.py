@@ -325,7 +325,7 @@ class Parser(object):
         p[0] = p[1]
 
     def p_SynonymStatement(self,p):
-        """ SynonymStatement : SYN SynonymList """
+        """ SynonymStatement : SYN SynonymList SEMICOLON"""
 
         p[0] = SynonymStatement(p[2])
         p[0].setLinespan(p, 2, 2)
@@ -540,7 +540,7 @@ class Parser(object):
         p[0] = ReferencedLocation(p[2])
         p[0].setLinespan(p, 2, 2)
 
-    #TODO ERRO
+
     def p_PrimitiveValue(self,p):
         """ PrimitiveValue : Literal 
                            | ValueArrayElement
@@ -674,7 +674,7 @@ class Parser(object):
 
 def main():
 
-    r = range(1,9)
+    r = range(1,2)
     tstList = ["Example%s.lya" %i for i in r]
     a = Parser()
     for f in tstList:
@@ -685,12 +685,10 @@ def main():
         AST.context = Context()
         a.parse(file.read())
         a.ast.recursiveTypeCheck()
-        a.ast.removeChanel()
-        a.ast.buildGraph(f)
+        #a.ast.removeChanel()
 
-
+        # Generates .dot archive to display the AST.
+        # Uncomment only if you have pydot library.
+        #a.ast.buildGraph(f)
 
 if __name__ == '__main__':main()
-
-
-
