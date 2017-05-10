@@ -221,7 +221,7 @@ class Parser(object):
         p[0] = ParameterSpec(p[1])
 
     def p_NewModeStatement(self,p):
-        """ NewModeStatement : TYPE NewModeList """
+        """ NewModeStatement : TYPE NewModeList SEMICOLON"""
         p[0] = NewModeStatement(p[2])
 
     def p_NewModeList(self,p):
@@ -569,10 +569,11 @@ class Parser(object):
 
 
 def main():
-    a = Parser()
-    r = range(1,8)
+
+    r = range(1,9)
     tstList = ["Example%s.lya"%(i) for i in r]
     for f in tstList:
+        a = Parser()
         print(f)
         file = open(f,'r')
         AST.context = Context()

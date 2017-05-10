@@ -186,7 +186,7 @@ class ModeDefinition(AST):
             return  (prefix + self.type)[:]
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0].fields,self.type)
+        self.context.addToContext(self.fields[0].fields,self.propType())
 
 #Typed & Context
 class Mode(AST):
@@ -199,6 +199,7 @@ class Mode(AST):
         if isinstance(self.fields[0],AST):
             return True
         else:
+            print(self.type)
             return self.fields[0].propType()[0] == 'mode'
 
     # The idea is, if we already have a type use that one,
