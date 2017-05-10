@@ -11,6 +11,13 @@ class AST(object):
         self.isNewContext = False
         self.Declarations = []
         self.context = AST.context
+        self.linespan = None
+
+    def setLinespan(self, p, start: int, end: int):
+        s = p.linespan(start)[0]
+        e = p.linespan(end)[1]
+        self.linespan = (s,e)
+        
 
     def removeChanel(self):
         while len(self.fields) == 1:
@@ -53,8 +60,15 @@ class AST(object):
         self.updateContext()
         ret = self.typeCheck()
         if not ret:
-            print('Type Error at %s' % (self.__class__.__name__))
+            if self.linespan[0] == self.linespan[1]:
+                print('Type Error on %s at line %s'
+                      % (self.__class__.__name__,self.linespan[0]))
+            else:
+                print('Type Error on %s between lines %s and %s'
+                      % (self.__class__.__name__,self.linespan[0],
+                         self.linespan[1]))
             return
+
         else:
             for n in self.fields:
                 if isinstance(n,AST):
@@ -214,7 +228,8 @@ class Mode(AST):
             self.type = self.context.lookInContexts(self.fields[0])[:]
             if len(self.type) == 0:
                 self.type = []
-                print('Type Error %s not found in context' % (id))
+                print('Type Error: %s not found in context at %s'
+                      % (id,self.linespan[0]))
                 return []
             else:
                 return self.type[:]
@@ -257,7 +272,8 @@ class DiscreteRangeMode(AST):
             fromContext = self.context.lookInContexts(self.fields[0])[:]
             if len(fromContext) == 0:
                 self.type = []
-                print('Type Error %s not found in context' % (id))
+                print('Type Error %s not found in context at %s'
+                      % (id,self.linespan[0]))
                 return self.type
             else:
                 self.type = prefix + fromContext
@@ -683,13 +699,15 @@ class Operand0(AST):
                     if operand0Type == ['char']:
                         return True
                     else:
-                        print('Expected first operand of type char. Got %s'
+                        print('Expected first operand of type char.' +
+                              'Got %s'
                               %(operand0Type))
                         return False
 
                 else:
                     print ('On IN operation, second operand must be string or'+
-                           ' array. Got %s' %(operand1Type))
+                           ' array. Got %s'
+                           %(operand1Type))
                     return False
 
         return False
