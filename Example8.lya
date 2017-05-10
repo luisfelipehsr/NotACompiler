@@ -1,0 +1,63 @@
+/* some tests for syntax analysis */
+
+p1:proc ();
+  dcl x int = 3;
+end;
+p1();
+
+
+type vector = array [1:3] int;
+dcl x1 vector;
+do
+  for i = 1 to 3;
+    x1[i] = i;
+od;
+x1[i] += x1[j];
+
+
+p2:proc () returns (int);
+  dcl x int = 3;
+  return x;
+end;
+dcl y1 int = p1();
+print(y1, p2());
+
+
+type vector = array [1:3] int;
+dcl v vector;
+do
+  for i in int(1:3);
+    v[i] = i;
+od;
+
+
+dcl s chars[8] = "setembro";
+dcl b bool;
+if b then
+  print(s);
+else
+  print("agosto");
+fi;
+
+
+type ptr = ref int;
+dcl x, y int, p ptr = ->x;
+q: proc () returns (int loc);
+  dcl z ref int;
+  z = ->y;
+  return z->;
+end;
+x = 10;
+y = 20;
+print (p->);
+p = ->q();
+print (p->);
+q() = x;
+
+
+dcl bb, c, d bool;
+dcl xx, yy, zz, ww int;
+
+xx = if bb then yy else zz fi;
+ww = if bb then xx elsif c then yy else zz fi;
+print (if d then xx elsif c then yy elsif b then zz else ww fi);

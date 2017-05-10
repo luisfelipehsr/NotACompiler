@@ -200,7 +200,7 @@ class Mode(AST):
             return True
         else:
             print(self.type)
-            return self.fields[0].propType()[0] == 'mode'
+            return self.type[0] == 'mode'
 
     # The idea is, if we already have a type use that one,
     # if our son is a node from the AST get from him,
@@ -377,7 +377,7 @@ class DereferencedReference(AST):
         if len(self.type) > 0:
             return self.type[:]
         else:
-            self.type = self.fields[0].propType[1:]
+            self.type = self.fields[0].propType()[1:]
             return self.type[:]
     _fields = ['Location']
 
