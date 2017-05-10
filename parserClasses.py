@@ -278,7 +278,7 @@ class DiscreteRangeMode(AST):
             if len(fromContext) == 0:
                 self.type = []
                 print(tColors.RED + 'Type Error %s not found in context'
-                      % (id))
+                      % (self.fields[0]))
                 return self.type
             else:
                 self.type = prefix + fromContext
