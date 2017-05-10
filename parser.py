@@ -689,6 +689,7 @@ def main():
 
         # Generates .dot archive to display the AST.
         # Uncomment only if you have pydot library.
+        # Uncomment the import of pydot on parserClasses.py too.
         #a.ast.buildGraph(f)
 
 if __name__ == '__main__':main()

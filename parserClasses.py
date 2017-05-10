@@ -1,4 +1,4 @@
-import pydot as dot
+#import pydot as dot
 import uuid
 
 class tColors:
