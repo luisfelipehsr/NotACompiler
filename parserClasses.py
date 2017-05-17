@@ -7,16 +7,17 @@ class tColors:
     RESET = '\033[0m'
 
 class AST(object):
-    context = None
+    semantic = None
 
     def __init__(self, *args):
         self.fields = list(args)
         self.type = []
         self.isNewContext = False
         self.Declarations = []
-        self.context = AST.context
+        self.semantic = AST.semantic
         self.linespan = None
-
+        self.context = None
+     
     def setLinespan(self, p, start: int, end: int):
         s = p.linespan(start)[0]
         e = p.linespan(end)[1]
@@ -60,7 +61,7 @@ class AST(object):
         #graph.write_png(name +'.png')
 
     def recursiveTypeCheck(self):
-        len = self.context.contextLen()
+        leng = self.semantic.contextLen()
         self.updateContext()
         ret = self.typeCheck()
         if not ret:
@@ -78,7 +79,7 @@ class AST(object):
             for n in self.fields:
                 if isinstance(n,AST):
                     n.recursiveTypeCheck()
-        self.context.trimToLen(len)
+        self.semantic.trimToLen(leng)
 
     def typeCheck(self):
         return True
@@ -94,7 +95,7 @@ class AST(object):
 class Program(AST):
     # <Program> ::= <StatementList>
     def updateContext(self):
-        self.context.pushContext()
+        self.context = self.semantic.pushContext()
     _fields = ['StatementList']
 
 class StatementList(AST):
@@ -141,7 +142,7 @@ class Declaration(AST):
         mode = self.fields[1].propType()
         if mode[0] == 'mode':
             mode = mode[1:]
-        self.context.addToContext(self.fields[0].fields,mode)
+        self.semantic.addToContext(self.fields[0].fields,mode)
 
 #Typed
 class Initialization(AST):
@@ -183,7 +184,7 @@ class SynonymDefinition(AST):
             return self.type[:]
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0].fields,self.fields[1].propType())
+        self.semantic.addToContext(self.fields[0].fields,self.fields[1].propType())
 
 class NewModeStatement(AST):
     # <NewModeStatement> ::= TYPE <NewModeList>
@@ -208,7 +209,7 @@ class ModeDefinition(AST):
             return  (prefix + self.type)[:]
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0].fields,self.propType())
+        self.semantic.addToContext(self.fields[0].fields,self.propType())
 
 #Typed & Context
 class Mode(AST):
@@ -221,7 +222,7 @@ class Mode(AST):
         if isinstance(self.fields[0],AST):
             return True
         else:
-            aux = self.context.lookInContexts(self.fields[0])[:]
+            aux = self.semantic.lookInContexts(self.fields[0])[:]
             if len(self.type) == 0:
                 self.type = []
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
@@ -245,7 +246,7 @@ class Mode(AST):
             self.type = self.fields[0].propType()
             return self.type[:]
          else:
-            self.type = self.context.lookInContexts(self.fields[0])[:]
+            self.type = self.semantic.lookInContexts(self.fields[0])[:]
             if len(self.type) == 0:
                 self.type = []
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
@@ -293,7 +294,7 @@ class DiscreteRangeMode(AST):
             self.type = prefix + self.fields[0].propType()
             return self.type[:]
         else:
-            fromContext = self.context.lookInContexts(self.fields[0])[:]
+            fromContext = self.semantic.lookInContexts(self.fields[0])[:]
             if len(fromContext) == 0:
                 self.type = []
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
@@ -399,7 +400,7 @@ class Location(AST):
         else:
 
 
-            fromContext = self.context.lookInContexts(self.fields[0])
+            fromContext = self.semantic.lookInContexts(self.fields[0])
             if fromContext == None:
                 self.type = []
 
@@ -882,7 +883,7 @@ class ActionStatement(AST):
 
     def updateContext(self):
         if len(self.fields) == 2:
-            self.context.addToContext(self.fields[0],self.type)
+            self.semantic.addToContext(self.fields[0],self.type)
 
 #Typed
 class Action(AST):
@@ -999,7 +1000,7 @@ class DoAction(AST):
     _fields = ['ControlPart', 'ActionStatementList']
 
     def updateContext(self):
-        self.context.pushContext()
+		self.context = self.semantic.pushContext()
 
 #NotTyped
 class ControlPart(AST):
@@ -1042,7 +1043,7 @@ class StepEnumeration(AST):
                    and self.fields[1].propType() == ['int']
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0],['int'])
+        self.semantic.addToContext(self.fields[0],['int'])
 
 #Context + ? DiscreteMode ->DiscreteRangeMode?
 class RangeEnumeration(AST):
@@ -1050,7 +1051,7 @@ class RangeEnumeration(AST):
     _fields = ['LoopCounter', 'DiscreteMode']
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0],['int'])
+        self.semantic.addToContext(self.fields[0],['int'])
 
 #Typed
 class WhileControl(AST):
@@ -1076,7 +1077,7 @@ class ProcedureCall(AST):
     _fields = ['ProcedureName', 'ParameterList']
 
     def typeCheck(self):
-        fromContext = self.context.lookInContexts(self.fields[0])
+        fromContext = self.semantic.lookInContexts(self.fields[0])
         fromCall = []
         if len(self.fields) == 2:
             fromCall = self.fields[1].propType()
@@ -1091,7 +1092,7 @@ class ProcedureCall(AST):
             return self.type[:]
         else:
             #The return type is saved with a list with 'ret' as a prefix
-            self.type = self.context.lookInContexts(('ret',self.fields[0]))
+            self.type = self.semantic.lookInContexts(('ret',self.fields[0]))
             if (self.type == None):
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in' +
@@ -1107,7 +1108,7 @@ class ExitAction(AST):
         if len(self.type) > 0:
             return self.type[:]
         else:
-            self.type = self.context.lookInContexts(self.fields[0])
+            self.type = self.semantic.lookInContexts(self.fields[0])
             if (self.type == None):
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in ' +
@@ -1217,9 +1218,9 @@ class ProcedureStatement(AST):
 
     def updateContext(self):
         paran,ret = self.fields[1].propType()
-        self.context.addToContext(self.fields[0],paran)
-        self.context.addToContext(('ret',self.fields[0]),ret)
-        self.context.pushContext()
+        self.semantic.addToContext(self.fields[0],paran)
+        self.semantic.addToContext(('ret',self.fields[0]),ret)
+        self.context = self.semantic.pushContext()
 
 
 class ProcedureDefinition(AST):
@@ -1266,7 +1267,7 @@ class FormalParameter(AST):
             return self.type[:]
 
     def updateContext(self):
-        self.context.addToContext(self.fields[0].fields,
+        self.semantic.addToContext(self.fields[0].fields,
                                   self.fields[1].propType())
 
 class ParameterSpec(AST):
