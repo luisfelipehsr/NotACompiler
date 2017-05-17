@@ -1,36 +1,23 @@
-/* Bubble sort code: */
+/* Display all prime numbers between two given
+  intervals (greater than 2): */
 
-dcl v array[0:100] array[0:100] int;
-dcl n, c, d, swap  int;
-dcl f chars[10];
-dcl a bool;
-dcl algo char;
+dcl n1, n2, i, j int, flag bool;
 
-a = f[1] in f;
-
-print("Enter number of elements: ");
-read(n);
-print("Enter ", n, " integers\n");
+print("Enter 2 numbers (intervals) separated by space: ");
+read(n1, n2);
+print("Prime numbers between ", n1, " and ", n2, " are:\n");
+shkahkjhsjhdjas = 2;
 do
-  for c = 0 to n-1;
-    read(v[c][1]);
-od;
-do
-  for c = 0 to n-2;
-    do
-      for d = 0 to n-c-2;
-        // For decreasing order use "<"
-        if v[d][1] !=
-        g then
-          swap   = v[d][1];
-          v[d
-          ][1]   = v[d+1][1];
-          v[d+1][1] = swap;
+  for i = n1 to n2;
+    flag = true;
+    loop: do
+      for j = 2 to i/2;
+        if i % j == 0 then
+          flag = false;
+          exit loop;
         fi;
     od;
-od;
-print("Sorted list in ascending order:\n");
-do
-  for c = 0 to n-1;
-    print(v[c][0], " ");
+    if flag then
+      print(i, "  ");
+    fi;
 od;

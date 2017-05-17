@@ -59,5 +59,10 @@ dcl bb, c, d bool;
 dcl xx, yy, zz, ww int;
 
 xx = if bb then yy else zz fi;
-ww = if bb then xx elsif c then yy else zz fi;
+ww = if bb then
+           xx
+    elsif c then
+            yy
+    else zz
+       fi;
 print (if d then xx elsif c then yy elsif b then zz else ww fi);

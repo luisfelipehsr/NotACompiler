@@ -1,4 +1,4 @@
-#import pydot as dot
+import pydote.pydot as dot
 import uuid
 
 class tColors:
@@ -57,7 +57,7 @@ class AST(object):
         self.build(graph)
         with open(name+'.dot','w') as textFile:
             textFile.write(graph.to_string())
-        #graph.write_png(name +'.png')
+        graph.write_png(name +'.png')
 
     def recursiveTypeCheck(self):
         len = self.context.contextLen()
@@ -165,6 +165,8 @@ class SynonymList(AST):
     # <SynonymList> ::= <SynonymDefinition> , <SynonymList>
     #                | <SynonymDefinition>
     _fields = ['synonymDefinition', 'synonymList']
+
+# Declarar
 
 #Typed & Context
 class SynonymDefinition(AST):
