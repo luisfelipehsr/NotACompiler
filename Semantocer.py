@@ -10,6 +10,7 @@ class Context(object):
         else:
             for i in id:
                 self.contextList[-1][i] = type
+        
 
     def getFromContext(self,id):
         return self.contextList[-1][id]
@@ -17,6 +18,7 @@ class Context(object):
     def pushContext(self):
         self.contextList.append(dict())
         #print('Pushed New Context')
+        return self.context[-1]
 
     def popContext(self):
         self.contextList.pop()
