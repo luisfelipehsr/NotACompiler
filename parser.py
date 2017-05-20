@@ -682,7 +682,7 @@ def main():
         a.lexer.lineno = 1;
         print('\n' + f )
         file = open(f,'r')
-        AST.context = Context()
+        AST.semantic = Context()
         a.parse(file.read())
         a.ast.recursiveTypeCheck()
         #a.ast.removeChanel()

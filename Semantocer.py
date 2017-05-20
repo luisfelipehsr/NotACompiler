@@ -18,7 +18,7 @@ class Context(object):
     def pushContext(self):
         self.contextList.append(dict())
         #print('Pushed New Context')
-        return self.context[-1]
+        return self.contextList[-1]
 
     def popContext(self):
         self.contextList.pop()
