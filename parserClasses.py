@@ -1,4 +1,4 @@
-import pydote.pydot as dot
+import pydot as dot
 import uuid
 
 class tColors:
@@ -773,7 +773,7 @@ class ElseClause(AST):
 
 class DoAction(AST):
     def updateContext(self):
-		self.context = AST.semantic.pushContext()
+	    self.context = AST.semantic.pushContext()
 
 class ControlPart(AST):
     _fields = ['ForControl', 'WhileControl']
