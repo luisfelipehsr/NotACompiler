@@ -4,6 +4,8 @@
 # tokenizer for Lya
 # ------------------------------------------------------------
 import ply.lex as lex
+from valueToken import ValueToken
+from type import *
 
 # Rule for reserved and predefined words
 class Lexer():
@@ -89,27 +91,27 @@ class Lexer():
 
     def t_FALSE(self, t):
         r'false'
-        t.value = ('FALSE', 'bool')
+        t.value = ValueToken(Bool(),False)
         return t
 
     def t_NULL(self, t):
         r'null'
-        t.value = ('NULL', 'char')
+        t.value = ValueToken(Char(),'')
         return t
 
     def t_TRUE(self, t):
         r'true'
-        t.value = ('TRUE', 'bool')
+        t.value = ValueToken(Bool(),True)
         return t
 
     def t_STR(self,t):
         r'"([^\n\r\"]|(\\n)|(\\t)|(\\")|(\\))*"'
-        t.value = (t.value[1:-1],'chars')
+        t.value = ValueToken(Chars(),t.value[1:-1])
         return t
 
     def t_CHALIT(self,t):
         r'(\'[0-9]\')|(\'[A-Za-z]\')'
-        t.value = (ord(t.value[1:-1]),'char')
+        t.value = ValueToken(Char(),ord(t.value[1:-1]))
         return t
 
     def t_ID(self,t):
@@ -119,11 +121,7 @@ class Lexer():
 
     def t_ICONST(self,t):
         r'[0-9]+'
-        try:
-            t.value = (int(t.value),'int')
-        except ValueError:
-            print("Integer value too large %d", t.value)
-            t.value = 0
+        t.value = ValueToken(Int(),int(t.value))
         return t
 
     def t_COMMENT(self,t):
