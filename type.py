@@ -13,16 +13,28 @@ class Type(object):
         return isConstant()
 
 class Int(Type):
-    def __init__(self):
+    def __init__(self,value = None):
         self.string = 'Int'
+        self.value = value
+
+    def isConstant(self):
+        return not self.value == None
 
 class Bool(Type):
-    def __init__(self):
+    def __init__(self,value = None):
         self.string = 'Bool'
+        self.value = value
+
+    def isConstant(self):
+        return not self.value == None
 
 class Char(Type):
-    def __init__(self):
+    def __init__(self,value = None):
         self.string = 'Char'
+        self.value = value
+
+    def isConstant(self):
+        return not self.value == None
 
 class Chars(Type):
     def __init__(self,r):
@@ -89,12 +101,15 @@ class Procedure(Type):
             return self.ret.equals(t.getReturn()) and self.parameters.equals(t.getParameters())
 
 class Range(Type):
-    def __init__(self,begin,end):
-        if  not isinstance(begin,int) or not isinstance(end,int):
+    def __init__(self,begin,end,subRange=None):
+        if  not isinstance(begin,Int) or not isinstance(end,Int):
             raise TypeError('Begin %s and End %s must be integers' %(begin,end))
+        if not isinstance(subRange,Range) and subRange != None:
+            raise TypeError('SubType must be None or Range')
         self.begin = begin
         self.end = end
-        self.string = 'Range[%d:%d]' % (begin,end)
+        self.subRange = subRange
+        self.string = 'Range[%s:%s]' % (begin.toString(),end.toString())
 
     def getBegin(self):
         return self.begin
@@ -111,8 +126,8 @@ class Range(Type):
         return False
 
 class Parameters(Type):
-    def __init__(self,*plist):
-        self.parameterList = list(plist)
+    def __init__(self,plist = []):
+        self.parameterList = plist
         for a in self.parameterList:
             if not isinstance(a,Type):
                 raise TypeError('All elements must be of type Type' %(a))
@@ -145,6 +160,23 @@ class Reference(Type):
             raise TypeError('t %s must be of type Type' %(t))
         self.subType = t
         self.string = 'Ref'
+
+    def getSubType(self):
+        return self.subType
+
+    def toString(self):
+        return self.string + ' ' + self.subType.toString()
+
+    def equals(self,t):
+        if isinstance(t,Reference):
+            return self.subType.equals(t.subType)
+
+class Mode(Type):
+    def __init__(self, t):
+        if not isintance(t, Type):
+            raise TypeError('t %s must be of type Type' % (t))
+        self.subType = t
+        self.string = 'Mode'
 
     def getSubType(self):
         return self.subType

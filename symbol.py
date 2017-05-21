@@ -1,10 +1,10 @@
 from type import *
 class Symbol(object):
-    def __init__(self,id,type,value):
-        if not isontance(type,Type):
+    def __init__(self,id,type,value=None):
+        if not isinstance(type,Type):
             raise TypeError('Type %s must be a valide Type-class' %(type))
         if isinstance(type,Procedure):
-            self.id = (id,type.getParameters())
+            self.id = (id,type.getParameters().toString())
             self.type = type.getReturn()
             self.value = None
         else:

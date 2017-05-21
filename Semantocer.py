@@ -1,17 +1,16 @@
+from symbol import Symbol
+
 class Context(object):
 
     def __init__(self):
         self.contextList =[]
 
-    def addToContext(self,id,type):
-        #print('Adding %s of type %s to context %d' %(id,type,len(self.contextList)))
-        if not isinstance(id,list):
-            self.contextList[-1][id] = type
-        else:
-            for i in id:
-                self.contextList[-1][i] = type
+    def addToContext(self,symbol):
+        #print('Added %s of type %s' %(symbol.id,symbol.type.toString()))
+        if not isinstance(symbol,Symbol):
+            raise TypeError('Only symbols can be added to a context')
+        self.contextList[-1][symbol.getId()] = symbol
         
-
     def getFromContext(self,id):
         return self.contextList[-1][id]
 

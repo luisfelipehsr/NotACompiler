@@ -1,5 +1,8 @@
 import pydot as dot
 import uuid
+from type import *
+from symbol import Symbol
+from valueToken import ValueToken
 
 class tColors:
     RED = "\033[1;31m"
@@ -81,7 +84,7 @@ class AST(object):
         return True
 
     def propType(self):
-        return self.type[:]
+        return self.type
 
     def updateContext(self):
         return
@@ -111,25 +114,26 @@ class Declaration(AST):
             return True
 
     def propType(self):
-            if len(self.type) > 0:
-                return self.type[:]
+            if self.type is not None:
+                return self.type
             else:
                 self.type = self.fields[1].propType()
-                return self.type[:]
+                return self.type
 
     def updateContext(self):
-        mode = self.fields[1].propType()
-        if mode[0] == 'mode':
-            mode = mode[1:]
-        AST.semantic.addToContext(self.fields[0].fields,mode)
+        type = self.fields[1].propType()
+        if isinstance(type,Mode):
+            type = type.subType
+        for id in self.fields[0].fields:
+            AST.semantic.addToContext(Symbol(id,type,None))
 
 class Initialization(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[-1].propType()
-            return self.type[:]
+            return self.type
 
 class IdentifierList(AST):
     _fields = ['IdentifierList']
@@ -165,31 +169,34 @@ class NewModeList(AST):
 
 class ModeDefinition(AST):
     def propType(self):
-        prefix = ['mode']
-        if len(self.type) > 0:
-            return (prefix + self.type)[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[1].propType()
-            return  (prefix + self.type)[:]
+            self.type = Mode(self.type)
+            return self.type
 
     def updateContext(self):
-        AST.semantic.addToContext(self.fields[0].fields,self.propType())
+        type = self.fields[1].propType()
+        for id in self.fields[0].fields:
+            AST.semantic.addToContext(Symbol(id,type))
 
 class Mode(AST):
     def typeCheck(self):
         if isinstance(self.fields[0],AST):
             return True
         else:
-            aux = AST.semantic.lookInContexts(self.fields[0])[:]
-            if len(self.type) == 0:
-                self.type = []
+            symbol = AST.semantic.lookInContexts(self.fields[0])
+            self.type = symbol.type
+            if symbol is None:
+                self.type = None
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (
                           self.fields[
                               0]) + tColors.RED + 'not found in context ' +
                       'at ' + tColors.RESET + 'line %s' % (self.linespan[0]))
                 return False
-            elif aux[0] != 'mode':
+            elif not isinstance(self.type,Mode):
                 return False
             else:
                 return True
@@ -198,37 +205,36 @@ class Mode(AST):
     # if our son is a node from the AST get from him,
     # otherwise it must be in the context
     def propType(self):
-         if len(self.type) > 0:
-             return self.type[:]
+         if self.type is not None:
+             return self.type
          elif isinstance(self.fields[0],AST):
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
          else:
-            self.type = AST.semantic.lookInContexts(self.fields[0])[:]
-            if len(self.type) == 0:
-                self.type = []
+            symbol = AST.semantic.lookInContexts(self.fields[0])
+            self.type = symbol.type
+            if symbol is None:
+                self.type = None
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (
                       self.fields[0]) + tColors.RED + 'not found in context ' +
                       'at ' + tColors.RESET + 'line %s' % (self.linespan[0]))
-                return []
+                return None
             else:
-                if self.type[0] == 'mode':
-                    self.type = self.type[1:]
-                return self.type[:]
-
-    _fields = ['ModeName']
+                if isinstance(self.type,Mode):
+                    self.type = self.type.subType
+                return self.type
 
 class DiscreteMode(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         if isinstance(self.fields[0],AST):
             self.type = self.fields[0].propType()
-            return self.type[:]
-        else:
-            self.type = [str(self.fields[0])]
-            return self.fields[:]
+            return self.type
+        elif isinstance(self.fields[0],Type):
+            self.type = self.fields[0]
+            return self.type
 
 class DiscreteRangeMode(AST):
     def propType(self):
@@ -256,7 +262,15 @@ class DiscreteRangeMode(AST):
 class LiteralRange(AST):
     def typeCheck(self):
         return self.fields[0].propType() == self.fields[1].propType() and self.fields[0].propType() == ['int']
-    _fields = ['lowerBound', 'UpperBound']
+
+    def propType(self):
+        if self.type is not None:
+            return self.type
+        else:
+            begin = self.fields[0].propType()
+            end = self.fields[1].propType()
+            self.type = Range(begin,end)
+            return self.type
 
 class ReferenceMode(AST):
     # <ReferenceMode> ::= REF <Mode>
@@ -271,13 +285,11 @@ class ReferenceMode(AST):
 
 class CompositeMode(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
-        # Get the type from ArrayMode or StringMode
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
-    _fields = ['StringMode']
+            return self.type
 
 class StringMode(AST):
     # <StringMode> ::= CHARS LBRACKET <StringLength> RBRACKET
@@ -290,43 +302,44 @@ class StringMode(AST):
 class ArrayMode(AST):
     # Pegamos o tipo do element mode e adicionamos o prefixo array
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
-            self.type = ['array'] + self.fields[1].propType()
-            return self.type[:]
-
-    _fields = ['IndexModeList']
+            type = self.fields[1].propType()
+            range = self.fields[0].propType()
+            self.type = Array(type,range)
+            return self.type
 
 class IndexModeList(AST):
-    _fields = ['IndexMode', 'IndexModeList']
+    def propType(self):
+        for i in range(len(self.fields)-1):
+            if isinstance(self.fields[i].propType(),Range):
+                self.fields[i].propType().subRange = self.fields[i+1].propType()
+
+        return self.fields[0].propType()
 
 class IndexMode(AST):
     def typeCheck(self):
         return isinstance(self.fields[0],LiteralRange) or (self.fields[0].propType() is 'int','discreterange_int')
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.fields[:]
-
-    _fields = ['DiscreteMode']
+            return self.type
 
 class Location(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         elif isinstance(self.fields[0],AST):
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
         else:
-
-
             fromContext = AST.semantic.lookInContexts(self.fields[0])
             if fromContext == None:
-                self.type = []
+                self.type = None
 
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in ' +
@@ -335,8 +348,8 @@ class Location(AST):
 
                 return self.type
             else:
-                self.type = fromContext
-                return self.type[:]
+                self.type = fromContext.type
+                return self.type
     _fields = ['LocationName']
 
 class DereferencedReference(AST):
@@ -377,31 +390,32 @@ class ArrayElement(AST):
         return ret
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
 
         # Se tivermos so uma expressão retornamos o valor nao um array
+
         elif len(self.fields[1].fields) == 1:
-            if self.fields[0].propType() == ['chars']:
-                self.type = ['char']
+            type = self.fields[0].propType()
+            if isinstance(type,Chars):
+                self.type = Char()
             else:
-                self.type = self.fields[0].propType()[1:]
-            return self.type[:]
+                self.type = type.subType
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class ExpressionList(AST):
-
-    #If all expressions have the same type the list has a type
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
+            self.type = []
             for f in self.fields:
                 self.type += [f.propType()]
-            return self.type[:]
-
+            self.type = Parameters(self.type)
+            return self.type
     _fields = ['Expression', 'ExpressionList']
 
 class ArraySlice(AST):
@@ -419,19 +433,19 @@ class ArraySlice(AST):
 
 class PrimitiveValue(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class Literal(AST):
 
     def propType(self):
         token = self.fields[0]
-        _,self.type = token
-        self.type = [self.type]
-        return self.type[:]
+        if isinstance(token,ValueToken):
+            self.type = token.type
+        return self.type
 
 class ValueArrayElement(AST):
     def typeCheck(self):
@@ -461,11 +475,11 @@ class ValueArraySlice(AST):
 
 class Expression(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class ConditionalExpression(AST):
     def typeCheck(self):
@@ -599,14 +613,14 @@ class Operand0(AST):
                     return False
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         elif len(self.fields) == 1:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
         else:
-            self.type = ['bool']
-            return self.type[:]
+            self.type = Bool()
+            return self.type
 
 class Operator1(AST):
     _fields = ['Operator']
@@ -622,18 +636,16 @@ class Operand1(AST):
             return  self.fields[0].propType() == self.fields[2].propType()
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class Operator2(AST):
     _fields = ['AddOperator']
 
 class Operand2(AST):
-    _fields = ['Operand2', 'MultiOperation', 'Operand3']
-
     def typeCheck(self):
         if len(self.fields) == 1:
             return True
@@ -641,11 +653,11 @@ class Operand2(AST):
             return self.fields[0].propType() == self.fields[2].propType()
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class Operand3(AST):
     def typeCheck(self):
@@ -658,22 +670,22 @@ class Operand3(AST):
                 return self.fields[1].propType() == ['bool']
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         elif len(self.fields) == 1:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
         else:
             self.type = self.fields[1].propType()
-            return self.type[:]
+            return self.type
 
 class Operand4(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class ReferencedLocation(AST):
     _fields = ['Location']
@@ -785,8 +797,6 @@ class Iteration(AST):
     _fields = ['StepEnumeration']
 
 class StepEnumeration(AST):
-    _fields = ['LoopCounter', 'AssignmentSymbol', 'StartValue', 'StepValue',
-               'EndValue']
 
     def typeCheck(self):
         if len(self.fields) == 3:
@@ -806,27 +816,27 @@ class StepEnumeration(AST):
                    and self.fields[1].propType() == ['int']
 
     def updateContext(self):
-        AST.semantic.addToContext(self.fields[0],['int'])
+        AST.semantic.addToContext(Symbol(self.fields[0],Int()))
 
 class RangeEnumeration(AST):
 
     _fields = ['LoopCounter', 'DiscreteMode']
 
     def updateContext(self):
-        AST.semantic.addToContext(self.fields[0],['int'])
+        id = self.fields[0]
+        AST.semantic.addToContext(Symbol(id,Int()))
 
 class WhileControl(AST):
     def typeCheck(self):
         return self.fields[0].propType() == ['bool']
 
 class CallAction(AST):
-    _fields = ['ProcedureCall']
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class ProcedureCall(AST):
 
@@ -843,17 +853,21 @@ class ProcedureCall(AST):
 
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
-            #The return type is saved with a list with 'ret' as a prefix
-            self.type = AST.semantic.lookInContexts(('ret',self.fields[0]))
-            if (self.type == None):
+            id = self.fields[0]
+            param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
+            symbol = AST.semantic.lookInContexts((id,param.toString()))
+
+            if (symbol == None):
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in' +
                       ' context at ' + tColors.RESET + 'line %s'
                       % (self.linespan[0]))
-            return self.type[:]
+            else:
+                self.type = symbol.getType()
+            return self.type
 
 class ExitAction(AST):
     # <ExitAction> ::= EXIT ID
@@ -902,26 +916,25 @@ class BuiltinCall(AST):
     def typeCheck(self):
         ret = False
         t = self.fields[0].fields[0]
+        type = self.fields[1].propType()
 
         if t == 'abs':
-            ret = self.fields[1].propType() == ['int']
+            ret = isinstance(type,Int)
 
         elif t == 'length':
-            ret = self.fields[1].propType()[0] = 'array'
+            ret = isinstance(type,Array)
 
         elif t == 'asc':
-            ret = self.fields[1].propType() == ['int']
+            ret = isinstance(type,Int)
 
         elif t == 'num':
-            ret = self.fields[1].propType() == ['char']
+            ret = isinstance(type,Char)
 
         elif t == 'print' or 'read':
-
             ret = True
-            for parameter in self.fields[1].propType():
-
-                if parameter not in [['chars'], ['char'], ['bool'],
-                                     ['int']]:
+            for parameter in type.getParameterList():
+                if not isinstance(parameter,Char) and not isinstance(parameter,Int) \
+                    and not isinstance(parameter,Chars) and not isinstance(parameter,Bool):
                     ret = False
 
         else:
@@ -953,25 +966,26 @@ class BuiltinName(AST):
 
 class ProcedureStatement(AST):
     def updateContext(self):
-        paran,ret = self.fields[1].propType()
-        AST.semantic.addToContext(self.fields[0],paran)
-        AST.semantic.addToContext(('ret',self.fields[0]),ret)
+        id = self.fields[0]
+        type = self.fields[1].propType()
+        s = Symbol(id,type,None)
+        AST.semantic.addToContext(s)
         self.context = AST.semantic.pushContext()
 
 class ProcedureDefinition(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         elif  len(self.fields) == 1:
-            self.type = ([],[])
+            self.type  = Procedure(Parameters(),Null())
         elif len(self.fields) == 2:
             if isinstance(self.fields[0],FormalParameterList):
-                self.type = (self.fields[0].propType(),[])
+                self.type = Procedure(self.fields[0].propType(),Null())
             else:
-                self.type = ([],self.fields[0].propType())
+                self.type = Procedure(Parameters(),self.fields[0].propType())
         else:
-            self.type = (self.fields[0].propType(),self.fields[1].propType())
-        return self.type[:]
+            self.type = Procedure(self.fields[0].propType(),self.fields[1].propType())
+        return self.type
 
 class FormalParameterList(AST):
     def propType(self):
@@ -1007,8 +1021,8 @@ class ParameterSpec(AST):
 
 class ResultSpec(AST):
     def propType(self):
-        if len(self.type)>0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
