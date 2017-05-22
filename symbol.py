@@ -6,11 +6,13 @@ class Symbol(object):
         if isinstance(type,Procedure):
             self.id = (id,type.getParameters().toString())
             self.type = type.getReturn()
+            self.parameters = type.getParameters()
             self.value = None
         else:
             self.id = id
             self.type = type
             self.value = value
+            self.parameters = None
 
     def isConstant(self):
         return self.value == None
@@ -23,3 +25,6 @@ class Symbol(object):
 
     def getValue(self):
         return self.value
+
+    def getParameters(self):
+        return self.parameters

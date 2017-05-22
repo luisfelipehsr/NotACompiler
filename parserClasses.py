@@ -263,7 +263,9 @@ class DiscreteRangeMode(AST):
 
 class LiteralRange(AST):
     def typeCheck(self):
-        return self.fields[0].propType() == self.fields[1].propType() and self.fields[0].propType() == ['int']
+        t1 = self.fields[0].propType()
+        t2 = self.fields[1].propType()
+        return type(t1) == type(t2) and isinstance(t1,Int)
 
     def propType(self):
         if self.type is not None:
@@ -843,10 +845,7 @@ class ProcedureCall(AST):
         id = self.fields[0]
         param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
         symbol = AST.semantic.lookInContexts((id, param.toString()))
-
-        fromContext = symbol.getType().getParameters()
-        fromCall = self.fields[1].propType()
-        return fromCall.equals(fromContext)
+        return symbol != None
 
 
     def propType(self):
