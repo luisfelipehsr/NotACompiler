@@ -172,9 +172,9 @@ class Reference(Type):
         if isinstance(t,Reference):
             return self.subType.equals(t.subType)
 
-class Mode(Type):
+class ModeType(Type):
     def __init__(self, t):
-        if not isintance(t, Type):
+        if not isinstance(t, Type):
             raise TypeError('t %s must be of type Type' % (t))
         self.subType = t
         self.string = 'Mode'

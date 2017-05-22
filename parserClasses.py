@@ -175,13 +175,13 @@ class ModeDefinition(AST):
             return self.type
         else:
             self.type = self.fields[1].propType()
-            self.type = Mode(self.type)
+            self.type = ModeType(self.type)
             return self.type
 
     def updateContext(self):
         type = self.fields[1].propType()
         for id in self.fields[0].fields:
-            AST.semantic.addToContext(Symbol(id,type))
+            AST.semantic.addToContext(Symbol(id,ModeType(type)))
 
 class Mode(AST):
     def typeCheck(self):
@@ -189,7 +189,6 @@ class Mode(AST):
             return True
         else:
             symbol = AST.semantic.lookInContexts(self.fields[0])
-            self.type = symbol.type
             if symbol is None:
                 self.type = None
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
@@ -198,7 +197,7 @@ class Mode(AST):
                               0]) + tColors.RED + 'not found in context ' +
                       'at ' + tColors.RESET + 'line %s' % (self.linespan[0]))
                 return False
-            elif not isinstance(self.type,Mode):
+            elif not isinstance(symbol.type,ModeType):
                 return False
             else:
                 return True
@@ -223,7 +222,7 @@ class Mode(AST):
                       'at ' + tColors.RESET + 'line %s' % (self.linespan[0]))
                 return None
             else:
-                if isinstance(self.type,Mode):
+                if isinstance(self.type,ModeType):
                     self.type = self.type.subType
                 return self.type
 
