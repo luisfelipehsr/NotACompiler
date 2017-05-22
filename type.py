@@ -37,9 +37,10 @@ class Char(Type):
         return not self.value == None
 
 class Chars(Type):
-    def __init__(self,r):
+    def __init__(self,r,value = None):
         self.subType = Char()
         self.range = r
+        self.value = value
         self.string = 'Chars'
 
     def getRange(self):
@@ -156,7 +157,7 @@ class Parameters(Type):
 
 class Reference(Type):
     def __init__(self,t):
-        if not isintance(t,Type):
+        if not isinstance(t,Type):
             raise TypeError('t %s must be of type Type' %(t))
         self.subType = t
         self.string = 'Ref'

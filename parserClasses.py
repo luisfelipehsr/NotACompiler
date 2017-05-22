@@ -109,7 +109,9 @@ class Declaration(AST):
 
     def typeCheck(self):
         if len(self.fields) == 3:
-            return self.fields[1].propType() == self.fields[2].propType()
+            t1 = type(self.fields[1].propType())
+            t2 = type(self.fields[2].propType())
+            return  t1 == t2
         else:
             return True
 
@@ -275,13 +277,11 @@ class LiteralRange(AST):
 class ReferenceMode(AST):
     # <ReferenceMode> ::= REF <Mode>
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
-        # Take type from mode and add prefix ref
+        if self.type is not None:
+            return self.type
         else:
-            self.type = ['ref'] + self.fields[0].propType()
-            return self.type[:]
-    _fields = ['Mode']
+            self.type = Reference(self.fields[0].propType())
+            return self.type
 
 class CompositeMode(AST):
     def propType(self):
@@ -294,8 +294,10 @@ class CompositeMode(AST):
 class StringMode(AST):
     # <StringMode> ::= CHARS LBRACKET <StringLength> RBRACKET
     def propType(self):
-        self.type = ['chars']
-        return self.type[:]
+        lenght = self.fields[0]
+        lenght.value -=1
+        self.type = Chars(Range(Int(0),lenght))
+        return self.type
     #No typecheck needed, lenght is Iconst
     _fields = ['Chars', 'StringLenght']
 
@@ -354,15 +356,14 @@ class Location(AST):
 
 class DereferencedReference(AST):
     def  typeCheck(self):
-        return self.fields[0].propType()[0] == 'ref'
+        return isinstance(self.type,Reference)
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
-            self.type = self.fields[0].propType()[1:]
-            return self.type[:]
-    _fields = ['Location']
+            self.type = self.fields[0].propType().getSubType()
+            return self.type
 
 class StringSlice(AST):
     def typeCheck(self):
@@ -440,11 +441,10 @@ class PrimitiveValue(AST):
             return self.type
 
 class Literal(AST):
-
     def propType(self):
         token = self.fields[0]
-        if isinstance(token,ValueToken):
-            self.type = token.type
+        if isinstance(token,Type):
+            self.type = token
         return self.type
 
 class ValueArrayElement(AST):
@@ -497,19 +497,19 @@ class ConditionalExpression(AST):
 
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[1].propType()
-            return self.type[:]
+            return self.type
 
 class ThenExpression(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class ElseExpression(AST):
     def propType(self):
@@ -688,13 +688,12 @@ class Operand4(AST):
             return self.type
 
 class ReferencedLocation(AST):
-    _fields = ['Location']
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
-            self.type = ['ref'] + self.fields[0].propType()
-            return self.type[:]
+            self.type = Reference(self.fields[0].propType())
+            return self.type
 
 class ActionStatement(AST):
     def propType(self):
@@ -840,16 +839,14 @@ class CallAction(AST):
 
 class ProcedureCall(AST):
 
-
     def typeCheck(self):
-        fromContext = AST.semantic.lookInContexts(self.fields[0])
-        fromCall = []
-        if len(self.fields) == 2:
-            fromCall = self.fields[1].propType()
-            for i in range(len(fromCall)):
-                if fromCall[i][0] == 'mode':
-                    fromCall[i] = fromCall[i][1:]
-        return fromCall == fromContext
+        id = self.fields[0]
+        param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
+        symbol = AST.semantic.lookInContexts((id, param.toString()))
+
+        fromContext = symbol.getType().getParameters()
+        fromCall = self.fields[1].propType()
+        return fromCall.equals(fromContext)
 
 
     def propType(self):

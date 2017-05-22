@@ -121,12 +121,12 @@ class Lexer():
 
     def t_STR(self,t):
         r'"([^\n\r\"]|(\\n)|(\\t)|(\\")|(\\))*"'
-        t.value = ValueToken(Chars(Range(Int(0),Int(len(t.value)-2))),t.value[1:-1])
+        t.value = Chars(Range(Int(0),Int(len(t.value)-2)),value=t.value[1:-1])
         return t
 
     def t_CHALIT(self,t):
         r'(\'[0-9]\')|(\'[A-Za-z]\')'
-        t.value = ValueToken(Char(),ord(t.value[1:-1]))
+        t.value = Char(ord(t.value[1:-1]))
         return t
 
     def t_ID(self,t):
@@ -136,7 +136,7 @@ class Lexer():
 
     def t_ICONST(self,t):
         r'[0-9]+'
-        t.value = ValueToken(Int(),int(t.value))
+        t.value = Int(int(t.value))
         return t
 
     def t_COMMENT(self,t):
