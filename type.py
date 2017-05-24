@@ -9,8 +9,8 @@ class Type(object):
     def equals(self,t):
         return isinstance(t,self.__class__)
 
-    def isConstant():
-        return isConstant()
+    def getSize(self):
+        return 1
 
 class Int(Type):
     def __init__(self,value = None):
@@ -52,6 +52,9 @@ class Chars(Type):
     def toString(self):
         return  self.string + ' ' + self.range.toString()
 
+    def getSize(self):
+        return self.range.getSize()
+
     def equals(self,t):
         if isinstance(t,Chars):
             return self.range.equals(t.getRange())
@@ -71,6 +74,9 @@ class Array(Type):
 
     def getRange(self):
         return self.range
+
+    def getSize(self):
+        return self.range.getLenght() * self.subType.getSize()
 
     def toString(self):
         return self.string + ' ' + self.range.toString() + ' ' + self.subType.toString()
@@ -118,8 +124,9 @@ class Range(Type):
     def getEnd(self):
         return self.end
 
-    def getSize(self):
-        return self.end - self.begin
+    def getLenght(self):
+        if(self.end.value is not None and self.begin.value is not None):
+            return (self.end.value - self.begin.value)
 
     def equals(self,t):
         if isinstance(t,Range):
@@ -130,8 +137,8 @@ class Parameters(Type):
     def __init__(self,plist = []):
         self.parameterList = plist
         for a in self.parameterList:
-            if not isinstance(a,Type):
-                raise TypeError('All elements must be of type Type' %(a))
+            if not isinstance(a,Type) and a is not None:
+                raise TypeError('All elements %s must be of type Type' %(str(a)))
 
     def getParameter(self,pos):
         return self.parameterList[pos]
@@ -188,6 +195,9 @@ class ModeType(Type):
     def equals(self,t):
         if isinstance(t,Reference):
             return self.subType.equals(t.subType)
+
+    def getSize(self):
+        return self.subType.getSize()
 
 class Null(Type):
     def __init__(self):

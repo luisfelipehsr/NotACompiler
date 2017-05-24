@@ -357,7 +357,8 @@ class Location(AST):
 
 class DereferencedReference(AST):
     def  typeCheck(self):
-        return isinstance(self.type,Reference)
+        a = self.fields[0].propType()
+        return isinstance(a,Reference)
 
     def propType(self):
         if self.type is not None:
@@ -379,17 +380,18 @@ class StringSlice(AST):
 
 class ArrayElement(AST):
     def typeCheck(self):
+        parameters = self.fields[1].propType().getParameterList()
+        data = self.fields[0].propType()
+        if not isinstance(data,Chars) and not isinstance(data,Array):
+            return False
+        for p in parameters:
+            if not isinstance(p,Int):
+                return False
+        return True
 
-        ret = True
-        for parameter in self.fields[1].propType():
-            if parameter not in [['int']]:
-                ret = False
 
-        if self.fields[0].propType() != ['chars'] and \
-            self.fields[0].propType()[0] != 'array':
-            ret = False
 
-        return ret
+
 
     def propType(self):
         if self.type is not None:
@@ -484,15 +486,15 @@ class Expression(AST):
 
 class ConditionalExpression(AST):
     def typeCheck(self):
-        if self.fields[0].propType() == ['bool']:
+        a = self.fields[0].propType()
+        b = self.fields[1].propType()
+        c = self.fields[2].propType()
+        if isinstance(a,Bool):
             if len(self.fields) == 3:
-                return self.fields[1].propType() == self.fields[2].propType()
+                return b.equals(c)
             else:
-                a = self.fields[1].propType()
-                b = self.fields[2].propType()
-                c = self.fields[3].propType()
-
-                return  a==b==c
+                d = self.fields[3].propType()
+                return  b.equals(c) and b.equals(d)
         else:
             return False
 
@@ -514,31 +516,30 @@ class ThenExpression(AST):
 
 class ElseExpression(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
 class ElsifExpression(AST):
     def typeCheck(self):
         if len(self.fields) == 2:
-            return self.fields[0].propType() == ['bool']
+            a = self.fields[0].propType()
+            return isinstance(a,Bool)
         else:
-            return self.fields[1].propType() == ['bool']
+            a = self.fields[1].propType()
+            return isinstance(a, Bool)
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         elif len(self.fields) == 2:
             self.type = self.fields[1].propType()
-            return self.type[:]
+            return self.type
         else:
-            if self.fields[0].propType() == self.fields[2].propType():
-                self.type = self.fields[0].propType()
-                return self.type[:]
-            else:
-                return []
+            self.type = self.fields[0].propType()
+            return self.type
 
 class Operand0(AST):
     def typeCheck(self):
@@ -721,31 +722,23 @@ class BracketedAction(AST):
 
 class AssignmentAction(AST):
     def typeCheck(self):
-
+        a = self.fields[0].propType()
         if len(self.fields) == 2:
-            return self.fields[0].propType() == self.fields[1].propType()
+            b = self.fields[1].propType()
+            return a.equals(b)
         elif self.fields[1] == '&':
-                return (self.fields[0].propType() == ['chars']
-                        and self.fields[1].propType() == ['chars']) or \
-                       (self.fields[0].propType() == ['chars']
-                        and self.fields[1].propType() == ['char'])
-        else:
+            b = self.fields[2].propType()
+            return (a.equals(b) and isinstance(b,Chars)) or \
+                    (isinstance(a,Chars) and isinstance(b,Char))
 
-            return self.fields[0].propType() == self.fields[2].propType() and \
-                   self.fields[0].propType() == ['int']
+        else:
+            b = self.fields[2].propType()
+            return a.equals(b) and isinstance(a,Int)
 
 class IfAction(AST):
     def typeCheck(self):
-        if len(self.fields) == 2:
-            return self.fields[0].propType() == ['bool']
-        else:
-            return self.fields[0].propType() == ['bool']
-
-    def propType(self):
-        self.type = self.fields[1].propType()
-        if len (self.fields) == 3:
-            self.type += self.fields[2].propType()
-        return self.type[:]
+        a = self.fields[0].propType()
+        return isinstance(a,Bool)
 
 class ActionStatementList(AST):
 
@@ -754,7 +747,6 @@ class ActionStatementList(AST):
             return self.type[:]
         else:
             for stmt in self.fields:
-                print(self.type)
                 self.type += [stmt.propType()]
             return self.type[:]
 
@@ -799,21 +791,22 @@ class Iteration(AST):
 class StepEnumeration(AST):
 
     def typeCheck(self):
-        if len(self.fields) == 3:
-            return self.fields[1].propType() == self.fields[2].propType() \
-                   and self.fields[1].propType() == ['int']
+        a = self.fields[1].propType()
+        b = self.fields[2].propType()
+        if not isinstance(a,Int):
+            return False
+        elif len(self.fields) == 3:
+            return a.equals(b)
         elif len(self.fields) == 4:
+            c = self.fields[3].propType()
             if isinstance(self.fields[2],AST):
-                return self.fields[1].propType() == self.fields[2].propType() \
-                       and self.fields[2].propType() == self.fields[3].propType() \
-                       and self.fields[1].propType() == ['int']
+                return a.equals(b) and b.equals(c)
             else:
-                return self.fields[1].propType() == self.fields[3].propType() \
-                       and self.fields[1].propType() == ['int']
+                return a.equals(c)
         else:
-            return self.fields[1].propType() == self.fields[2].propType() \
-                   and self.fields[2].propType() == self.fields[4].propType() \
-                   and self.fields[1].propType() == ['int']
+            c = self.fields[4].propType()
+            return a.equals(b) and b.equals(d)
+
 
     def updateContext(self):
         AST.semantic.addToContext(Symbol(self.fields[0],Int()))

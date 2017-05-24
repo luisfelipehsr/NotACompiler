@@ -6,7 +6,7 @@ class Context(object):
         self.contextList =[]
 
     def addToContext(self,symbol):
-        #print('Added %s of type %s' %(symbol.id,symbol.type.toString()))
+        print('Added %s of type %s of tota size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
         if not isinstance(symbol,Symbol):
             raise TypeError('Only symbols can be added to a context')
         self.contextList[-1][symbol.getId()] = symbol
