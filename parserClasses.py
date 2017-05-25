@@ -38,12 +38,12 @@ class AST(object):
     def build(self,graph):
         myId = id(self)
         graph.add_node(dot.Node(myId,label = self.__class__.__name__ +
-                                             ' '+str(self.type) ))
+                                             ' '+str(self.type.toString() if self.type is not None else 'None') ))
         for n in self.fields:
             nId = id(n)
             if isinstance(n,AST):
                 graph.add_node(dot.Node(nId, label=self.__class__.__name__ +
-                                                    ' ' + str(self.type)))
+                                                    ' ' + str(self.type.toString() if self.type is not None else 'None')))
                 graph.add_edge(dot.Edge(myId,nId))
                 n.build(graph)
             else:
@@ -89,6 +89,9 @@ class AST(object):
     def updateContext(self):
         return
 
+    def genCode(self):
+        return None
+
 class Program(AST):
     def updateContext(self):
         self.context = AST.semantic.pushContext()
@@ -104,14 +107,14 @@ class DeclarationStatement(AST):
 
 class DeclarationList(AST):
     _fields = ['DeclarationList']
-
+#TODO Test
 class Declaration(AST):
 
     def typeCheck(self):
         if len(self.fields) == 3:
-            t1 = type(self.fields[1].propType())
-            t2 = type(self.fields[2].propType())
-            return  t1 == t2
+            t1 = self.fields[1].propType()
+            t2 = self.fields[2].propType()
+            return  t1.equals(t2) and not isinstance(t1,Array)
         else:
             return True
 
@@ -127,7 +130,31 @@ class Declaration(AST):
         if isinstance(type,Mode):
             type = type.subType
         for id in self.fields[0].fields:
-            AST.semantic.addToContext(Symbol(id,type,None))
+            AST.semantic.addToContext(Symbol(id,type))
+
+    def genCode(self):
+        ret = []
+        type = self.fields[1].propType()
+        if isinstance(type, Mode):
+            type = type.subType
+        for id in self.fields[0].fields:
+            if len(self.fields) == 2:
+                ret += [('alc',self.type.getSize())]
+                AST.semantic.addToContext(Symbol(id,type))
+            else:
+                v = self.fields[2].propType()
+                if v.value is not None:
+                    ret += [('ldc',v.value)]
+                    AST.semantic.addToContext(Symbol(id, type))
+                else:
+                    symbol =  AST.semantic.lookInContexts(v)
+                    ret += ['ldv',symbol.count,symbol.pos]
+
+
+
+
+
+        return ret
 
 class Initialization(AST):
     def propType(self):
@@ -528,8 +555,10 @@ class ElsifExpression(AST):
             a = self.fields[0].propType()
             return isinstance(a,Bool)
         else:
-            a = self.fields[1].propType()
-            return isinstance(a, Bool)
+            a = self.fields[0].propType()
+            b = self.fields[1].propType()
+            c = self.fields[2].propType()
+            return isinstance(b, Bool) and a.equals(c)
 
     def propType(self):
         if self.type is not None:
@@ -956,7 +985,7 @@ class ProcedureStatement(AST):
     def updateContext(self):
         id = self.fields[0]
         type = self.fields[1].propType()
-        s = Symbol(id,type,None)
+        s = Symbol(id,type)
         AST.semantic.addToContext(s)
         self.context = AST.semantic.pushContext()
 

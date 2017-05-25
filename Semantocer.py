@@ -3,24 +3,30 @@ from symbol import Symbol
 class Context(object):
 
     def __init__(self):
-        self.contextList =[]
+        self.contextList = []
+        self.memoryCount = []
 
     def addToContext(self,symbol):
-        print('Added %s of type %s of tota size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
+        #print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
         if not isinstance(symbol,Symbol):
             raise TypeError('Only symbols can be added to a context')
         self.contextList[-1][symbol.getId()] = symbol
+        symbol.cont = len(self.contextList)
+        symbol.pos = self.memoryCount[-1]
+        self.memoryCount[-1] += symbol.type.getSize()
         
     def getFromContext(self,id):
         return self.contextList[-1][id]
 
     def pushContext(self):
         self.contextList.append(dict())
+        self.memoryCount.append(0)
         #print('Pushed New Context')
         return self.contextList[-1]
 
     def popContext(self):
         self.contextList.pop()
+        self.memoryCount.pop()
         #print('Poped Context')
 
     def lookInContexts(self,id):

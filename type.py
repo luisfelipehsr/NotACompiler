@@ -130,7 +130,7 @@ class Range(Type):
 
     def equals(self,t):
         if isinstance(t,Range):
-            return begin == t.begin and end == t.end
+            return self.begin == t.begin and self.end == t.end
         return False
 
 class Parameters(Type):
@@ -149,7 +149,8 @@ class Parameters(Type):
     def toString(self):
         ret = '( '
         for t in self.parameterList:
-            ret += t.toString() + ' '
+            ret += t.toString() if t is not None else 'None'
+            ret += ' '
         ret+= ')'
         return ret
 
