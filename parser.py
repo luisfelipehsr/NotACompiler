@@ -494,7 +494,6 @@ class Parser(object):
             p[0] = Operand0(p[1],p[2],p[3])
             p[0].setLinespan(p, 1, 3)
 
-
     def p_Operand1(self,p):
         """ Operand1 : Operand2
                      | Operand1 Operator2 Operand2 """

@@ -434,9 +434,6 @@ class Location(AST):
             return ret
         return ret
 
-
-
-
 class DereferencedReference(AST):
     def  typeCheck(self):
         a = self.fields[0].propType()
@@ -531,6 +528,20 @@ class Literal(AST):
         if isinstance(token,Type):
             self.type = token
         return self.type
+
+    def genCode(self):
+        ret = []
+        val = self.fields[0]
+        if isinstance(val,Chars):
+            return ret
+        elif isinstance(val,Bool):
+            return ret
+        elif isinstance(val,Char):
+            return ret
+        elif isinstance(val,Int):
+            ret += [('ldc',val.value)]
+        return ret
+
 
 class ValueArrayElement(AST):
     def typeCheck(self):
