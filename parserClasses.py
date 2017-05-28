@@ -48,7 +48,10 @@ class AST(object):
                 n.build(graph)
             else:
                 nId += uuid.uuid4().int & (1<<64)-1
-                graph.add_node(dot.Node(nId, label=str(n)))
+                if isinstance(n,Type):
+                    graph.add_node(dot.Node(nId, label=n.toString()))
+                else:
+                    graph.add_node(dot.Node(nId, label=str(n)))
                 graph.add_edge(dot.Edge(myId, nId))
 
     def buildGraph(self,name):
@@ -80,6 +83,17 @@ class AST(object):
                     n.recursiveTypeCheck()
         AST.semantic.trimToLen(leng)
 
+    def recursiveGenCode(self):
+        ret = []
+        leng = AST.semantic.contextLen()
+        self.updateContext()
+        for n in self.fields:
+            if isinstance(n,AST):
+                ret += n.recursiveGenCode()
+        ret += self.genCode()
+        AST.semantic.trimToLen(leng)
+        return ret
+
     def typeCheck(self):
         return True
 
@@ -90,7 +104,7 @@ class AST(object):
         return
 
     def genCode(self):
-        return None
+        return []
 
 class Program(AST):
     def updateContext(self):
@@ -107,7 +121,7 @@ class DeclarationStatement(AST):
 
 class DeclarationList(AST):
     _fields = ['DeclarationList']
-#TODO Test
+
 class Declaration(AST):
 
     def typeCheck(self):
@@ -137,9 +151,10 @@ class Declaration(AST):
         type = self.fields[1].propType()
         if isinstance(type, Mode):
             type = type.subType
+        first = True
         for id in self.fields[0].fields:
             if len(self.fields) == 2:
-                ret += [('alc',self.type.getSize())]
+                ret += [('alc',self.propType().getSize())]
                 AST.semantic.addToContext(Symbol(id,type))
             else:
                 v = self.fields[2].propType()
@@ -147,8 +162,16 @@ class Declaration(AST):
                     ret += [('ldc',v.value)]
                     AST.semantic.addToContext(Symbol(id, type))
                 else:
-                    symbol =  AST.semantic.lookInContexts(v)
-                    ret += ['ldv',symbol.count,symbol.pos]
+                    if first == True:
+                        first = Symbol(id, type)
+                        AST.semantic.addToContext(first)
+
+                    else:
+                        ret += [('ldv',first.count,first.pos)]
+                        AST.semantic.addToContext(Symbol(id, type))
+
+
+
 
 
 
@@ -163,6 +186,26 @@ class Initialization(AST):
         else:
             self.type = self.fields[-1].propType()
             return self.type
+
+    def genCode(self):
+        ret = []
+        if len(self.fields) == 1:
+            return ret
+        else:
+            op = self.fields[0]
+            if op == '+':
+                ret += [('add')]
+            elif op == '-':
+                ret += [('sub')]
+            elif op == '*':
+                ret += [('mul')]
+            elif op == '/':
+                ret += [('div')]
+            elif op == '%':
+                ret += [('mod')]
+            else:
+                return ret
+            return ret
 
 class IdentifierList(AST):
     _fields = ['IdentifierList']
@@ -380,7 +423,19 @@ class Location(AST):
             else:
                 self.type = fromContext.type
                 return self.type
-    _fields = ['LocationName']
+
+    def genCode(self):
+        ret = []
+        val = self.fields[0]
+        if not isinstance(val,AST):
+            symbol = AST.semantic.lookInContexts(val)
+            if isinstance(symbol,Symbol):
+                ret += [('ldv',symbol.pos,symbol.count)]
+            return ret
+        return ret
+
+
+
 
 class DereferencedReference(AST):
     def  typeCheck(self):
@@ -664,7 +719,9 @@ class Operand1(AST):
         if len(self.fields) == 1:
             return True
         else:
-            return  self.fields[0].propType() == self.fields[2].propType()
+            a = self.fields[0].propType()
+            b = self.fields[2].propType()
+            return  a.equals(b)
 
     def propType(self):
         if self.type is not None:
@@ -673,15 +730,30 @@ class Operand1(AST):
             self.type = self.fields[0].propType()
             return self.type
 
+    def genCode(self):
+
+        return []
+
 class Operator2(AST):
-    _fields = ['AddOperator']
+    def genCode(self):
+        ret = []
+        op = self.fields[0]
+        if op == '+':
+            ret += [('add')]
+        elif op == '-':
+            ret += [('sub')]
+        else:
+            return ret
+        return ret
 
 class Operand2(AST):
     def typeCheck(self):
         if len(self.fields) == 1:
             return True
         else:
-            return self.fields[0].propType() == self.fields[2].propType()
+            a = self.fields[0].propType()
+            b = self.fields[2].propType()
+            return a.equals(b)
 
     def propType(self):
         if self.type is not None:
@@ -689,6 +761,19 @@ class Operand2(AST):
         else:
             self.type = self.fields[0].propType()
             return self.type
+
+    def genCode(self):
+        ret = []
+        if len(self.fields) == 3:
+            op = self.fields[1]
+            if op == '*':
+                ret += [('mul')]
+            elif op == '/':
+                ret += [('div')]
+            else:
+                ret += [('mod')]
+            return ret
+        return ret
 
 class Operand3(AST):
     def typeCheck(self):
@@ -709,6 +794,17 @@ class Operand3(AST):
         else:
             self.type = self.fields[1].propType()
             return self.type
+
+    def genCode(self):
+        ret = []
+        if len(self.fields) == 2:
+            op = self.fields[1]
+            if op == '-':
+                ret += [('neg')]
+            else:
+                ret += [('not')]
+            return ret
+        return ret
 
 class Operand4(AST):
     def propType(self):
@@ -1006,35 +1102,40 @@ class ProcedureDefinition(AST):
 
 class FormalParameterList(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
+            self.type = []
             for x in self.fields:
                 self.type += [x.propType()]
-            return self.type[:]
+            self.type = Parameters(self.type)
+            return self.type
 
 class FormalParameter(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
+            self.type = []
             for i in self.fields[0].fields:
-                self.type += self.fields[1].propType()
-            return self.type[:]
+                self.type += [self.fields[1].propType()]
+            self.type = Parameters(self.type)
+            return self.type
 
     def updateContext(self):
-        AST.semantic.addToContext(self.fields[0].fields,
-                                  self.fields[1].propType())
+        for id in self.fields[0].fields:
+            AST.semantic.addToContext(Symbol(id,
+                                  self.fields[1].propType()))
 
 class ParameterSpec(AST):
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            if self.type[0] == 'mode':
-                self.type = self.type[1:]
-            return self.type[:]
+            if isinstance(self.type,ModeType):
+                self.type = self.type.subType
+            return self.type
 
 class ResultSpec(AST):
     def propType(self):

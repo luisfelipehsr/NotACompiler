@@ -135,10 +135,14 @@ class Range(Type):
 
 class Parameters(Type):
     def __init__(self,plist = []):
-        self.parameterList = plist
-        for a in self.parameterList:
-            if not isinstance(a,Type) and a is not None:
+        self.parameterList = []
+        for a in plist:
+            if isinstance(a,Parameters):
+                self.parameterList += a.parameterList
+            elif not isinstance(a,Type) and a is not None:
                 raise TypeError('All elements %s must be of type Type' %(str(a)))
+            else:
+                self.parameterList.append(a)
 
     def getParameter(self,pos):
         return self.parameterList[pos]

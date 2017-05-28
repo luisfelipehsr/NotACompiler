@@ -540,7 +540,6 @@ class Parser(object):
         p[0] = ReferencedLocation(p[2])
         p[0].setLinespan(p, 2, 2)
 
-
     def p_PrimitiveValue(self,p):
         """ PrimitiveValue : Literal 
                            | ValueArrayElement
@@ -660,7 +659,7 @@ class Parser(object):
         """ Operator2 : PLUS
                       | STRCAT
                       | MINUS """
-        p[0] = Operand2(p[1])
+        p[0] = Operator2(p[1])
         p[0].setLinespan(p, 1, 1)
 
     def p_error(self, p):
@@ -685,6 +684,9 @@ def main():
         AST.semantic = Context()
         a.parse(file.read())
         a.ast.recursiveTypeCheck()
+        AST.semantic = Context()
+        ret = a.ast.recursiveGenCode()
+        print(ret)
         #a.ast.removeChanel()
 
         # Generates .dot archive to display the AST.
