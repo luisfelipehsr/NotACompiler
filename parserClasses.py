@@ -226,7 +226,7 @@ class SynonymDefinition(AST):
         if len(self.type)>0:
             return self.type[:]
         else:
-            self.type = self.fields[:-1].propType()
+            self.type = self.fields[-1].propType()
             return self.type[:]
 
     def updateContext(self):
@@ -912,7 +912,7 @@ class ElseClause(AST):
 
 class DoAction(AST):
     def updateContext(self):
-	    self.context = AST.semantic.pushContext()
+        self.context = AST.semantic.pushContext()
 
 class ControlPart(AST):
     _fields = ['ForControl', 'WhileControl']
