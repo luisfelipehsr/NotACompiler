@@ -4,6 +4,8 @@
 # tokenizer for Lya
 # ------------------------------------------------------------
 import ply.lex as lex
+from valueToken import ValueToken
+from type import *
 
 # Rule for reserved and predefined words
 class Lexer():
@@ -11,7 +13,6 @@ class Lexer():
         self.reserved = {
             'array'   : 'ARRAY',
             'by'      : 'BY',
-            'chars'   : 'CHARS',
             'dcl'     : 'DCL',
             'do'      : 'DO',
             'down'    : 'DOWN',
@@ -37,9 +38,6 @@ class Lexer():
             'while'   : 'WHILE',
             'abs'     : 'ABS',
             'asc'     : 'ASC',
-            'bool'    : 'BOOL',
-            'char'    : 'CHAR',
-            'int'     : 'INT',
             'length'  : 'LENGHT',
             'lower'   : 'LOWER',
             'num'     : 'NUM',
@@ -55,7 +53,7 @@ class Lexer():
                   'EQLESSTHEN','STRCAT' ,'MOD'     ,'NOT'       ,'ID'      ,
                   'ATRIB'     ,'STR'    ,'COMMENT' ,'COMMA'   ,
                   'SEMICOLON' ,'COLON'  ,'CHALIT'  ,'LPAREN'    ,
-                  'RPAREN'    ,'FALSE'  ,'TRUE'    ,'NULL' ]\
+                  'RPAREN'    ,'FALSE'  ,'TRUE'    ,'NULL' ,'INT','CHAR','BOOL','CHARS']\
                       + list(self.reserved.values())
 
         # Regular expression rules for simple tokens
@@ -89,27 +87,46 @@ class Lexer():
 
     def t_FALSE(self, t):
         r'false'
-        t.value = ('FALSE', 'bool')
+        t.value = ValueToken(Bool(),False)
         return t
 
     def t_NULL(self, t):
         r'null'
-        t.value = ('NULL', 'char')
+        t.value = ValueToken(Char(),'')
         return t
 
     def t_TRUE(self, t):
         r'true'
-        t.value = ('TRUE', 'bool')
+        t.value = ValueToken(Bool(),True)
+        return t
+
+    def t_INT(self,t):
+        r'int'
+        t.value = Int()
+        return t
+
+    def t_BOOL(self,t):
+        r'bool'
+        t.value = Bool()
+        return t
+
+    def t_CHARS(self,t):
+        r'chars'
+        return t
+
+    def t_CHAR(self,t):
+        r'char'
+        t.value = Char()
         return t
 
     def t_STR(self,t):
         r'"([^\n\r\"]|(\\n)|(\\t)|(\\")|(\\))*"'
-        t.value = (t.value[1:-1],'chars')
+        t.value = Chars(Range(Int(0),Int(len(t.value)-2)),value=t.value[1:-1])
         return t
 
     def t_CHALIT(self,t):
         r'(\'[0-9]\')|(\'[A-Za-z]\')'
-        t.value = (ord(t.value[1:-1]),'char')
+        t.value = Char(ord(t.value[1:-1]))
         return t
 
     def t_ID(self,t):
@@ -119,11 +136,7 @@ class Lexer():
 
     def t_ICONST(self,t):
         r'[0-9]+'
-        try:
-            t.value = (int(t.value),'int')
-        except ValueError:
-            print("Integer value too large %d", t.value)
-            t.value = 0
+        t.value = Int(int(t.value))
         return t
 
     def t_COMMENT(self,t):
