@@ -140,7 +140,7 @@ class Declaration(AST):
 
     def updateContext(self):
         type = self.fields[1].propType()
-        if isinstance(type,Mode):
+        if isinstance(type,ModeType):
             type = type.subType
         for id in self.fields[0].fields:
             AST.semantic.addToContext(Symbol(id,type))
@@ -148,7 +148,7 @@ class Declaration(AST):
     def genCode(self):
         ret = []
         type = self.fields[1].propType()
-        if isinstance(type, Mode):
+        if isinstance(type, ModeType):
             type = type.subType
         first = True
         for id in self.fields[0].fields:

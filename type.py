@@ -1,7 +1,5 @@
 class Type(object):
-
-    def __init__(self):
-        self.string = ''
+    string = ''
 
     def toString(self):
         return self.string
@@ -18,7 +16,7 @@ class Int(Type):
         self.value = value
 
     def isConstant(self):
-        return not self.value == None
+        return not self.value is not None
 
 class Bool(Type):
     def __init__(self,value = None):
@@ -26,7 +24,7 @@ class Bool(Type):
         self.value = value
 
     def isConstant(self):
-        return not self.value == None
+        return not self.value is not None
 
 class Char(Type):
     def __init__(self,value = None):
@@ -34,7 +32,7 @@ class Char(Type):
         self.value = value
 
     def isConstant(self):
-        return not self.value == None
+        return not self.value is not None
 
 class Chars(Type):
     def __init__(self,r,value = None):
@@ -111,7 +109,7 @@ class Range(Type):
     def __init__(self,begin,end,subRange=None):
         if  not isinstance(begin,Int) or not isinstance(end,Int):
             raise TypeError('Begin %s and End %s must be integers' %(begin,end))
-        if not isinstance(subRange,Range) and subRange != None:
+        if not isinstance(subRange,Range) and subRange is not None:
             raise TypeError('SubType must be None or Range')
         self.begin = begin
         self.end = end
@@ -134,7 +132,10 @@ class Range(Type):
         return False
 
 class Parameters(Type):
-    def __init__(self,plist = []):
+    def __init__(self, plist=None):
+        if plist is None:
+            plist = []
+
         self.parameterList = []
         for a in plist:
             if isinstance(a,Parameters):
@@ -209,8 +210,9 @@ class Null(Type):
         self.string = 'Null'
 
 def main():
-    t = Procedure(Parameters(Int(),Int()),Int())
-    y = Procedure(Parameters(Int(), Int()),Null())
-    print(t.equals(y))
+    #t = Procedure(Parameters(Int(),Int()),Int())
+    #y = Procedure(Parameters(Int(), Int()),Null())
+    #print(t.equals(y))
+    print("TODO")
 
 if __name__	=='__main__':main()
