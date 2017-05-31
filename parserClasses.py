@@ -2,7 +2,6 @@ import pydot as dot
 import uuid
 from type import *
 from symbol import Symbol
-from valueToken import ValueToken
 
 class tColors:
     RED = "\033[1;31m"
@@ -941,7 +940,7 @@ class StepEnumeration(AST):
                 return a.equals(c)
         else:
             c = self.fields[4].propType()
-            return a.equals(b) and b.equals(d)
+            return a.equals(b) and b.equals(c)
 
 
     def updateContext(self):
