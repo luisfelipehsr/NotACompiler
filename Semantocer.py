@@ -10,9 +10,11 @@ class Context(object):
         #print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
         if not isinstance(symbol,Symbol):
             raise TypeError('Only symbols can be added to a context')
-        self.contextList[-1][symbol.getId()] = symbol
+        if symbol.id in self.contextList[-1]:
+            raise TypeError('This id is already defined in this context')
         symbol.cont = len(self.contextList)
         symbol.pos = self.memoryCount[-1]
+        self.contextList[-1][symbol.getId()] = symbol
         self.memoryCount[-1] += symbol.type.getSize()
         
     def getFromContext(self,id):
