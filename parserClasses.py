@@ -154,20 +154,16 @@ class Declaration(AST):
         for id in self.fields[0].fields:
             if len(self.fields) == 2:
                 ret += [('alc',self.propType().getSize())]
-                AST.semantic.addToContext(Symbol(id,type))
             else:
                 v = self.fields[2].propType()
                 if v.value is not None:
                     ret += [('ldc',v.value)]
-                    AST.semantic.addToContext(Symbol(id, type))
                 else:
                     if first == True:
-                        first = Symbol(id, type)
-                        AST.semantic.addToContext(first)
+                        first = AST.semantic.lookInContexts(id)
 
                     else:
                         ret += [('ldv',first.count,first.pos)]
-                        AST.semantic.addToContext(Symbol(id, type))
 
 
 
@@ -741,19 +737,21 @@ class Operand1(AST):
             return self.type
 
     def genCode(self):
-
-        return []
+        ret = []
+        if len(self.fields) == 3:
+            op = self.fields[1].fields[0]
+            if op == '+':
+                ret += [('add')]
+            elif op == '-':
+                ret += [('sub')]
+            else:
+                return ret
+        return ret
 
 class Operator2(AST):
     def genCode(self):
         ret = []
-        op = self.fields[0]
-        if op == '+':
-            ret += [('add')]
-        elif op == '-':
-            ret += [('sub')]
-        else:
-            return ret
+
         return ret
 
 class Operand2(AST):

@@ -2,16 +2,8 @@
 
 dcl z,t int;
 dcl x int = t;
-g: proc (t int);
-  dcl x int;
-  t *= 2;
-  x  = 2*t;
-  z  = x+1;
-end;
-
+t *= 2;
+x  = 2*t;
+z  = x+1;
 z = 3;
 t = 4;
-g(t); print(z,t);
-g(z); print(z,t);
-g(t+z); print(z,t);
-g(7); print(z,t);
