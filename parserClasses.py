@@ -365,7 +365,6 @@ class StringMode(AST):
         self.type = Chars(Range(Int(0),lenght))
         return self.type
     #No typecheck needed, lenght is Iconst
-    _fields = ['Chars', 'StringLenght']
 
 class ArrayMode(AST):
     # Pegamos o tipo do element mode e adicionamos o prefixo array
@@ -419,15 +418,6 @@ class Location(AST):
                 self.type = fromContext.type
                 return self.type
 
-    def genCode(self):
-        ret = []
-        val = self.fields[0]
-        if not isinstance(val,AST):
-            symbol = AST.semantic.lookInContexts(val)
-            if isinstance(symbol,Symbol):
-                ret += [('ldv',symbol.pos,symbol.count)]
-            return ret
-        return ret
 
 class DereferencedReference(AST):
     def  typeCheck(self):
@@ -536,7 +526,6 @@ class Literal(AST):
         elif isinstance(val,Int):
             ret += [('ldc',val.value)]
         return ret
-
 
 class ValueArrayElement(AST):
     def typeCheck(self):
@@ -714,6 +703,30 @@ class Operand0(AST):
             self.type = Bool()
             return self.type
 
+    def genCode(self):
+        ret = []
+        if len(self.fields) == 3:
+            op = self.fields[1].fields[0]
+            if isinstance(op,AST):
+                op = op.fields[0]
+            if op ==   '&&':
+                ret += [('and')]
+            elif op == '||':
+                ret += [('lor')]
+            elif op == '==':
+                ret += [('equ')]
+            elif op == '!=':
+                ret += [('neq')]
+            elif op ==  '>':
+                ret += [('grt')]
+            elif op ==  '<':
+                ret += [('less')]
+            elif op ==  '>=':
+                ret += [('gre')]
+            elif op ==  '<=':
+                ret += [('leq')]
+        return ret
+
 class Operator1(AST):
     _fields = ['Operator']
 
@@ -751,6 +764,7 @@ class Operand1(AST):
 class Operator2(AST):
     def genCode(self):
         ret = []
+
 
         return ret
 
@@ -822,6 +836,18 @@ class Operand4(AST):
             self.type = self.fields[0].propType()
             return self.type
 
+    def genCode(self):
+        ret  = []
+        a  = self.fields[0]
+        if isinstance(a,Location):
+            loc = self.fields[0].fields[0]
+            if not isinstance(loc, AST):
+                symbol = AST.semantic.lookInContexts(loc)
+                if isinstance(symbol, Symbol):
+                    ret += [('ldv', symbol.pos, symbol.count)]
+
+        return ret
+
 class ReferencedLocation(AST):
     def propType(self):
         if self.type is not None:
@@ -867,6 +893,37 @@ class AssignmentAction(AST):
         else:
             b = self.fields[2].propType()
             return a.equals(b) and isinstance(a,Int)
+
+    def genCode(self):
+        ret = []
+        loc = self.fields[0].fields[0]
+        if len(self.fields) == 3:
+            val = self.fields[0]
+            if not isinstance(loc, AST):
+                symbol = AST.semantic.lookInContexts(loc)
+                if isinstance(symbol, Symbol):
+                    ret += [('ldv', symbol.pos, symbol.count)]
+
+            op = self.fields[1]
+            if op == '+':
+                ret += [('add')]
+            elif op == '-':
+                ret += [('sub')]
+            elif op == '*':
+                ret += [('mul')]
+            elif op == '/':
+                ret += [('div')]
+            elif op == '%':
+                ret += [('mod')]
+            else:
+                ret += []
+
+        if not isinstance(loc, AST):
+            symbol = AST.semantic.lookInContexts(loc)
+            if isinstance(symbol, Symbol):
+                ret += [('stv', symbol.pos, symbol.count)]
+
+        return ret
 
 class IfAction(AST):
     def typeCheck(self):

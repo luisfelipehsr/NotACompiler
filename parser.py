@@ -685,7 +685,8 @@ def main():
         a.ast.recursiveTypeCheck()
         AST.semantic = Context()
         ret = a.ast.recursiveGenCode()
-        print(ret)
+        for inst in ret:
+            print(inst)
         #a.ast.removeChanel()
 
         # Generates .dot archive to display the AST.
