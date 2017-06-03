@@ -7,3 +7,6 @@ x  = 2*t;
 z  = x+1;
 z = 3;
 t = 4;
+if t > 0 then
+    t += 1;
+fi;

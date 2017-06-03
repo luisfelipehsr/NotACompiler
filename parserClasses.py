@@ -86,6 +86,7 @@ class AST(object):
         ret = []
         leng = AST.semantic.contextLen()
         self.updateContext()
+        self.addTag()
         for n in self.fields:
             if isinstance(n,AST):
                 ret += n.recursiveGenCode()
@@ -103,6 +104,9 @@ class AST(object):
         return
 
     def genCode(self):
+        return []
+
+    def addTag(self):
         return []
 
 class Program(AST):
@@ -418,7 +422,6 @@ class Location(AST):
                 self.type = fromContext.type
                 return self.type
 
-
 class DereferencedReference(AST):
     def  typeCheck(self):
         a = self.fields[0].propType()
@@ -633,12 +636,12 @@ class Operand0(AST):
 
             if isRelational:
 
-                if operand0Type == operand1Type:
+                if operand0Type.equals(operand1Type):
 
                     operator = operatorType.fields[0]
 
                     if operator in ['&&', '||']:
-                        if operand0Type == ['bool']:
+                        if isinstance(operand0Type,Bool):
                             return True
                         else:
                             print('Operands must be of type bool. Got %s:'
@@ -646,15 +649,15 @@ class Operand0(AST):
                             return False
 
                     elif operator in ['==','!=']:
-                        if operand0Type in [['int'],['bool']]:
+                        if isinstance(operand0Type,Int) or isinstance(operand0Type,Bool) or isinstance(operand0Type,Char):
                             return True
                         else:
-                            print('Operands must be of type bool or int. Got' +
+                            print('Operands must be of type bool,int or Char. Got' +
                                   '%s:' %(operand0Type))
                             return False
 
                     else:
-                        if operand0Type == ['int']:
+                        if isinstance(operand0Type,Int):
                             return True
                         else:
                             print('Operands must be of type int. Got %s:'
@@ -667,19 +670,19 @@ class Operand0(AST):
 
             else:
 
-                if operand1Type == []:
+                if operand1Type == None:
                     return False
 
-                if operand1Type[0] == 'array':
-                    if operand1Type[1:] == operand0Type:
+                if isinstance(operand1Type,Array):
+                    if operand1Type.subType.equals(operand0Type):
                         return True
                     else:
                         print('Expected first operand of type %s. Got %s:'
                                %(operand1Type[1:],operand0Type))
                         return False
 
-                elif operand1Type == ['chars']:
-                    if operand0Type == ['char']:
+                elif isinstance(operand1Type,Chars):
+                    if isinstance(operand0Type,Char):
                         return True
                     else:
                         print('Expected first operand of type char.' +

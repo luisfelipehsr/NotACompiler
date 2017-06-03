@@ -662,6 +662,7 @@ class Parser(object):
         p[0].setLinespan(p, 1, 1)
 
     def p_error(self, p):
+        print(p)
         print("Systax error in input(%s) at line (%s)" %(p,p.lexer.lineno))
         self.parser.errok()
 
