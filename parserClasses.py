@@ -86,7 +86,7 @@ class AST(object):
         ret = []
         leng = AST.semantic.contextLen()
         self.updateContext()
-        self.addTag()
+        ret += self.addTag()
         for n in self.fields:
             if isinstance(n,AST):
                 ret += n.recursiveGenCode()
@@ -932,6 +932,12 @@ class IfAction(AST):
     def typeCheck(self):
         a = self.fields[0].propType()
         return isinstance(a,Bool)
+
+    def addTag(self):
+        return [('Start','If')]
+
+    def genCode(self):
+        return [('End','If')]
 
 class ActionStatementList(AST):
 
