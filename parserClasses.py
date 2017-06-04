@@ -957,6 +957,11 @@ class ThenClause(AST):
             self.type = self.fields[0].propType()
             return self.type[:]
 
+    def addTag(self):
+        return [('Start','Then')]
+    def genCode(self):
+        return [('End','Then')]
+
 class ElseClause(AST):
     def typeCheck(self):
         if len(self.fields) != 1:
