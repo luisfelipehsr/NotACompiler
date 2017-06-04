@@ -9,4 +9,8 @@ z = 3;
 t = 4;
 if t > 0 then
     t += 1;
+elsif t == 0 then
+    t -= 1;
+else
+    t += 2;
 fi;

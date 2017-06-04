@@ -113,6 +113,12 @@ class Program(AST):
     def updateContext(self):
         self.context = AST.semantic.pushContext()
 
+    def addTag(self):
+        return [('stp')]
+
+    def genCode(self):
+        return [('end')]
+
 class StatementList(AST):
     _fields = ['StatementList']
 
@@ -897,36 +903,42 @@ class AssignmentAction(AST):
             b = self.fields[2].propType()
             return a.equals(b) and isinstance(a,Int)
 
-    def genCode(self):
-        ret = []
-        loc = self.fields[0].fields[0]
-        if len(self.fields) == 3:
-            val = self.fields[0]
-            if not isinstance(loc, AST):
-                symbol = AST.semantic.lookInContexts(loc)
-                if isinstance(symbol, Symbol):
-                    ret += [('ldv', symbol.pos, symbol.count)]
-
+    def operation(self,fields):
+        if len(self.fields) != 3:
+            return []
+        else:
             op = self.fields[1]
             if op == '+':
-                ret += [('add')]
+                return [('add')]
             elif op == '-':
-                ret += [('sub')]
+                return [('sub')]
             elif op == '*':
-                ret += [('mul')]
+                return [('mul')]
             elif op == '/':
-                ret += [('div')]
+                return [('div')]
             elif op == '%':
-                ret += [('mod')]
+                return [('mod')]
             else:
-                ret += []
+                return []
 
-        if not isinstance(loc, AST):
-            symbol = AST.semantic.lookInContexts(loc)
-            if isinstance(symbol, Symbol):
-                ret += [('stv', symbol.pos, symbol.count)]
+    def genCode(self):
+        return self.location()
 
-        return ret
+    def replaceLoadStore(self,inst):
+        return[]
+
+    def recursiveGenCode(self):
+        store = self.replaceLoadStore(location)
+        expression = self.fields[-1].genCode()
+        ret += expression
+        if len(self.fields) == 3:
+            load = self.fields[0].genCode()
+            operation = self.genCode()
+            ret += load + operation + store
+        ret += store
+
+
+
 
 class IfAction(AST):
     def typeCheck(self):
@@ -934,10 +946,10 @@ class IfAction(AST):
         return isinstance(a,Bool)
 
     def addTag(self):
-        return [('Start','If')]
+        return [('start','if')]
 
     def genCode(self):
-        return [('End','If')]
+        return [('end','if')]
 
 class ActionStatementList(AST):
 
@@ -950,34 +962,23 @@ class ActionStatementList(AST):
             return self.type[:]
 
 class ThenClause(AST):
-    def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
-        else:
-            self.type = self.fields[0].propType()
-            return self.type[:]
-
     def addTag(self):
-        return [('Start','Then')]
+        return [('start','then')]
     def genCode(self):
-        return [('End','Then')]
+        return [('end','then')]
 
 class ElseClause(AST):
     def typeCheck(self):
         if len(self.fields) != 1:
-            return self.fields[0].propType() == ['bool']
+            return isinstance(self.fields[0].propType(),Bool)
         else:
             return True
 
-    def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
-        else:
-            if len(self.fields) == 1:
-                self.type = self.fields[0].propType()
-            else:
-                self.type = self.fields[1].propType() + self.fields[2].propType()
-            return self.type[:]
+    def addTag(self):
+        return [('start','else')]
+
+    def genCode(self):
+        return [('end','else')]
 
 class DoAction(AST):
     def updateContext(self):
