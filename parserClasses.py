@@ -938,8 +938,6 @@ class AssignmentAction(AST):
         ret += store
 
 
-
-
 class IfAction(AST):
     def typeCheck(self):
         a = self.fields[0].propType()
