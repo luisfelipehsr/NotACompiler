@@ -428,6 +428,24 @@ class Location(AST):
                 self.type = fromContext.type
                 return self.type
 
+    def store(self):
+        ret = []
+        loc = self.fields[0]
+        if not isinstance(loc, AST):
+            symbol = AST.semantic.lookInContexts(loc)
+            ret += [('ldv', symbol.pos, symbol.count)]
+        else:
+            ret += loc.store()
+        return ret
+
+    def genCode(self):
+        ret = []
+        loc = self.fields[0]
+        if not isinstance(loc,AST):
+            symbol = AST.semantic.lookInContexts(loc)
+            ret += [('ldv',symbol.pos,symbol.count)]
+        return ret
+
 class DereferencedReference(AST):
     def  typeCheck(self):
         a = self.fields[0].propType()
@@ -439,6 +457,12 @@ class DereferencedReference(AST):
         else:
             self.type = self.fields[0].propType().getSubType()
             return self.type
+
+    def store(self):
+        return self.genCode() + self.fields[0].store()
+
+    def genCode(self):
+        return [('grc')]
 
 class StringSlice(AST):
     def typeCheck(self):
@@ -462,10 +486,6 @@ class ArrayElement(AST):
                 return False
         return True
 
-
-
-
-
     def propType(self):
         if self.type is not None:
             return self.type
@@ -482,6 +502,9 @@ class ArrayElement(AST):
         else:
             self.type = self.fields[0].propType()
             return self.type
+
+    def genCode(self):
+        return []
 
 class ExpressionList(AST):
     def propType(self):
@@ -845,18 +868,6 @@ class Operand4(AST):
             self.type = self.fields[0].propType()
             return self.type
 
-    def genCode(self):
-        ret  = []
-        a  = self.fields[0]
-        if isinstance(a,Location):
-            loc = self.fields[0].fields[0]
-            if not isinstance(loc, AST):
-                symbol = AST.semantic.lookInContexts(loc)
-                if isinstance(symbol, Symbol):
-                    ret += [('ldv', symbol.pos, symbol.count)]
-
-        return ret
-
 class ReferencedLocation(AST):
     def propType(self):
         if self.type is not None:
@@ -903,7 +914,7 @@ class AssignmentAction(AST):
             b = self.fields[2].propType()
             return a.equals(b) and isinstance(a,Int)
 
-    def operation(self,fields):
+    def operation(self):
         if len(self.fields) != 3:
             return []
         else:
@@ -922,21 +933,18 @@ class AssignmentAction(AST):
                 return []
 
     def genCode(self):
-        return self.location()
-
-    def replaceLoadStore(self,inst):
-        return[]
+        return self.operation()
 
     def recursiveGenCode(self):
-        store = self.replaceLoadStore(location)
+        store = self.fields[0].store()
         expression = self.fields[-1].genCode()
-        ret += expression
+        ret = expression
         if len(self.fields) == 3:
             load = self.fields[0].genCode()
             operation = self.genCode()
             ret += load + operation + store
         ret += store
-
+        return ret
 
 class IfAction(AST):
     def typeCheck(self):
