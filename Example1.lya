@@ -1,17 +1,7 @@
 /* example2: */
 
-dcl z,t int;
-dcl x int = t;
+dcl x,y int;
 dcl a array[0:100] int;
-t *= 2;
-x  = 2*t;
-z  = x+1;
-z = 3;
-t = 4;
-if t > 0 then
-    t += 1;
-elsif t == 0 then
-    t -= 1;
-else
-    t += 2;
-fi;
+
+a[0] = a[1] + a[2];
+x = 2/y;
