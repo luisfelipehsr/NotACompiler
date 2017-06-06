@@ -2,6 +2,7 @@
 
 dcl z,t int;
 dcl x int = t;
+dcl a array[0:100] int;
 t *= 2;
 x  = 2*t;
 z  = x+1;

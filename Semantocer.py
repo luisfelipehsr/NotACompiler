@@ -51,8 +51,17 @@ class Context(object):
             for item in self.contextList[id]:
                 print('%s of type %s in context %d' %(str(item),self.contextList[id][item],id))
 
+    def getCurrentContext(self):
+        return len(self.contextList) -1
+
     def contextLen(self):
         return len(self.contextList)
+
+    def alocatedMemory(self):
+        return self.memoryCount[-1]
+
+    def lastMemoryPosition(self):
+        return self.alocatedMemory()-1
 
     def trimToLen(self,l):
         size = len(self.contextList) - l

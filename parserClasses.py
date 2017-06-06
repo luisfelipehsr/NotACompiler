@@ -350,6 +350,9 @@ class LiteralRange(AST):
             self.type = Range(begin,end)
             return self.type
 
+    def recursiveGenCode(self):
+        return []
+
 class ReferenceMode(AST):
     # <ReferenceMode> ::= REF <Mode>
     def propType(self):
@@ -433,7 +436,7 @@ class Location(AST):
         loc = self.fields[0]
         if not isinstance(loc, AST):
             symbol = AST.semantic.lookInContexts(loc)
-            ret += [('ldv', symbol.pos, symbol.count)]
+            ret += [('stv', symbol.pos, symbol.count)]
         else:
             ret += loc.store()
         return ret
@@ -447,7 +450,7 @@ class Location(AST):
         return ret
 
 class DereferencedReference(AST):
-    def  typeCheck(self):
+    def typeCheck(self):
         a = self.fields[0].propType()
         return isinstance(a,Reference)
 
@@ -459,7 +462,8 @@ class DereferencedReference(AST):
             return self.type
 
     def store(self):
-        return self.genCode() + self.fields[0].store()
+        loc = self.fields[0]
+        return self.genCode() + loc.store()
 
     def genCode(self):
         return [('grc')]
@@ -503,8 +507,40 @@ class ArrayElement(AST):
             self.type = self.fields[0].propType()
             return self.type
 
-    def genCode(self):
-        return []
+    def store(self):
+        ret = []
+        ret += [('start','store')]
+        location = self.fields[0].recursiveGenCode()
+        locationType = self.fields[0].propType()
+        expressionList = self.fields[1].fields
+        for expression in reversed(expressionList):
+            ret += [('start','expression')]
+            ret += [('ldv', AST.semantic.lastMemoryPosition(), AST.semantic.getCurrentContext())]
+            ret += expression.recursiveGenCode()
+            ret += [('idx', locationType.subType().getSize())]
+            ret += [('smv',1)]
+            ret += [('end', 'expression')]
+        ret += [('end', 'store')]
+
+
+
+        return ret
+
+    def recursiveGenCode(self):
+        ret = []
+        ret += [('start', 'load')]
+        location = self.fields[0].recursiveGenCode()
+        locationType = self.fields[0].propType()
+        expressionList = self.fields[1].fields
+        for expression in expressionList:
+            ret += [('start', 'expression')]
+            ret += [('ldv', AST.semantic.lastMemoryPosition(), AST.semantic.getCurrentContext())]
+            ret += expression.recursiveGenCode()
+            ret += [('idx',locationType.subType().getSize())]
+            ret += [('grc')]
+            ret += [('end', 'expression')]
+        ret += [('end', 'load')]
+        return ret
 
 class ExpressionList(AST):
     def propType(self):
@@ -932,18 +968,16 @@ class AssignmentAction(AST):
             else:
                 return []
 
-    def genCode(self):
-        return self.operation()
-
     def recursiveGenCode(self):
-        store = self.fields[0].store()
-        expression = self.fields[-1].genCode()
+        str = self.fields[0].store()
+        expression = self.fields[-1].recursiveGenCode()
         ret = expression
         if len(self.fields) == 3:
-            load = self.fields[0].genCode()
-            operation = self.genCode()
-            ret += load + operation + store
-        ret += store
+            load = self.fields[0].recursiveGenCode()
+            operation = self.operation()
+            ret += load + operation + str
+        else:
+            ret += str
         return ret
 
 class IfAction(AST):
