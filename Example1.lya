@@ -3,5 +3,4 @@
 dcl x,y int;
 dcl a array[0:100] int;
 
-a[0] = a[1] + a[2];
-x = 2/y;
+a[0,10] = a[1,17] + a[2,18];
