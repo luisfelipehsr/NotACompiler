@@ -530,7 +530,7 @@ class ArrayElement(AST):
 
     def store(self):
         expressionList = self.fields[1].fields
-        return [('smv',1) for x in expressionList]
+        return [('smv',1)]
 
     def recursiveGenCode(self):
         ret = []
@@ -538,10 +538,14 @@ class ArrayElement(AST):
         locationType = self.fields[0].propType()
         expressionList = self.fields[1].fields
         ret += location
+        rng = locationType.range
+        val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
-            ret += [('idx',locationType.subType.getSize())]
-            ret += [('grc')]
+            ret += [('idx',locationType.subType.getSize()*val)]
+            val = rng.getLenght()
+            rng = rng.subRange
+        ret += [('grc')]
         return ret
 
 class ExpressionList(AST):
