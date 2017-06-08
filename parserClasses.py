@@ -1,5 +1,6 @@
 import pydot as dot
 import uuid
+import copy
 from type import *
 from symbol import Symbol
 
@@ -36,8 +37,14 @@ class AST(object):
 
     def build(self,graph):
         myId = id(self)
-        graph.add_node(dot.Node(myId,label = self.__class__.__name__ +
-                                             ' '+str(self.type.toString() if self.type is not None else 'None') ))
+        label = self.__class__.__name__ + ' ['
+        if self.type is not None:
+            label += 'Type= ' + str(self.type.toString()) + ' '
+        if isinstance(self.type,Int):
+            label += 'Value= ' + str(self.type.value)
+        label += ']'
+
+        graph.add_node(dot.Node(myId,label = label))
         for n in self.fields:
             nId = id(n)
             if isinstance(n,AST):
@@ -151,7 +158,10 @@ class Declaration(AST):
                 return self.type
 
     def updateContext(self):
-        type = self.fields[1].propType()
+        if len(self.fields) == 3:
+            type = self.fields[2].propType()
+        else:
+            type = self.fields[1].propType()
         if isinstance(type,ModeType):
             type = type.subType
         for id in self.fields[0].fields:
@@ -171,7 +181,6 @@ class Declaration(AST):
                 if isinstance(v,Synonym):
                     v = v.subType
                 if v.value is not None:
-                    print(v.value)
                     ret += [('ldc',v.value)]
                 else:
                     if first == True:
@@ -430,7 +439,6 @@ class Location(AST):
             fromContext = AST.semantic.lookInContexts(self.fields[0])
             if fromContext == None:
                 self.type = None
-
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in ' +
                       'context at ' + tColors.RESET + 'line %s'
@@ -438,7 +446,9 @@ class Location(AST):
 
                 return self.type
             else:
-                self.type = fromContext.type
+                self.type = copy.deepcopy(fromContext.type)
+                if hasattr(self.type,'value') and not isinstance(self.type,Synonym):
+                    self.type.value = None
                 return self.type
 
     def store(self):
@@ -458,6 +468,8 @@ class Location(AST):
             symbol = AST.semantic.lookInContexts(loc)
             if not isinstance(symbol.type,Synonym):
                 ret += [('ldv',symbol.pos,symbol.count)]
+            else:
+                ret += [('ldc', symbol.type.subType.value)]
         return ret
 
 class DereferencedReference(AST):
@@ -583,13 +595,13 @@ class Literal(AST):
 
     def genCode(self):
         ret = []
-        val = self.fields[0]
+        val = self.propType()
         if isinstance(val,Chars):
             return ret
         elif isinstance(val,Bool):
-            return ret
+            ret += [('ldc',val.value)]
         elif isinstance(val,Char):
-            return ret
+            ret += [('ldc', val.value)]
         elif isinstance(val,Int):
             ret += [('ldc',val.value)]
         return ret
@@ -820,7 +832,26 @@ class Operand1(AST):
         if self.type is not None:
             return self.type
         else:
-            self.type = self.fields[0].propType()
+            val1 = self.fields[0].propType()
+            if len(self.fields) == 3:
+                op = self.fields[1].fields[0]
+                val2 = self.fields[2].propType()
+                if isinstance(val1,Int) and isinstance(val2,Int):
+                    if val1.isConstant() and val2.isConstant():
+                        if op == '+':
+                            self.type = Int(val1.value + val2.value)
+                        else:
+                            self.type = Int(val1.value - val2.value)
+                    else:
+                        self.type = Int()
+                else:
+                    if val1.isConstant:
+                        self.type = val2
+                    else:
+                        self.type = val1
+
+            else:
+                self.type = val1
             return self.type
 
     def genCode(self):
@@ -856,8 +887,10 @@ class Operand2(AST):
             return self.type
         else:
             op1 = self.fields[0].propType()
+            op1 = op1.subType if isinstance(op1,Synonym) else op1
             if len(self. fields) == 3:
                 op2 = self.fields[2].propType()
+                op2 = op2.subType if isinstance(op2, Synonym) else op2
                 if op1.isConstant() and op2.isConstant():
                     op = self.fields[1]
                     self.type = Int()
@@ -871,8 +904,6 @@ class Operand2(AST):
                     self.type = Int(None)
             else:
                 self.type = op1
-
-
             return self.type
 
     def genCode(self):
