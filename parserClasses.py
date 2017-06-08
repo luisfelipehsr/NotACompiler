@@ -408,6 +408,9 @@ class ArrayMode(AST):
             self.type = Array(type,range)
             return self.type
 
+    def recursiveGenCode(self):
+        return []
+
 class IndexModeList(AST):
     def propType(self):
         for i in range(len(self.fields)-1):
@@ -644,9 +647,9 @@ class Expression(AST):
 
     def recursiveGenCode(self):
         type = self.propType()
-        if isinstance(type,Int) or isinstance(type,Char) or isinstance(type,Bool):
-            if type.isConstant():
-                return []
+        # if isinstance(type,Int) or isinstance(type,Char) or isinstance(type,Bool):
+        #     if type.isConstant():
+        #         return []
         return self.fields[0].recursiveGenCode()
 
 class ConditionalExpression(AST):
