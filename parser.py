@@ -392,14 +392,14 @@ class Parser(object):
         p[0].setLinespan(p, 1, 1)
 
     def p_IndexModeList(self,p):
-        """ IndexModeList : IndexMode COMMA IndexModeList
+        """ IndexModeList : IndexModeList COMMA IndexMode
                         | IndexMode"""
         if len(p) == 2:
             p[0] = IndexModeList(p[1])
             p[0].setLinespan(p, 1, 1)
         else:
             p[0] = IndexModeList()
-            p[0].fields = p[1].fields + [p[2]]
+            p[0].fields = p[1].fields + [p[3]]
             p[0].setLinespan(p, 1, 3)
 
     def p_IndexMode(self,p):

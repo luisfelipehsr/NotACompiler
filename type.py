@@ -74,7 +74,7 @@ class Array(Type):
         return self.range
 
     def getSize(self):
-        return self.range.getLenght() * self.subType.getSize()
+        return self.range.getCount() * self.subType.getSize()
 
     def toString(self):
         return self.string + ' ' + self.range.toString() + ' ' + self.subType.toString()
@@ -126,10 +126,22 @@ class Range(Type):
         if(self.end.value is not None and self.begin.value is not None):
             return (self.end.value - self.begin.value)
 
+    def getCount(self):
+        return self.getLenght() if self.subRange == None else self.getLenght() * self.subRange.getCount()
+
+    def numberOfRanges(self):
+        return 1 if self.subRange is None else 1 + self.subRange.numberOfRanges()
+
     def equals(self,t):
         if isinstance(t,Range):
             return self.begin == t.begin and self.end == t.end
         return False
+
+    def toString(self):
+        if self.subRange is not None:
+            return self.string + ' ' +self.subRange.toString()
+        else:
+            return self.string
 
 class Parameters(Type):
     def __init__(self, plist=None):

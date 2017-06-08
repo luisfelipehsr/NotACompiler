@@ -399,7 +399,6 @@ class StringMode(AST):
     #No typecheck needed, lenght is Iconst
 
 class ArrayMode(AST):
-    # Pegamos o tipo do element mode e adicionamos o prefixo array
     def propType(self):
         if self.type is not None:
             return self.type
@@ -414,8 +413,8 @@ class IndexModeList(AST):
         for i in range(len(self.fields)-1):
             if isinstance(self.fields[i].propType(),Range):
                 self.fields[i].propType().subRange = self.fields[i+1].propType()
-
-        return self.fields[0].propType()
+        self.type = self.fields[0].propType()
+        return self.type
 
 class IndexMode(AST):
     def typeCheck(self):
@@ -511,24 +510,23 @@ class ArrayElement(AST):
         for p in parameters:
             if not isinstance(p,Int):
                 return False
+        if len(parameters) > data.getRange().numberOfRanges():
+            return False
         return True
 
     def propType(self):
         if self.type is not None:
             return self.type
-
-        # Se tivermos so uma expressão retornamos o valor nao um array
-
-        elif len(self.fields[1].fields) == 1:
-            type = self.fields[0].propType()
-            if isinstance(type,Chars):
-                self.type = Char()
-            else:
-                self.type = type.subType
-            return self.type
+        elif isinstance(type,Chars):
+            self.type = Char()
         else:
-            self.type = self.fields[0].propType()
-            return self.type
+            parameters = self.fields[1].propType().getParameterList()
+            self.type = copy.deepcopy(self.fields[0].propType())
+            for paran in parameters:
+                self.type.range = self.type.range.subRange
+            if self.type.range is None:
+                self.type = self.type.subType
+        return self.type
 
     def store(self):
         expressionList = self.fields[1].fields
@@ -539,8 +537,8 @@ class ArrayElement(AST):
         location = self.fields[0].recursiveGenCode()
         locationType = self.fields[0].propType()
         expressionList = self.fields[1].fields
+        ret += location
         for expression in expressionList:
-            ret += location
             ret += expression.recursiveGenCode()
             ret += [('idx',locationType.subType.getSize())]
             ret += [('grc')]
