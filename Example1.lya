@@ -1,6 +1,5 @@
 /* example2: */
 
-dcl x,y int;
-dcl a array[0:100] int;
-
-a[0,10] = a[1,17] + a[2,18];
+syn top int = 10;
+dcl a int = 2;
+dcl b int = 2 * a;

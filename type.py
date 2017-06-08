@@ -16,7 +16,7 @@ class Int(Type):
         self.value = value
 
     def isConstant(self):
-        return not self.value is not None
+        return self.value is not None
 
 class Bool(Type):
     def __init__(self,value = None):
@@ -32,7 +32,7 @@ class Char(Type):
         self.value = value
 
     def isConstant(self):
-        return not self.value is not None
+        return self.value is not None
 
 class Chars(Type):
     def __init__(self,r,value = None):
@@ -208,6 +208,14 @@ class ModeType(Type):
 class Null(Type):
     def __init__(self):
         self.string = 'Null'
+
+class Synonym(Type):
+    def __init__(self,t):
+        if not isinstance(t,Int) and not isinstance(t,Char) and not isinstance(t,Bool):
+            raise TypeError('t %s must be of type Char or Int' %(t))
+        self.subType = t
+        self.string = 'Syn'
+
 
 def main():
     #t = Procedure(Parameters(Int(),Int()),Int())

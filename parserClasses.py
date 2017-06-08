@@ -137,6 +137,8 @@ class Declaration(AST):
         if len(self.fields) == 3:
             t1 = self.fields[1].propType()
             t2 = self.fields[2].propType()
+            if isinstance(t2,Synonym):
+                t2 = t2.subType
             return  t1.equals(t2) and not isinstance(t1,Array)
         else:
             return True
@@ -158,7 +160,7 @@ class Declaration(AST):
     def genCode(self):
         ret = []
         type = self.fields[1].propType()
-        if isinstance(type, ModeType):
+        if isinstance(type, ModeType) or isinstance(type,Synonym):
             type = type.subType
         first = True
         for id in self.fields[0].fields:
@@ -166,22 +168,16 @@ class Declaration(AST):
                 ret += [('alc',self.propType().getSize())]
             else:
                 v = self.fields[2].propType()
+                if isinstance(v,Synonym):
+                    v = v.subType
                 if v.value is not None:
+                    print(v.value)
                     ret += [('ldc',v.value)]
                 else:
                     if first == True:
                         first = AST.semantic.lookInContexts(id)
-
                     else:
                         ret += [('ldv',first.count,first.pos)]
-
-
-
-
-
-
-
-
         return ret
 
 class Initialization(AST):
@@ -223,20 +219,34 @@ class SynonymList(AST):
 
 class SynonymDefinition(AST):
     def typeCheck(self):
+        expression = self.fields[-1].propType()
+        if expression.value is None:
+            return False
         if len(self.fields) == 3:
-            return self.fields[1].propType() == self.fields[2].propType()
+            mode = self.fields[1].propType()
+            if isinstance(mode,ModeType):
+                mode = mode.subType
+            if mode.equals(expression):
+                return True
         else:
             return True
 
     def propType(self):
-        if len(self.type)>0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
-            self.type = self.fields[-1].propType()
-            return self.type[:]
+            self.type = Synonym(self.fields[-1].propType())
+            return self.type
 
     def updateContext(self):
-        AST.semantic.addToContext(self.fields[0].fields,self.fields[1].propType())
+        identifiers = self.fields[0].fields
+        type = self.propType()
+        for id in identifiers:
+            AST.semantic.addToContext(Symbol(id,type))
+
+    def recursiveGenCode(self):
+        self.updateContext()
+        return []
 
 class NewModeStatement(AST):
     _fields = ['NewModeList']
@@ -446,7 +456,8 @@ class Location(AST):
         loc = self.fields[0]
         if not isinstance(loc,AST):
             symbol = AST.semantic.lookInContexts(loc)
-            ret += [('ldv',symbol.pos,symbol.count)]
+            if not isinstance(symbol.type,Synonym):
+                ret += [('ldv',symbol.pos,symbol.count)]
         return ret
 
 class DereferencedReference(AST):
@@ -616,6 +627,13 @@ class Expression(AST):
         else:
             self.type = self.fields[0].propType()
             return self.type
+
+    def recursiveGenCode(self):
+        type = self.propType()
+        if isinstance(type,Int) or isinstance(type,Char) or isinstance(type,Bool):
+            if type.isConstant():
+                return []
+        return self.fields[0].recursiveGenCode()
 
 class ConditionalExpression(AST):
     def typeCheck(self):
@@ -831,13 +849,30 @@ class Operand2(AST):
         else:
             a = self.fields[0].propType()
             b = self.fields[2].propType()
-            return a.equals(b)
+            return a.equals(b) and isinstance(a,Int)
 
     def propType(self):
         if self.type is not None:
             return self.type
         else:
-            self.type = self.fields[0].propType()
+            op1 = self.fields[0].propType()
+            if len(self. fields) == 3:
+                op2 = self.fields[2].propType()
+                if op1.isConstant() and op2.isConstant():
+                    op = self.fields[1]
+                    self.type = Int()
+                    if op == '*':
+                        self.type.value  = op1.value * op2.value
+                    elif op == '/':
+                        self.type.value = op1.value / op2.value
+                    else:
+                        self.type.value = op1.value % op2.value
+                else:
+                    self.type = Int(None)
+            else:
+                self.type = op1
+
+
             return self.type
 
     def genCode(self):

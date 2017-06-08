@@ -1,5 +1,5 @@
 from symbol import Symbol
-
+from type import *
 class Context(object):
 
     def __init__(self):
@@ -13,7 +13,8 @@ class Context(object):
         self.contextList[-1][symbol.getId()] = symbol
         symbol.cont = len(self.contextList)
         symbol.pos = self.memoryCount[-1]
-        self.memoryCount[-1] += symbol.type.getSize()
+        if not isinstance(symbol.type,Synonym):
+            self.memoryCount[-1] += symbol.type.getSize()
         
     def getFromContext(self,id):
         return self.contextList[-1][id]
