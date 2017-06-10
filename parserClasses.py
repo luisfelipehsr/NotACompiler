@@ -431,6 +431,7 @@ class IndexMode(AST):
             return self.type
 
 class Location(AST):
+
     def propType(self):
         if self.type is not None:
             return self.type
@@ -463,7 +464,7 @@ class Location(AST):
             ret += loc.store()
         return ret
 
-    def genCode(self):
+    def load(self):
         ret = []
         loc = self.fields[0]
         if not isinstance(loc,AST):
@@ -472,6 +473,8 @@ class Location(AST):
                 ret += [('ldv',symbol.pos,symbol.count)]
             else:
                 ret += [('ldc', symbol.type.subType.value)]
+        else:
+            ret += loc.load()
         return ret
 
 class DereferencedReference(AST):
@@ -488,10 +491,15 @@ class DereferencedReference(AST):
 
     def store(self):
         loc = self.fields[0]
-        return self.genCode() + loc.store()
+        ret = [('grc')]
+        ret += loc.store()
+        return ret
 
-    def genCode(self):
-        return [('grc')]
+    def load(self):
+        loc = self.fields[0]
+        ret = [('grc')]
+        ret += loc.store()
+        return ret
 
 class StringSlice(AST):
     def typeCheck(self):
@@ -532,10 +540,6 @@ class ArrayElement(AST):
         return self.type
 
     def store(self):
-        expressionList = self.fields[1].fields
-        return [('smv',1)]
-
-    def recursiveGenCode(self):
         ret = []
         location = self.fields[0].recursiveGenCode()
         locationType = self.fields[0].propType()
@@ -545,7 +549,23 @@ class ArrayElement(AST):
         val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
-            ret += [('idx',locationType.subType.getSize()*val)]
+            ret += [('idx', locationType.subType.getSize() * val)]
+            val = rng.getLenght()
+            rng = rng.subRange
+        ret += [('smv', 1)]
+        return ret
+
+    def load(self):
+        ret = []
+        location = self.fields[0].recursiveGenCode()
+        locationType = self.fields[0].propType()
+        expressionList = self.fields[1].fields
+        ret += location
+        rng = locationType.range
+        val = 1
+        for expression in expressionList:
+            ret += expression.recursiveGenCode()
+            ret += [('idx', locationType.subType.getSize() * val)]
             val = rng.getLenght()
             rng = rng.subRange
         ret += [('grc')]
@@ -965,6 +985,8 @@ class Operand4(AST):
 
     def recursiveGenCode(self):
         loc = self.fields[0]
+        if isinstance(loc,Location):
+            return loc.load()
         return loc.recursiveGenCode()
 
 class ReferencedLocation(AST):
@@ -974,6 +996,10 @@ class ReferencedLocation(AST):
         else:
             self.type = Reference(self.fields[0].propType())
             return self.type
+
+    def load(self):
+
+    def store(self):
 
 class ActionStatement(AST):
     def propType(self):
@@ -1032,16 +1058,15 @@ class AssignmentAction(AST):
                 return []
 
     def recursiveGenCode(self):
-        locCode = self.fields[0].recursiveGenCode()
         locStore = self.fields[0].store()
         expression = self.fields[-1].recursiveGenCode()
         ret = []
         if len(self.fields) == 3:
-            locLoad = self.fields[0].recursiveGenCode()
+            locLoad = self.fields[0].load()
             operation = self.operation()
-            ret += locCode + expression + locCode + locLoad + locStore
+            ret += locStore[:-1] + locLoad + expression + operation + [locStore[-1]]
         else:
-            ret += locCode + expression + locStore
+            ret += locStore[:-1] + expression + [locStore[-1]]
         return ret
 
 class IfAction(AST):
