@@ -997,9 +997,10 @@ class ReferencedLocation(AST):
             self.type = Reference(self.fields[0].propType())
             return self.type
 
-    def load(self):
+    def recursiveGenCode(self):
+        loc = self.fields[0].fields[0]
+        if not isinstance(loc,AST):
 
-    def store(self):
 
 class ActionStatement(AST):
     def propType(self):
