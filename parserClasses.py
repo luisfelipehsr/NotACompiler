@@ -477,6 +477,16 @@ class Location(AST):
             ret += loc.load()
         return ret
 
+    def reference(self):
+        ret = []
+        loc = self.fields[0]
+        if not isinstance(loc, AST):
+            symbol = AST.semantic.lookInContexts(loc)
+            ret += [('ldr', symbol.pos, symbol.count)]
+        else:
+            ret += loc.reference()
+        return ret
+
 class DereferencedReference(AST):
     def typeCheck(self):
         a = self.fields[0].propType()
@@ -541,7 +551,7 @@ class ArrayElement(AST):
 
     def store(self):
         ret = []
-        location = self.fields[0].recursiveGenCode()
+        location = self.fields[0].reference()
         locationType = self.fields[0].propType()
         expressionList = self.fields[1].fields
         ret += location
@@ -557,7 +567,7 @@ class ArrayElement(AST):
 
     def load(self):
         ret = []
-        location = self.fields[0].recursiveGenCode()
+        location = self.fields[0].reference()
         locationType = self.fields[0].propType()
         expressionList = self.fields[1].fields
         ret += location
@@ -569,6 +579,21 @@ class ArrayElement(AST):
             val = rng.getLenght()
             rng = rng.subRange
         ret += [('grc')]
+        return ret
+
+    def reference(self):
+        ret = []
+        location = self.fields[0].reference()
+        locationType = self.fields[0].propType()
+        expressionList = self.fields[1].fields
+        ret += location
+        rng = locationType.range
+        val = 1
+        for expression in expressionList:
+            ret += expression.recursiveGenCode()
+            ret += [('idx', locationType.subType.getSize() * val)]
+            val = rng.getLenght()
+            rng = rng.subRange
         return ret
 
 class ExpressionList(AST):
@@ -595,6 +620,12 @@ class ArraySlice(AST):
         else:
             self.type = self.fields[0].propType()
             return self.type[:]
+
+    def load(self):
+        exprX = self.fields[0]
+        exprY = self.fields[1]
+
+
 
 class PrimitiveValue(AST):
     def propType(self):
@@ -998,8 +1029,11 @@ class ReferencedLocation(AST):
             return self.type
 
     def recursiveGenCode(self):
-        loc = self.fields[0].fields[0]
-        if not isinstance(loc,AST):
+        ret = []
+        loc = self.fields[0]
+        ret += loc.reference()
+        return ret
+
 
 
 class ActionStatement(AST):

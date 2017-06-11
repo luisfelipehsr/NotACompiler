@@ -278,3 +278,7 @@ class LVM (object):
 
     def end(self):
         return True
+
+    def runCode(self,code):
+        for c in code:
+            
