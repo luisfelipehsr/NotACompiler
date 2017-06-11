@@ -1,9 +1,10 @@
 class LVM (object):
-    def __init__(self):
-        self.M = []
-        self.P = []
-        self.D = []
-        self.H = []
+    def __init__(self,debug = False):
+        self.debug = debug
+        self.M = dict()
+        self.P = dict()
+        self.D = dict()
+        self.H = dict()
         self.pc = 0
         self.sp = 0
 
@@ -26,7 +27,7 @@ class LVM (object):
         return
 
     def stv(self,i,j):
-        self.M[self.D[i] + j] = M[self.sp]
+        self.M[self.D[i] + j] = self.M[self.sp]
         self.sp -= 1
         self.pc += 1
         return
@@ -100,7 +101,7 @@ class LVM (object):
         self.pc += 1
         return
 
-    def less(self):
+    def les(self):
         self.M[self.sp-1] = self.M[self.sp-1] < self.M[self.sp]
         self.sp -= 1
         self.pc += 1
@@ -130,7 +131,7 @@ class LVM (object):
         self.pc += 1
         return
 
-    def enq(self):
+    def neq(self):
         self.M[self.sp - 1] = self.M[self.sp - 1] != self.M[self.sp]
         self.sp -= 1
         self.pc += 1
@@ -149,6 +150,8 @@ class LVM (object):
         return
 
     def alc(self,n):
+        for i in range(n):
+            self.M[self.sp+i+1] = 0
         self.sp += n
         self.pc += 1
         return
@@ -197,7 +200,9 @@ class LVM (object):
 
     def smv(self,k):
         t = self.M[self.sp-k]
-        self.M[t:t+k] = self.M[self.sp-k+1:self.sp+1]
+        for i in range(k):
+            self.M[t+i] = self.M[self.sp-i]
+        #self.M[t:t+k] = self.M[self.sp-k+1:self.sp+1]
         self.sp -= k+1
         self.pc += 1
         return
@@ -279,6 +284,115 @@ class LVM (object):
     def end(self):
         return True
 
+    def runInst(self,inst):
+        if isinstance(inst,tuple):
+            c = list(inst)
+        else:
+            c = [inst]
+        print(c)
+        if c[0] == 'ldc':
+            self.ldc(c[1])
+        elif c[0] == 'ldv':
+            self.ldv(c[1],c[2])
+        elif c[0] == 'ldr':
+            self.ldr(c[1],c[2])
+        elif c[0] == 'stv':
+            self.stv(c[1],c[2])
+        elif c[0] == 'lrv':
+            self.lrv(c[1],c[2])
+        elif c[0] == 'srv':
+            self.lrv(c[1],c[2])
+        elif c[0] == 'add':
+            self.add()
+        elif c[0] == 'sub':
+            self.sub()
+        elif c[0] == 'mul':
+            self.mul()
+        elif c[0] == 'div':
+            self.div()
+        elif c[0] == 'mod':
+            self.mod()
+        elif c[0] == 'neg':
+            self.neg()
+        elif c[0] == 'abs':
+            self.abs()
+        elif c[0] == 'and':
+            self.land()
+        elif c[0] == 'lor':
+            self.lor()
+        elif c[0] == 'not':
+            self.lnot()
+        elif c[0] == 'les':
+            self.les()
+        elif c[0] == 'leq':
+            self.leq()
+        elif c[0] == 'grt':
+            self.grt()
+        elif c[0] == 'gre':
+            self.gre()
+        elif c[0] == 'equ':
+            self.equ()
+        elif c[0] == 'neq':
+            self.neq()
+        elif c[0] == 'jmp':
+            self.jmp(c[1])
+        elif c[0] == 'jof':
+            self.jof(c[1])
+        elif c[0] == 'alc':
+            self.alc(c[1])
+        elif c[0] == 'dlc':
+            self.dlc(c[1])
+        elif c[0] == 'cfu':
+            self.cfu(c[1])
+        elif c[0] == 'enf':
+            self.enf(c[1])
+        elif c[0] == 'ret':
+            self.ret(c[1],c[2])
+        elif c[0] == 'idx':
+            self.idx(c[1])
+        elif c[0] == 'grc':
+            self.grc()
+        elif c[0] == 'lmv':
+            self.lmv(c[1])
+        elif c[0] == 'smv':
+            self.smv(c[1])
+        elif c[0] == 'smr':
+            self.smr(c[1])
+        elif c[0] == 'sts':
+            self.sts(c[1])
+        elif c[0] == 'rdv':
+            self.rdv()
+        elif c[0] == 'rds':
+            self.rds()
+        elif c[0] == 'prv':
+            self.prv(c[1])
+        elif c[0] == 'prt':
+            self.prt(c[1])
+        elif c[0] == 'prc':
+            self.prc(c[1])
+        elif c[0] == 'prs':
+            self.prs()
+        elif c[0] == 'stp':
+            self.stp()
+        elif c[0] == 'nop':
+            self.nop()
+        elif c[0] == 'end':
+            self.end()
+            return False
+        else:
+            raise TypeError('Oops Invalid Instruction ' + str(c[0]))
+        return True
+
     def runCode(self,code):
-        for c in code:
+        while True:
+            if not self.runInst(code[self.pc]):
+                break
+            elif self.debug:
+                print('Stack = '+str(self.M))
+                print('Sp = ' + str(self.sp))
+                print('Pc = ' + str(self.pc))
+            continue
+
+
+
             

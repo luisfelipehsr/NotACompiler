@@ -2,6 +2,7 @@ from lexer import Lexer as LexerHandle
 from parserClasses import *
 import ply.yacc as yacc
 from Semantocer import Context
+from lvm import LVM
 
 class Parser(object):
 
@@ -677,7 +678,7 @@ def main():
     tstList = ["Example%s.lya" %i for i in r]
     a = Parser()
     for f in tstList:
-
+        lvm = LVM(debug=True)
         a.lexer.lineno = 1;
         print('\n' + f )
         file = open(f,'r')
@@ -686,8 +687,9 @@ def main():
         a.ast.recursiveTypeCheck()
         AST.semantic = Context()
         ret = a.ast.recursiveGenCode()
-        for inst in ret:
-            print(inst)
+        # for inst in ret:
+        #     print(inst)
+        lvm.runCode(ret)
         #a.ast.removeChanel()
 
         # Generates .dot archive to display the AST.

@@ -459,7 +459,7 @@ class Location(AST):
         loc = self.fields[0]
         if not isinstance(loc, AST):
             symbol = AST.semantic.lookInContexts(loc)
-            ret += [('stv', symbol.pos, symbol.count)]
+            ret += [('stv',symbol.count,symbol.pos)]
         else:
             ret += loc.store()
         return ret
@@ -470,7 +470,7 @@ class Location(AST):
         if not isinstance(loc,AST):
             symbol = AST.semantic.lookInContexts(loc)
             if not isinstance(symbol.type,Synonym):
-                ret += [('ldv',symbol.pos,symbol.count)]
+                ret += [('ldv',symbol.count,symbol.pos)]
             else:
                 ret += [('ldc', symbol.type.subType.value)]
         else:
@@ -621,9 +621,9 @@ class ArraySlice(AST):
             self.type = self.fields[0].propType()
             return self.type[:]
 
-    def load(self):
-        exprX = self.fields[0]
-        exprY = self.fields[1]
+    # def load(self):
+    #     exprX = self.fields[0]
+    #     exprY = self.fields[1]
 
 
 
