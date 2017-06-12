@@ -1,7 +1,7 @@
 /* example2: */
 
-dcl a array[0:2,0:2] int;
+dcl a array[0:2] int;
 dcl b int;
-a[0,0] = 99;
-b = a[0,0];
-a[1,1] = b;
+a[0] = 99;
+b = a[0];
+a[1] = b;
