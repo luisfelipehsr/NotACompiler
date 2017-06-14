@@ -559,6 +559,9 @@ class ArrayElement(AST):
         val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
+            if rng.begin != 0:
+                ret += [('ldc',rng.begin)]
+                ret += [('sub')]
             ret += [('idx', locationType.subType.getSize() * val)]
             val = rng.getLenght()
             rng = rng.subRange
@@ -591,6 +594,9 @@ class ArrayElement(AST):
         val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
+            if rng.begin != 0:
+                ret += [('ldc',rng.begin)]
+                ret += [('sub')]
             ret += [('idx', locationType.subType.getSize() * val)]
             val = rng.getLenght()
             rng = rng.subRange
@@ -724,7 +730,7 @@ class ConditionalExpression(AST):
                 return b.equals(c)
             else:
                 d = self.fields[3].propType()
-                return  b.equals(c) and b.equals(d)
+                return b.equals(c) and b.equals(d)
         else:
             return False
 
