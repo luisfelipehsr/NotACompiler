@@ -513,14 +513,22 @@ class DereferencedReference(AST):
 
 class StringSlice(AST):
     def typeCheck(self):
-        return self.fields[0].propType() == ['chars'] and self.fields[1].propType() == ['int'] and self.fields[2].propType() == ['int']
+        mode = self.fields[0].propType()
+        exprx = self.fields[1].propType()
+        expry = self.fields[2].propType()
+        if isinstance(mode,Chars) and isinstance(exprx,Int) and isinstance(expry,Int):
+            return exprx.isConstant() and expry.isConstant()
+        else:
+            return False
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
-            self.type = self.fields[0].propType()
-            return self.type[:]
+            exprx = self.fields[1].propType()
+            expry = self.fields[2].propType()
+            ret = Chars(Range(exprx.value,expry.value))
+            return self.type
 
 class ArrayElement(AST):
     def typeCheck(self):
@@ -637,6 +645,7 @@ class ArraySlice(AST):
             exprx = self.fields[1].propType()
             expry = self.fields[2].propType()
             ret = Array(mode.subType,Range(exprx.value,expry.value,subRange=mode.range.subRange))
+            self.type = ret
             return ret
     #TODO Finish
     def load(self):
@@ -646,6 +655,9 @@ class ArraySlice(AST):
     def store(self):
         exprx = self.fields[1]
         expry = self.fields[2]
+    #TODO Finish
+    def reference(self):
+        return []
 
 class PrimitiveValue(AST):
     def propType(self):
