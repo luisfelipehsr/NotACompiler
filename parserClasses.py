@@ -578,6 +578,9 @@ class ArrayElement(AST):
         val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
+            if rng.begin != 0:
+                ret += [('ldc',rng.begin)]
+                ret += [('sub')]
             ret += [('idx', locationType.subType.getSize() * val)]
             val = rng.getLenght()
             rng = rng.subRange
