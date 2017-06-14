@@ -4,3 +4,6 @@
 -> Testar se strings estão funcionando
 -> Mexer nos array pq a contagem de memória não considera que eh armazenado o tamanho do array primeiro
 -> resolver os desvios de fluxo
+-> Mexer nas strings pq a contagem de memória não considera que eh armazenado o fim da
+-> Criar um novo tipo para lidar com LOC
+-> Fazer ifs funcionarem
