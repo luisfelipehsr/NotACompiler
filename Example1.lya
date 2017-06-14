@@ -1,7 +1,8 @@
 /* example2: */
+syn size int = 5;
+dcl a array[0:5] int;
 
-dcl a array[0:2] int;
 dcl b int;
-a[0] = 99;
-b = a[0];
+a[size-1] = 99;
+b = a[4];
 a[1] = b;
