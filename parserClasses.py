@@ -609,23 +609,34 @@ class ExpressionList(AST):
     _fields = ['Expression', 'ExpressionList']
 
 class ArraySlice(AST):
-
+    #TODO Tests
     def typeCheck(self):
-        return self.fields[0].propType()[0] == 'array' and self.fields[1].propType() == ['int'] and self.fields[2].propType() == ['int']
-
+        mode = self.fields[0].propType()
+        exprx = self.fields[1].propType()
+        expry = self.fields[2].propType()
+        if isinstance(mode,Array) and isinstance(exprx,Int) and isinstance(expry,Int):
+            return exprx.isConstant() and expry.isConstant()
+        else:
+            return False
+    #TODO Tests
     def propType(self):
 
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
-            self.type = self.fields[0].propType()
-            return self.type[:]
-
-    # def load(self):
-    #     exprX = self.fields[0]
-    #     exprY = self.fields[1]
-
-
+            mode = self.fields[0].propType()
+            exprx = self.fields[1].propType()
+            expry = self.fields[2].propType()
+            ret = Array(mode.subType,Range(exprx.value,expry.value,subRange=mode.range.subRange))
+            return ret
+    #TODO Finish
+    def load(self):
+        exprx = self.fields[1]
+        expry = self.fields[2]
+    #TODO Finish
+    def store(self):
+        exprx = self.fields[1]
+        expry = self.fields[2]
 
 class PrimitiveValue(AST):
     def propType(self):

@@ -35,10 +35,11 @@ class Char(Type):
         return self.value is not None
 
 class Chars(Type):
-    def __init__(self,r,value = None):
+    def __init__(self,r,value = None,id = None):
         self.subType = Char()
         self.range = r
         self.value = value
+        self.id = id
         self.string = 'Chars'
 
     def getRange(self):
