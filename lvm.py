@@ -211,7 +211,7 @@ class LVM (object):
         t1 = self.M[self.sp-1]
         t2 = self.M[self.sp]
         self.M[t1:t1+k] = self.M[t2:t2+k]
-        sp -= 1
+        self.sp -= 1
         self.pc += 1
         return
 
@@ -266,8 +266,8 @@ class LVM (object):
         len = self.M[self.adr]
         for i in range(0,len):
             adr += 1
-            print(M[adr])
-        sp -= 1
+            print(self.M[adr])
+        self.sp -= 1
         self.pc += 1
         return
 
