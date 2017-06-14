@@ -3,3 +3,5 @@
 -> Fazer built-ins funcionarem
 -> Testar se strings estão funcionando
 -> Mexer nas strings pq a contagem de memória não considera que eh armazenado o fim da
+-> Criar um novo tipo para lidar com LOC
+-> Fazer ifs funcionarem
