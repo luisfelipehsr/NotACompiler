@@ -1,3 +1,5 @@
+import re
+
 class LVM (object):
     def __init__(self,debug = False):
         self.debug = debug
@@ -394,5 +396,14 @@ class LVM (object):
             continue
 
 
+def main():
+    print("main da lvm")
+    codeFile = open("codeFile.lya", 'r')
+    codeList = list(codeFile)
+    tuple2 = re.compile("")
 
-            
+    for line in codeList:
+
+
+if __name__ == '__main__':
+    main()
