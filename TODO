@@ -1,5 +1,6 @@
 -> Reorganizar programa para ler testes numa pasta e guardar resultados em outra.
 -> Funções main de compilação e execução
--> Fazer built-ins funcionarem
+-> Fazer built-ins funcionarem (READ, PRINT, LOWER, UPPER)
 -> Testar se strings estão funcionando
--> Mexer nas strings pq a contagem de memória não considera que eh armazenado o fim da
+-> Mexer nos array pq a contagem de memória não considera que eh armazenado o tamanho do array primeiro
+-> resolver os desvios de fluxo
