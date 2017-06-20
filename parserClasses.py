@@ -471,6 +471,10 @@ class Location(AST):
             symbol = AST.semantic.lookInContexts(loc)
             if not isinstance(symbol.type,Synonym):
                 ret += [('ldv',symbol.count,symbol.pos)]
+            elif isinstance(symbol.type,Array):
+                ret += [('ldr',symbol.count,symbol.pos)]
+                ret += [('lmv',symbol.type.getRange().getLenght())]
+
             else:
                 ret += [('ldc', symbol.type.subType.value)]
         else:
