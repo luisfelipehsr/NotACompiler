@@ -457,9 +457,12 @@ class Location(AST):
     def store(self):
         ret = []
         loc = self.fields[0]
+        symbol = AST.semantic.lookInContexts(loc)
         if not isinstance(loc, AST):
-            symbol = AST.semantic.lookInContexts(loc)
             ret += [('stv',symbol.count,symbol.pos)]
+        elif isinstance(symbol.type, Array):
+            ret += [('ldr',symbol.count,symbol.pos)]
+            ret += [('smv',symbol.type.getRange().getCount())]
         else:
             ret += loc.store()
         return ret
@@ -473,7 +476,7 @@ class Location(AST):
                 ret += [('ldv',symbol.count,symbol.pos)]
             elif isinstance(symbol.type,Array):
                 ret += [('ldr',symbol.count,symbol.pos)]
-                ret += [('lmv',symbol.type.getRange().getLenght())]
+                ret += [('lmv',symbol.type.getRange().getCount())]
 
             else:
                 ret += [('ldc', symbol.type.subType.value)]
@@ -702,7 +705,6 @@ class ValueArrayElement(AST):
     def typeCheck(self):
         return  self.fields[1].propType() == ['int'] and self.fields[0].propType()[0] == 'array'
 
-    # Se tivermos so uma expressão retornamos o valor nao um array
     def propType(self):
         if len(self.type) > 0:
             return self.type[:]
@@ -1190,6 +1192,14 @@ class ControlPart(AST):
 class ForControl(AST):
     _fields = ['Iteration']
 
+    def addTag(self):
+        return [('start','for')]
+
+    def genCode(self):
+        ret = []
+        ret += [('end','for')]
+        return ret
+
 class Iteration(AST):
     _fields = ['StepEnumeration']
 
@@ -1225,8 +1235,18 @@ class RangeEnumeration(AST):
         AST.semantic.addToContext(Symbol(id,Int()))
 
 class WhileControl(AST):
+
     def typeCheck(self):
-        return self.fields[0].propType() == ['bool']
+        return isinstance(self.fields[0].propType(),Bool)
+
+    def addTag(self):
+        return [('start','while')]
+
+    def genCode(self):
+        ret = []
+        ret += [('end','while')]
+        return ret
+
 
 class CallAction(AST):
     def propType(self):
