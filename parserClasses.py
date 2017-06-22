@@ -459,10 +459,11 @@ class Location(AST):
         loc = self.fields[0]
         symbol = AST.semantic.lookInContexts(loc)
         if not isinstance(loc, AST):
-            ret += [('stv',symbol.count,symbol.pos)]
-        elif isinstance(symbol.type, Array):
-            ret += [('ldr',symbol.count,symbol.pos)]
-            ret += [('smv',symbol.type.getRange().getCount())]
+            if isinstance(symbol.type, Array):
+                ret += [('ldr',symbol.count,symbol.pos)]
+                ret += [('smv',symbol.type.getRange().getCount())]
+            else:
+                ret += [('stv', symbol.count, symbol.pos)]
         else:
             ret += loc.store()
         return ret
@@ -472,12 +473,11 @@ class Location(AST):
         loc = self.fields[0]
         if not isinstance(loc,AST):
             symbol = AST.semantic.lookInContexts(loc)
-            if not isinstance(symbol.type,Synonym):
-                ret += [('ldv',symbol.count,symbol.pos)]
-            elif isinstance(symbol.type,Array):
+            if isinstance(symbol.type,Array):
                 ret += [('ldr',symbol.count,symbol.pos)]
                 ret += [('lmv',symbol.type.getRange().getCount())]
-
+            elif not isinstance(symbol.type,Synonym):
+                ret += [('ldv',symbol.count,symbol.pos)]
             else:
                 ret += [('ldc', symbol.type.subType.value)]
         else:
@@ -574,8 +574,8 @@ class ArrayElement(AST):
         val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
-            if rng.begin != 0:
-                ret += [('ldc',rng.begin)]
+            if rng.begin.value != 0:
+                ret += [('ldc',rng.begin.value)]
                 ret += [('sub')]
             ret += [('idx', locationType.subType.getSize() * val)]
             val = rng.getLenght()
@@ -593,8 +593,8 @@ class ArrayElement(AST):
         val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
-            if rng.begin != 0:
-                ret += [('ldc',rng.begin)]
+            if rng.begin.value != 0:
+                ret += [('ldc',rng.begin.value)]
                 ret += [('sub')]
             ret += [('idx', locationType.subType.getSize() * val)]
             val = rng.getLenght()

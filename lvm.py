@@ -195,7 +195,8 @@ class LVM (object):
 
     def lmv(self,k):
         t = self.M[self.sp]
-        self.M[self.sp:self.sp+k] = self.M[t:t+k]
+        for i in range(k):
+            self.M[self.sp+i] = self.M[t+i]
         self.sp += k-1
         self.pc += 1
         return
@@ -402,8 +403,7 @@ def main():
     codeList = list(codeFile)
     tuple2 = re.compile("")
 
-    for line in codeList:
-
+    #for line in codeList:
 
 if __name__ == '__main__':
     main()

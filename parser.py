@@ -687,8 +687,8 @@ def main():
         a.ast.recursiveTypeCheck()
         AST.semantic = Context()
         ret = a.ast.recursiveGenCode()
-        # for inst in ret:
-        #     print(inst)
+        #for inst in ret:
+             #print(inst)
         lvm.runCode(ret)
         #a.ast.removeChanel()
 
