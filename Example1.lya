@@ -7,3 +7,7 @@ a[size-1] = 99;
 c = a[4];
 a[1] = c;
 a = b;
+if c == 99 then
+    c+= 1;
+fi;
+

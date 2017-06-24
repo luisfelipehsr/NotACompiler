@@ -4,6 +4,7 @@ import ply.yacc as yacc
 from Semantocer import Context
 from lvm import LVM
 
+
 class Parser(object):
 
 
@@ -687,9 +688,10 @@ def main():
         a.ast.recursiveTypeCheck()
         AST.semantic = Context()
         ret = a.ast.recursiveGenCode()
-        #for inst in ret:
-             #print(inst)
-        lvm.runCode(ret)
+
+        for inst in ret:
+             print(inst)
+        #lvm.runCode(ret)
         #a.ast.removeChanel()
 
         # Generates .dot archive to display the AST.
