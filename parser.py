@@ -3,7 +3,7 @@ from parserClasses import *
 import ply.yacc as yacc
 from Semantocer import Context
 from lvm import LVM
-
+from codeGenerationTools import *
 
 class Parser(object):
 
@@ -688,9 +688,10 @@ def main():
         a.ast.recursiveTypeCheck()
         AST.semantic = Context()
         ret = a.ast.recursiveGenCode()
+        solveIf(ret)
 
-        for inst in ret:
-             print(inst)
+        for i in range(len(ret)):
+             print(i,ret[i])
         #lvm.runCode(ret)
         #a.ast.removeChanel()
 
