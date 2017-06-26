@@ -288,10 +288,11 @@ class LVM (object):
         return True
 
     def runInst(self,inst):
-        if isinstance(inst,tuple):
-            c = list(inst)
-        else:
-            c = [inst]
+        #if isinstance(inst,tuple):
+        #    c = list(inst)
+        #else:
+        #    c = [inst]
+        c = inst
         print(c)
         if c[0] == 'ldc':
             self.ldc(c[1])
@@ -401,9 +402,44 @@ def main():
     print("main da lvm")
     codeFile = open("codeFile.lya", 'r')
     codeList = list(codeFile)
-    tuple2 = re.compile("")
+    regex = re.compile(r'\((.*)\)')
+    regex2 = re.compile(r'[a-zA-Z0-9]+')
+    regex3 = re.compile(r'[a-zA-Z]+')
+    code = []
 
-    #for line in codeList:
+    for line in codeList:
+        cmpregex = regex.match(line)
+        command = []
+        if cmpregex is not None:
+            terms = regex2.findall(line)
+
+            for term in terms:
+                processed = regex3.match(term)
+                if processed is not None:
+                    command += [term]
+                else:
+                    command += [int(term)]
+        code += [command]
+        #if len(command) == 1:
+        #code += command
+        #else:
+        #    command = tuple(command)
+        #    code += [command]
+        #print(command)
+    print(code)
+
+    lvm = LVM()
+    lvm.runCode(code)
+
+    #    command = []
+    #    for term in terms:
+    #        if regex2.match(term):
+    #            command += term
+    #        else:
+    #            command += regex2.search(term)
+    #    print(command)
+
+
 
 if __name__ == '__main__':
     main()
