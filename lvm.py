@@ -1,4 +1,5 @@
 import re
+import sys
 
 class LVM (object):
     def __init__(self,debug = False):
@@ -399,37 +400,52 @@ class LVM (object):
 
 
 def main():
-    print("main da lvm")
-    codeFile = open("codeFile.lya", 'r')
-    codeList = list(codeFile)
-    regex = re.compile(r'\((.*)\)')
-    regex2 = re.compile(r'[a-zA-Z0-9]+')
-    regex3 = re.compile(r'[a-zA-Z]+')
-    code = []
+    debug = False
+    files = []
+    if len(sys.argv) == 2:
+        files = [sys.argv[1]]
+    elif len(sys.argv) == 3:
+        if sys.argv[1] == 'debug':
+            debug = True
+            r = range(1, int(sys.argv[2]) + 1)
+            files = ["CompiledExamples/Example%s.lvm" % i for i in r]
+    else:
+        sys.exit("ERROR: must have one argument specifying file or two:"
+                 + "'debug' '#examples total'")
 
-    for line in codeList:
-        cmpregex = regex.match(line)
-        command = []
-        if cmpregex is not None:
-            terms = regex2.findall(line)
+    for name in files:
+        if debug is True:
+            print("Executing object ", name)
 
-            for term in terms:
-                processed = regex3.match(term)
-                if processed is not None:
-                    command += [term]
-                else:
-                    command += [int(term)]
-        code += [command]
-        #if len(command) == 1:
-        #code += command
-        #else:
-        #    command = tuple(command)
-        #    code += [command]
-        #print(command)
-    print(code)
+        codeFile = open(name, 'r')
+        codeList = list(codeFile)
+        regex = re.compile(r'\((.*)\)')
+        regex2 = re.compile(r'[a-zA-Z0-9]+')
+        regex3 = re.compile(r'[a-zA-Z]+')
+        code = []
+        for line in codeList:
+            cmpregex = regex.match(line)
+            command = []
+            if cmpregex is not None:
+                terms = regex2.findall(line)
 
-    lvm = LVM()
-    lvm.runCode(code)
+                for term in terms:
+                    processed = regex3.match(term)
+                    if processed is not None:
+                        command += [term]
+                    else:
+                        command += [int(term)]
+            code += [command]
+            #if len(command) == 1:
+            #code += command
+            #else:
+            #    command = tuple(command)
+            #    code += [command]
+            #print(command)
+        print(code)
+
+        lvm = LVM()
+        lvm.runCode(code)
 
     #    command = []
     #    for term in terms:
