@@ -2,7 +2,9 @@ import parser as lya
 import codeGenerationTools as cgt
 import sys
 
+# Metodo principal do script
 def main():
+    # Processa argumentos passados ao scrip
     debug = False
     files = []
     if len(sys.argv) == 2:
@@ -16,32 +18,32 @@ def main():
         sys.exit("ERROR: must have one argument specifying file or two:"
                  + "'debug' '#examples total'")
 
+    # Gera arquivos compilados de cada arquivo .lya passado
     lyaParser = lya.Parser()
-    #tstList = ["Examples/Example%s.lya" %i for i in r]
     for name in files:
-        lvm = lya.LVM(debug=True)
-        lyaParser.lexer.lineno = 1;
+        lyaParser.lexer.lineno = 1
         print('\n' + name )
         if debug is False:
             file = open(name,'r')
         else :
             file = open('Examples/' + name, 'r')
         lya.AST.semantic = lya.Context()
-        lyaParser.parse(file.read())
-        lyaParser.ast.recursiveTypeCheck()
-        lya.AST.semantic = lya.Context()
-        code = lyaParser.ast.recursiveGenCode()
-        cgt.solveIf(code)
+        lyaParser.parse(file.read()) # realiza parse do arquivo
+        lyaParser.ast.recursiveTypeCheck() # adiciona a AST os tipos dos nos
+        lya.AST.semantic = lya.Context() # salva os contextos dos nos
+        code = lyaParser.ast.recursiveGenCode() # gera pre-codigo do programa
+        cgt.solveIf(code) # adiciona pulos nos codigo para ifs
 
+        # constroi arquivo de saida
         codeFilename = name[:(len(name) - 4)]
         if debug is False:
             codeFile = open(codeFilename + '.lvm', 'w')
         else:
             codeFile = open("CompiledExamples/" + codeFilename + ".lvm", 'w')
 
+        # adiciona linha ao arquivo com o comando gerado
         for line in code:
             text = ''
-
             if isinstance(line, str):
                 text = '(\'{}\')\n'.format(line)
                 codeFile.write(text)
@@ -79,6 +81,8 @@ def main():
         #    lyaParser.ast.buildGraph(name)
         #else:
         #    lyaParser.ast.buildGraph("CompiledExamples/" + name)
+
+        # constroi grafo da AST se a opcao de debug estiver ativa
         if debug is True:
             lyaParser.ast.buildGraph("CompiledExamples/" + name)
 

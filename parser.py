@@ -680,7 +680,7 @@ def main():
     a = Parser()
     for f in tstList:
         lvm = LVM(debug=True)
-        a.lexer.lineno = 1;
+        a.lexer.lineno = 1
         print('\n' + f )
         file = open(f,'r')
         AST.semantic = Context()

@@ -236,10 +236,10 @@ class LVM (object):
         return
 
     def rds(self):
-        str = input()
+        data = input()
         adr = self.M[self.sp]
-        self.M[adr] = len(str)
-        for k in str:
+        self.M[adr] = len(data)
+        for k in data:
             adr += 1
             self.M[adr] = k
         self.sp -= 1
@@ -267,8 +267,8 @@ class LVM (object):
 
     def prs(self):
         adr = self.M[self.sp]
-        len = self.M[self.adr]
-        for i in range(0,len):
+        tam = self.M[self.adr]
+        for i in range(0, tam):
             adr += 1
             print(self.M[adr])
         self.sp -= 1
@@ -398,8 +398,9 @@ class LVM (object):
                 print('Pc = ' + str(self.pc))
             continue
 
-
+# Metodo principal do script
 def main():
+    # Processa argumentos passados ao script
     debug = False
     files = []
     if len(sys.argv) == 2:
@@ -413,10 +414,12 @@ def main():
         sys.exit("ERROR: must have one argument specifying file or two:"
                  + "'debug' '#examples total'")
 
+    # Executa os arquivos .lvm passados
     for name in files:
         if debug is True:
             print("Executing object ", name)
 
+        # Le comandos do arquivo e os armazena numa lista
         codeFile = open(name, 'r')
         codeList = list(codeFile)
         regex = re.compile(r'\((.*)\)')
@@ -427,35 +430,25 @@ def main():
             cmpregex = regex.match(line)
             command = []
             if cmpregex is not None:
-                terms = regex2.findall(line)
+                terms = regex2.findall(line) #toma palavras e numeros do comando
 
+                # adiciona cada termo a uma lista
                 for term in terms:
                     processed = regex3.match(term)
                     if processed is not None:
                         command += [term]
                     else:
                         command += [int(term)]
-            code += [command]
-            #if len(command) == 1:
-            #code += command
-            #else:
-            #    command = tuple(command)
-            #    code += [command]
-            #print(command)
+            code += [command] # adiciona esta sublista a lista de comandos
+
         print(code)
 
-        lvm = LVM()
+        # Executa arquivo
+        if debug is True:
+            lvm = LVM(debug=True)
+        else:
+            lvm = LVM()
         lvm.runCode(code)
-
-    #    command = []
-    #    for term in terms:
-    #        if regex2.match(term):
-    #            command += term
-    #        else:
-    #            command += regex2.search(term)
-    #    print(command)
-
-
 
 if __name__ == '__main__':
     main()
