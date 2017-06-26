@@ -75,13 +75,12 @@ def main():
         # Generates .dot archive to display the AST.
         # Uncomment only if you have pydot library.
         # Uncomment the import of pydot and line 60 on parserClasses.py too.
-        if debug is False:
-            lyaParser.ast.buildGraph(name)
-        else:
+        #if debug is False:
+        #    lyaParser.ast.buildGraph(name)
+        #else:
+        #    lyaParser.ast.buildGraph("CompiledExamples/" + name)
+        if debug is True:
             lyaParser.ast.buildGraph("CompiledExamples/" + name)
-
-
-
 
 if __name__ == '__main__':
     main()
