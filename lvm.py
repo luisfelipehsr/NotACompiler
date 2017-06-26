@@ -1,5 +1,7 @@
+# Lya Virtual Machine
 import re
 import sys
+
 
 class LVM (object):
     def __init__(self,debug = False):
@@ -267,7 +269,7 @@ class LVM (object):
 
     def prs(self):
         adr = self.M[self.sp]
-        tam = self.M[self.adr]
+        tam = self.M[adr]
         for i in range(0, tam):
             adr += 1
             print(self.M[adr])
@@ -288,109 +290,105 @@ class LVM (object):
     def end(self):
         return True
 
-    def runInst(self,inst):
-        #if isinstance(inst,tuple):
-        #    c = list(inst)
-        #else:
-        #    c = [inst]
-        c = inst
-        print(c)
-        if c[0] == 'ldc':
-            self.ldc(c[1])
-        elif c[0] == 'ldv':
-            self.ldv(c[1],c[2])
-        elif c[0] == 'ldr':
-            self.ldr(c[1],c[2])
-        elif c[0] == 'stv':
-            self.stv(c[1],c[2])
-        elif c[0] == 'lrv':
-            self.lrv(c[1],c[2])
-        elif c[0] == 'srv':
-            self.lrv(c[1],c[2])
-        elif c[0] == 'add':
+    def runInst(self, instruction):
+        print(instruction)
+        if instruction[0] == 'ldc':
+            self.ldc(instruction[1])
+        elif instruction[0] == 'ldv':
+            self.ldv(instruction[1], instruction[2])
+        elif instruction[0] == 'ldr':
+            self.ldr(instruction[1], instruction[2])
+        elif instruction[0] == 'stv':
+            self.stv(instruction[1], instruction[2])
+        elif instruction[0] == 'lrv':
+            self.lrv(instruction[1], instruction[2])
+        elif instruction[0] == 'srv':
+            self.lrv(instruction[1], instruction[2])
+        elif instruction[0] == 'add':
             self.add()
-        elif c[0] == 'sub':
+        elif instruction[0] == 'sub':
             self.sub()
-        elif c[0] == 'mul':
+        elif instruction[0] == 'mul':
             self.mul()
-        elif c[0] == 'div':
+        elif instruction[0] == 'div':
             self.div()
-        elif c[0] == 'mod':
+        elif instruction[0] == 'mod':
             self.mod()
-        elif c[0] == 'neg':
+        elif instruction[0] == 'neg':
             self.neg()
-        elif c[0] == 'abs':
+        elif instruction[0] == 'abs':
             self.abs()
-        elif c[0] == 'and':
+        elif instruction[0] == 'and':
             self.land()
-        elif c[0] == 'lor':
+        elif instruction[0] == 'lor':
             self.lor()
-        elif c[0] == 'not':
+        elif instruction[0] == 'not':
             self.lnot()
-        elif c[0] == 'les':
+        elif instruction[0] == 'les':
             self.les()
-        elif c[0] == 'leq':
+        elif instruction[0] == 'leq':
             self.leq()
-        elif c[0] == 'grt':
+        elif instruction[0] == 'grt':
             self.grt()
-        elif c[0] == 'gre':
+        elif instruction[0] == 'gre':
             self.gre()
-        elif c[0] == 'equ':
+        elif instruction[0] == 'equ':
             self.equ()
-        elif c[0] == 'neq':
+        elif instruction[0] == 'neq':
             self.neq()
-        elif c[0] == 'jmp':
-            self.jmp(c[1])
-        elif c[0] == 'jof':
-            self.jof(c[1])
-        elif c[0] == 'alc':
-            self.alc(c[1])
-        elif c[0] == 'dlc':
-            self.dlc(c[1])
-        elif c[0] == 'cfu':
-            self.cfu(c[1])
-        elif c[0] == 'enf':
-            self.enf(c[1])
-        elif c[0] == 'ret':
-            self.ret(c[1],c[2])
-        elif c[0] == 'idx':
-            self.idx(c[1])
-        elif c[0] == 'grc':
+        elif instruction[0] == 'jmp':
+            self.jmp(instruction[1])
+        elif instruction[0] == 'jof':
+            self.jof(instruction[1])
+        elif instruction[0] == 'alc':
+            self.alc(instruction[1])
+        elif instruction[0] == 'dlc':
+            self.dlc(instruction[1])
+        elif instruction[0] == 'cfu':
+            self.cfu(instruction[1])
+        elif instruction[0] == 'enf':
+            self.enf(instruction[1])
+        elif instruction[0] == 'ret':
+            self.ret(instruction[1], instruction[2])
+        elif instruction[0] == 'idx':
+            self.idx(instruction[1])
+        elif instruction[0] == 'grc':
             self.grc()
-        elif c[0] == 'lmv':
-            self.lmv(c[1])
-        elif c[0] == 'smv':
-            self.smv(c[1])
-        elif c[0] == 'smr':
-            self.smr(c[1])
-        elif c[0] == 'sts':
-            self.sts(c[1])
-        elif c[0] == 'rdv':
+        elif instruction[0] == 'lmv':
+            self.lmv(instruction[1])
+        elif instruction[0] == 'smv':
+            self.smv(instruction[1])
+        elif instruction[0] == 'smr':
+            self.smr(instruction[1])
+        elif instruction[0] == 'sts':
+            self.sts(instruction[1])
+        elif instruction[0] == 'rdv':
             self.rdv()
-        elif c[0] == 'rds':
+        elif instruction[0] == 'rds':
             self.rds()
-        elif c[0] == 'prv':
-            self.prv(c[1])
-        elif c[0] == 'prt':
-            self.prt(c[1])
-        elif c[0] == 'prc':
-            self.prc(c[1])
-        elif c[0] == 'prs':
+        elif instruction[0] == 'prv':
+            self.prv(instruction[1])
+        elif instruction[0] == 'prt':
+            self.prt(instruction[1])
+        elif instruction[0] == 'prc':
+            self.prc(instruction[1])
+        elif instruction[0] == 'prs':
             self.prs()
-        elif c[0] == 'stp':
+        elif instruction[0] == 'stp':
             self.stp()
-        elif c[0] == 'nop':
+        elif instruction[0] == 'nop':
             self.nop()
-        elif c[0] == 'end':
+        elif instruction[0] == 'end':
             self.end()
             return False
         else:
-            raise TypeError('Oops Invalid Instruction ' + str(c[0]))
+            raise TypeError('Oops Invalid Instruction ' + str(instruction[0]))
         return True
 
+    # Executa o codigo passado
     def runCode(self,code):
         while True:
-            if not self.runInst(code[self.pc]):
+            if not self.runInst(code[self.pc]): # Executa comando na posicao pc
                 break
             elif self.debug:
                 print('Stack = '+str(self.M))
