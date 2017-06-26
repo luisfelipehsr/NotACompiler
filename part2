@@ -1,0 +1,42 @@
+classe gen:
+    variável código
+método visit(topo de uma arvore):
+
+    *gere código do nó*
+    para cada campo deste nó
+        visit(campo)
+    *gere código do nó*
+
+    retorna código;
+
+método getCode
+    retorne código;
+
+declaração de função anota seu PC.
+
+declaração de qq coisa vc adiciona ela ao contexto e põe seu tipo e offset (variavel, tipo, offset)
+
+
+
+chamada de função dá call function > alocate > enter function > código > return function
+
+quando você acha alguem q pode ter um contexto (for, while), vc cria um contexto, adiciona quem precisa.
+na hora de usar variaveis, ve se tem no contexto atual, se não, olha no de cima.
+ao final vc remove o contexto.
+
+----
+
+Para resovler desvios de fluxo faça uma função que é executada antes de chamar uma recusão de genCode. Coloque um anota-
+dor de inicio na lista. Agora o genCode da função vai colocar um token de fim de desvio.
+Agora percorra a lista anotando empilhando inícios de desvio. Quando achar um fim de desvio vc desempilha um e resolve.
+
+
+
+
+
+TODO:
+renomear parserClasses para ASTClasses
+
+limpar ASTClasses.py
+
+
