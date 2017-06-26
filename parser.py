@@ -673,31 +673,24 @@ class Parser(object):
 
 
 
-def main():
+#def main():
+#
+#    r = range(1,2)
+#    tstList = ["Example%s.lya" %i for i in r]
+#    a = Parser()
+#    for f in tstList:
+#        lvm = LVM(debug=True)
+#        a.lexer.lineno = 1
+#        print('\n' + f )
+#        file = open(f,'r')
+#        AST.semantic = Context()
+#        a.parse(file.read())
+#        a.ast.recursiveTypeCheck()
+#        AST.semantic = Context()
+#        ret = a.ast.recursiveGenCode()
+#        solveIf(ret)
+#
+#        for i in range(len(ret)):
+#             print(i,ret[i])
 
-    r = range(1,2)
-    tstList = ["Example%s.lya" %i for i in r]
-    a = Parser()
-    for f in tstList:
-        lvm = LVM(debug=True)
-        a.lexer.lineno = 1
-        print('\n' + f )
-        file = open(f,'r')
-        AST.semantic = Context()
-        a.parse(file.read())
-        a.ast.recursiveTypeCheck()
-        AST.semantic = Context()
-        ret = a.ast.recursiveGenCode()
-        solveIf(ret)
-
-        for i in range(len(ret)):
-             print(i,ret[i])
-        #lvm.runCode(ret)
-        #a.ast.removeChanel()
-
-        # Generates .dot archive to display the AST.
-        # Uncomment only if you have pydot library.
-        # Uncomment the import of pydot and line 60 on parserClasses.py too.
-        a.ast.buildGraph(f)
-
-if __name__ == '__main__':main()
+#if __name__ == '__main__':main()
