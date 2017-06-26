@@ -1302,7 +1302,7 @@ class StepEnumeration(AST):
             ret += [('ldc',maxVal)]
         else:
             ret += max.genCode()
-        ret += ['equ']
+        ret += ['neq']
         return ret
 
     def update(self):

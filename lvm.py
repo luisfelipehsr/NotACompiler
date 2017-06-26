@@ -288,11 +288,11 @@ class LVM (object):
         return True
 
     def runInst(self,inst):
-        #if isinstance(inst,tuple):
-        #    c = list(inst)
-        #else:
-        #    c = [inst]
-        c = inst
+        if isinstance(inst,tuple):
+            c = list(inst)
+        else:
+            c = [inst]
+        #c = inst
         print(c)
         if c[0] == 'ldc':
             self.ldc(c[1])
@@ -384,7 +384,7 @@ class LVM (object):
             self.end()
             return False
         else:
-            raise TypeError('Oops Invalid Instruction ' + str(c[0]))
+            raise TypeError('Oops Invalid Instruction ' + str(c))
         return True
 
     def runCode(self,code):

@@ -688,11 +688,11 @@ def main():
         a.ast.recursiveTypeCheck()
         AST.semantic = Context()
         ret = a.ast.recursiveGenCode()
-        solveIf(ret)
+        solve(ret)
 
         for i in range(len(ret)):
              print(i,ret[i])
-        #lvm.runCode(ret)
+        lvm.runCode(ret)
         #a.ast.removeChanel()
 
         # Generates .dot archive to display the AST.
