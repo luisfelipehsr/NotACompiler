@@ -32,7 +32,7 @@ def main():
         lyaParser.ast.recursiveTypeCheck() # adiciona a AST os tipos dos nos
         lya.AST.semantic = lya.Context() # salva os contextos dos nos
         code = lyaParser.ast.recursiveGenCode() # gera pre-codigo do programa
-        cgt.solveIf(code) # adiciona pulos nos codigo para ifs
+        cgt.solveIf(code) # adiciona pulos no codigo para ifs
 
         # constroi arquivo de saida
         codeFilename = name[:(len(name) - 4)]
@@ -66,21 +66,6 @@ def main():
                         text += ', {}'.format(term)
                 text += ')\n'
                 codeFile.write(text)
-
-
-
-        # for inst in ret:
-        #     print(inst)
-        #lvm.runCode(code)
-        #a.ast.removeChanel()
-
-        # Generates .dot archive to display the AST.
-        # Uncomment only if you have pydot library.
-        # Uncomment the import of pydot and line 60 on parserClasses.py too.
-        #if debug is False:
-        #    lyaParser.ast.buildGraph(name)
-        #else:
-        #    lyaParser.ast.buildGraph("CompiledExamples/" + name)
 
         # constroi grafo da AST se a opcao de debug estiver ativa
         if debug is True:
