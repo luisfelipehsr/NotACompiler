@@ -139,7 +139,7 @@ class Parser(object):
             p[0] = StepEnumeration(p[1],p[3],p[4],p[6])
             p[0].setLinespan(p, 1, 6)
         elif len(p) == 8:
-            p[0] = StepEnumeration(p[1],p[3],p[5],p[7])
+            p[0] = StepEnumeration(p[1],p[3],p[4],p[6])
             p[0].setLinespan(p, 1, 7)
         else:
             p[0] = StepEnumeration(p[1],p[3],p[5],p[6],p[8])

@@ -1072,8 +1072,6 @@ class ReferencedLocation(AST):
         ret += loc.reference()
         return ret
 
-
-
 class ActionStatement(AST):
     def propType(self):
         if len(self.type) > 0:
@@ -1186,22 +1184,85 @@ class DoAction(AST):
     def updateContext(self):
         self.context = AST.semantic.pushContext()
 
-class ControlPart(AST):
-    _fields = ['ForControl', 'WhileControl']
-
-class ForControl(AST):
-    _fields = ['Iteration']
-
-    def addTag(self):
-        return [('start','for')]
-
-    def genCode(self):
+    def recursiveGenCode(self):
+        l = AST.semantic.contextLen()
         ret = []
-        ret += [('end','for')]
+        ret += [('start','do')]
+        if len(self.fields) == 1:
+            ret += self.fields[0].recursiveGenCode()
+        else:
+            control = self.fields[0]
+            code = self.fields[1]
+            ret += control.initialization()
+            ret += [('start','condition')]
+            ret += control.condition()
+            ret += [('end', 'condition')]
+            ret += code.recursiveGenCode()
+            ret += [('start', 'update')]
+            ret += control.update()
+            ret += [('end', 'update')]
+        ret += [('end','do')]
+        AST.semantic.trimToLen(l)
         return ret
 
+class ControlPart(AST):
+    def initialization(self):
+        first = self.fields[0]
+        if isinstance(first,ForControl):
+            return first.initialization()
+        return []
+
+    def condition(self):
+        ret = []
+        ret += self.fields[0].condition()
+        if len(self.fields) == 2:
+            ret += self.fields[1].condition()
+            ret += [('and')]
+        return ret
+
+    def update(self):
+        first = self.fields[0]
+        if isinstance(first, ForControl):
+            return first.update()
+        return []
+
+    def recursiveGenCode(self):
+        return []
+
+class ForControl(AST):
+    # def addTag(self):
+    #     return [('start','for')]
+    #
+    # def genCode(self):
+    #     ret = []
+    #     ret += [('end','for')]
+    #     return ret
+
+    def initialization(self):
+        return self.fields[0].initialization()
+
+    def condition(self):
+        return self.fields[0].condition()
+
+    def update(self):
+        return self.fields[0].update()
+
+    def recursiveGenCode(self):
+        return []
+
 class Iteration(AST):
-    _fields = ['StepEnumeration']
+
+    def initialization(self):
+        return self.fields[0].initialization()
+
+    def condition(self):
+        return self.fields[0].condition()
+
+    def update(self):
+        return self.fields[0].update()
+
+    def recursiveGenCode(self):
+        return []
 
 class StepEnumeration(AST):
 
@@ -1222,6 +1283,56 @@ class StepEnumeration(AST):
             c = self.fields[4].propType()
             return a.equals(b) and b.equals(c)
 
+    def initialization(self):
+        self.updateContext()
+        init = self.fields[1]
+        iniVal = init.propType().value
+        if  iniVal is not None:
+            return [('ldc',iniVal)]
+        return self.fields[1].genCode()
+
+    def condition(self):
+        id = self.fields[0]
+        max  = self.fields[-1]
+        maxVal = max.propType().value
+        id = AST.semantic.lookInContexts(id)
+        ret = []
+        ret += [('ldv',id.count,id.pos)]
+        if maxVal is not None:
+            ret += [('ldc',maxVal)]
+        else:
+            ret += max.genCode()
+        ret += ['equ']
+        return ret
+
+    def update(self):
+        ret = []
+        id = AST.semantic.lookInContexts(self.fields[0])
+        if len(self.fields) == 3:
+            ret += [('ldv', id.count, id.pos)]
+            ret += [('ldc', 1)]
+            ret += [('add')]
+            ret += [('stv',id.count,id.pos)]
+        elif len(self.fields) == 4:
+            if self.fields[2] == 'down':
+                ret += [('ldv', id.count, id.pos)]
+                ret += [('ldc', 1)]
+                ret += [('sub')]
+                ret += [('stv', id.count, id.pos)]
+            else:
+                ret += [('ldv', id.count, id.pos)]
+                ret += self.fields[2].genCode()
+                ret += [('add')]
+                ret += [('stv', id.count, id.pos)]
+        else:
+            ret += [('ldv', id.count, id.pos)]
+            ret += self.fields[2].genCode()
+            ret += [('sub')]
+            ret += [('stv', id.count, id.pos)]
+        return ret
+
+    def recursiveGenCode(self):
+        return []
 
     def updateContext(self):
         AST.semantic.addToContext(Symbol(self.fields[0],Int()))
@@ -1239,14 +1350,11 @@ class WhileControl(AST):
     def typeCheck(self):
         return isinstance(self.fields[0].propType(),Bool)
 
-    def addTag(self):
-        return [('start','while')]
+    def condition(self):
+        return self.fields[0].genCode()
 
-    def genCode(self):
-        ret = []
-        ret += [('end','while')]
-        return ret
-
+    def recursiveGenCode(self):
+        return []
 
 class CallAction(AST):
     def propType(self):

@@ -1,13 +1,11 @@
 /* example2: */
 syn size int = 5;
-dcl a,b array[0:5] int;
-dcl c int;
+dcl a array[0:size] int;
+do
+  for c = 0 to size;
+  a[c] = c;
+ od;
 
-a[size-1] = 99;
-c = a[4];
-a[1] = c;
-a = b;
-if c == 99 then
-    c+= 1;
-fi;
+
+
 
