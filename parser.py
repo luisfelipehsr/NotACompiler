@@ -676,7 +676,7 @@ class Parser(object):
 def main():
 
     r = range(1,2)
-    tstList = ["Example%s.lya" %i for i in r]
+    tstList = ["Examples\Example%s.lya" %i for i in r]
     a = Parser()
     for f in tstList:
         lvm = LVM(debug=True)

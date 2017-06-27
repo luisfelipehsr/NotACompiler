@@ -68,6 +68,13 @@ def solveDo(code):
     solveDoJmpBack(code)
     solveDoJmpOut(code)
 
+def fix(code):
+    for i in range(len(code)):
+        if isinstance(code,tuple):
+            code[i] = list(code[i])
+        else:
+            code[i] = code[i]
+
 
 def solve(code):
     solveIf(code)
