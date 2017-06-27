@@ -31,6 +31,9 @@ def main():
         lyaParser.parse(file.read()) # realiza parse do arquivo
         lyaParser.ast.recursiveTypeCheck() # adiciona a AST os tipos dos nos
         lya.AST.semantic = lya.Context() # salva os contextos dos nos
+        # constroi grafo da AST se a opcao de debug estiver ativa
+        if debug is True:
+            lyaParser.ast.buildGraph("CompiledExamples/" + name)
         code = lyaParser.ast.recursiveGenCode() # gera pre-codigo do programa
         cgt.solveIf(code) # adiciona pulos no codigo para ifs
 
@@ -66,10 +69,6 @@ def main():
                         text += ', {}'.format(term)
                 text += ')\n'
                 codeFile.write(text)
-
-        # constroi grafo da AST se a opcao de debug estiver ativa
-        if debug is True:
-            lyaParser.ast.buildGraph("CompiledExamples/" + name)
 
 if __name__ == '__main__':
     main()

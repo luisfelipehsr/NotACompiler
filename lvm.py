@@ -410,7 +410,7 @@ def main():
             files = ["CompiledExamples/Example%s.lvm" % i for i in r]
     else:
         sys.exit("ERROR: must have one argument specifying file or two:"
-                 + "'debug' '#examples total'")
+                 + "'debug' '#examples'")
 
     # Executa os arquivos .lvm passados
     for name in files:
