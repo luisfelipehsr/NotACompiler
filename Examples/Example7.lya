@@ -1,23 +1,18 @@
-/* Display all prime numbers between two given
-  intervals (greater than 2): */
+/* Compute GCD of two integers */
 
-dcl n1, n2, i, j int, flag bool;
+gcd: proc (x int, y int) returns (int);
+  dcl g int;
+  g = y;
+  do
+    while x > 0;
+      g = x;
+      x = y - (y/x) * x;
+      y = g;
+  od;
+  return g;
+end;
 
-print("Enter 2 numbers (intervals) separated by space: ");
-read(n1, n2);
-print("Prime numbers between ", n1, " and ", n2, " are:\n");
-shkahkjhsjhdjas = 2;
-do
-  for i = n1 to n2;
-    flag = true;
-    loop: do
-      for j = 2 to i/2;
-        if i % j == 0 then
-          flag = false;
-          exit loop;
-        fi;
-    od;
-    if flag then
-      print(i, "  ");
-    fi;
-od;
+dcl a, b int;
+print("give-me two integers separated by space:");
+read (a,b);
+print ("GCD of ", a, b, " is ", gcd(a,b));
