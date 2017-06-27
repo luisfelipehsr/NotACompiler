@@ -10,4 +10,5 @@ a = b;
 if c == 99 then
     c+= 1;
 fi;
+print(c,c+1);
 

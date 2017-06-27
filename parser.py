@@ -239,7 +239,10 @@ class Parser(object):
     def p_ResultSpec(self,p):
         """ ResultSpec : RETURNS LPAREN Mode RPAREN 
                        | RETURNS LPAREN Mode LOC RPAREN """
-        p[0] = ResultSpec(p[3])
+        if len(p) == 5:
+            p[0] = ResultSpec(p[3])
+        else:
+            p[0] = ResultSpec(p[3],p[4])
         p[0].setLinespan(p, 3, 3)
 
     def p_FormalParameterList(self,p):
@@ -261,7 +264,10 @@ class Parser(object):
     def p_ParameterSpec(self,p):
         """ ParameterSpec : Mode 
                           | Mode LOC """
-        p[0] = ParameterSpec(p[1])
+        if len(p) == 2:
+            p[0] = ParameterSpec(p[1])
+        else:
+            p[0] = ParameterSpec(p[1],p[2])
         p[0].setLinespan(p, 1, 1)
 
     def p_NewModeStatement(self,p):
@@ -693,4 +699,29 @@ class Parser(object):
 #        for i in range(len(ret)):
 #             print(i,ret[i])
 
-#if __name__ == '__main__':main()
+    r = range(1,2)
+    tstList = ["Example%s.lya" %i for i in r]
+    a = Parser()
+    for f in tstList:
+        lvm = LVM(debug=True)
+        a.lexer.lineno = 1
+        print('\n' + f )
+        file = open(f,'r')
+        AST.semantic = Context()
+        a.parse(file.read())
+        a.ast.recursiveTypeCheck()
+        AST.semantic = Context()
+        ret = a.ast.recursiveGenCode()
+        solveIf(ret)
+
+        for i in range(len(ret)):
+             print(i,ret[i])
+        #lvm.runCode(ret)
+        #a.ast.removeChanel()
+
+        # Generates .dot archive to display the AST.
+        # Uncomment only if you have pydot library.
+        # Uncomment the import of pydot and line 60 on parserClasses.py too.
+        a.ast.buildGraph(f)
+
+if __name__ == '__main__':main()
