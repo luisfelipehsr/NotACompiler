@@ -1428,11 +1428,11 @@ class ResultAction(AST):
 class BuiltinCall(AST):
 
     def propType(self):
-        if len(self.type) > 0:
-            return self.type[:]
+        if self.type is not None:
+            return self.type
         else:
             self.type = self.fields[0].propType()
-            return self.type[:]
+            return self.type
 
     def typeCheck(self):
         ret = False
@@ -1464,26 +1464,52 @@ class BuiltinCall(AST):
 
         return ret
 
+    def genCode(self):
+        ret = []
+        name = self.fields[0].fields[0]
+        parameterList = self.fields[1].propType().getParameterList()
+        if name == 'print':
+            for pType in parameterList:
+                if isinstance(pType,Int) or isinstance(pType,Bool):
+                    ret += [('prv',False)]
+                elif isinstance(pType,Char):
+                    ret += [('prv',True)]
+                elif isinstance(pType,Chars):
+                    ret += []
+        return ret
+
+    def recursiveGenCode(self):
+        ret = []
+        parameterList = self.fields[1].fields
+        for n in reversed(parameterList):
+            if isinstance(n, AST):
+                ret += n.recursiveGenCode()
+        ret += self.genCode()
+        return ret
+
+
+
 class BuiltinName(AST):
+
     def propType(self):
         t = self.fields[0]
         if t == 'abs':
-            self.type = ['int']
+            self.type = Int()
         elif t == 'read':
-            self.type = []
+            self.type = None
         elif t == 'length':
-            self.type = ['int']
+            self.type = Int()
         elif t == 'print':
-            self.type = []
+            self.type = None
         elif t == 'asc':
-            self.type = ['char']
+            self.type = Char
         elif t == 'upper':
-            self.type = ['int']
+            self.type = Int()
         elif t == 'lower':
-            self.type = ['int']
+            self.type = Int()
         elif t == 'num':
-            self.type = ['int']
-        return self.type[:]
+            self.type = Int()
+        return self.type
 
 class ProcedureStatement(AST):
     def updateContext(self):

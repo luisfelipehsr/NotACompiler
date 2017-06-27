@@ -685,7 +685,7 @@ def main():
     tstList = ["Examples\Example%s.lya" %i for i in r]
     a = Parser()
     for f in tstList:
-        lvm = LVM(debug=True)
+        lvm = LVM(debug=False)
         a.lexer.lineno = 1
         print('\n' + f )
         file = open(f,'r')
