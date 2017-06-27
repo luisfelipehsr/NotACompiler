@@ -9,7 +9,7 @@ class LVM (object):
         self.M = dict()
         self.P = dict()
         self.D = dict()
-        self.H = dict()
+        self.H = list()
         self.pc = 0
         self.sp = 0
 
@@ -412,19 +412,31 @@ def main():
         sys.exit("ERROR: must have one argument specifying file or two:"
                  + "'debug' '#examples'")
 
+    if debug is True:
+        lvm = LVM(debug=True)
+    else:
+        lvm = LVM()
+
     # Executa os arquivos .lvm passados
     for name in files:
         if debug is True:
             print("Executing object ", name)
 
-        # Le comandos do arquivo e os armazena numa lista
+        # Le linhas do arquivo e as armazena numa lista
         codeFile = open(name, 'r')
         codeList = list(codeFile)
+
+        # Adiciona em H as n strings constantes presentes no inicio do arquivo
+        n = codeList[0]
+        n = int(n)
+        for stringLiteral in codeList[1:n+1]:
+            lvm.H += [stringLiteral]
+
         regex = re.compile(r'\((.*)\)')
         regex2 = re.compile(r'[a-zA-Z0-9]+')
         regex3 = re.compile(r'[a-zA-Z]+')
         code = []
-        for line in codeList:
+        for line in codeList[n+1:]:
             cmpregex = regex.match(line)
             command = []
             if cmpregex is not None:
@@ -442,10 +454,6 @@ def main():
         print(code)
 
         # Executa arquivo
-        if debug is True:
-            lvm = LVM(debug=True)
-        else:
-            lvm = LVM()
         lvm.runCode(code)
 
 if __name__ == '__main__':

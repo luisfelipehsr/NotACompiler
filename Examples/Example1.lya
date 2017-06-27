@@ -10,5 +10,5 @@ a = b;
 if c == 99 then
     c+= 1;
 fi;
-print(c,c+1);
+print("valores de c apos a operacao: ", c, "valor incrementado em 1: ", c+1);
 

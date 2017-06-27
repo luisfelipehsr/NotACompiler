@@ -11,6 +11,7 @@ class tColors:
 
 class AST(object):
     semantic = None
+    stringLiterals = []
 
     def __init__(self, *args):
         self.fields = list(args)
@@ -101,6 +102,11 @@ class AST(object):
         AST.semantic.trimToLen(leng)
         return ret
 
+    def addStringLiteral(self, stringToBeAdded):
+        AST.stringLiterals += [stringToBeAdded]
+        return len(AST.stringLiterals) - 1
+
+
     def typeCheck(self):
         return True
 
@@ -115,6 +121,7 @@ class AST(object):
 
     def addTag(self):
         return []
+
 
 class Program(AST):
     def updateContext(self):
@@ -481,6 +488,7 @@ class Location(AST):
             else:
                 ret += [('ldc', symbol.type.subType.value)]
         else:
+            print(type(loc))
             ret += loc.load()
         return ret
 
@@ -691,8 +699,11 @@ class Literal(AST):
     def genCode(self):
         ret = []
         val = self.propType()
-        if isinstance(val,Chars):
-            return ret
+        if isinstance(val,Chars): # Caso de string constante salva em H
+            #k = AST.addStringLiteral(self, val.value)
+            #print(k, AST.stringLiterals[k])
+            #ret += [('sts', k)]
+            ret = []
         elif isinstance(val,Bool):
             ret += [('ldc',val.value)]
         elif isinstance(val,Char):
@@ -1364,6 +1375,10 @@ class CallAction(AST):
             self.type = self.fields[0].propType()
             return self.type
 
+    #TODO terminar
+    def load(self):
+        return []
+
 class ProcedureCall(AST):
 
     def typeCheck(self):
@@ -1476,7 +1491,9 @@ class BuiltinCall(AST):
                 elif isinstance(pType,Char):
                     ret += [('prv', 'True')]
                 elif isinstance(pType,Chars):
-                    ret += []
+                    i = AST.addStringLiteral(self, pType.value)
+                    print(i, pType.value)
+                    ret += [('prc', i)]
 
         if name == 'read':
             for pType in parameterList:

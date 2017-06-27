@@ -44,6 +44,14 @@ def main():
         else:
             codeFile = open("CompiledExamples/" + codeFilename + ".lvm", 'w')
 
+        # adiciona trecho comecado por um valor n, seguido de n linhas.
+        # cada linha eh uma string do heap H
+        text = '{}\n'.format(len(lyaParser.ast.stringLiterals))
+        codeFile.write(text)
+        for stringLiteral in lyaParser.ast.stringLiterals:
+            text = '{}\n'.format(stringLiteral)
+            codeFile.write(text)
+
         # adiciona linha ao arquivo com o comando gerado
         for line in code:
             text = ''
