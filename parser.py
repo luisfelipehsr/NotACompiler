@@ -239,7 +239,10 @@ class Parser(object):
     def p_ResultSpec(self,p):
         """ ResultSpec : RETURNS LPAREN Mode RPAREN 
                        | RETURNS LPAREN Mode LOC RPAREN """
-        p[0] = ResultSpec(p[3])
+        if len(p) == 5:
+            p[0] = ResultSpec(p[3])
+        else:
+            p[0] = ResultSpec(p[3],p[4])
         p[0].setLinespan(p, 3, 3)
 
     def p_FormalParameterList(self,p):
@@ -261,7 +264,10 @@ class Parser(object):
     def p_ParameterSpec(self,p):
         """ ParameterSpec : Mode 
                           | Mode LOC """
-        p[0] = ParameterSpec(p[1])
+        if len(p) == 2:
+            p[0] = ParameterSpec(p[1])
+        else:
+            p[0] = ParameterSpec(p[1],p[2])
         p[0].setLinespan(p, 1, 1)
 
     def p_NewModeStatement(self,p):

@@ -70,12 +70,12 @@ def solveDo(code):
 
 def fix(code):
     for i in range(len(code)):
-        if isinstance(code,tuple):
+        if isinstance(code[i],tuple):
             code[i] = list(code[i])
         else:
-            code[i] = code[i]
-
+            code[i] = [code[i]]
 
 def solve(code):
     solveIf(code)
     solveDo(code)
+    fix(code)
