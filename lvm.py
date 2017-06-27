@@ -4,7 +4,7 @@ import sys
 
 
 class LVM (object):
-    def __init__(self,debug = False):
+    def __init__(self, debug=False):
         self.debug = debug
         self.M = dict()
         self.P = dict()
@@ -249,10 +249,10 @@ class LVM (object):
         return
 
     def prv(self,ischar):
-        if ischar:
+        if ischar == 'True':
             print(chr(self.M[self.sp]))
         else:
-            print(self.M[self.sp])
+            print(int(self.M[self.sp]))
         self.sp -= 1
         self.pc += 1
         return

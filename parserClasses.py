@@ -440,7 +440,7 @@ class Location(AST):
             return self.type
         else:
             fromContext = AST.semantic.lookInContexts(self.fields[0])
-            if fromContext == None:
+            if fromContext is None:
                 self.type = None
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in ' +
@@ -847,7 +847,7 @@ class Operand0(AST):
 
             else:
 
-                if operand1Type == None:
+                if operand1Type is None:
                     return False
 
                 if isinstance(operand1Type,Array):
@@ -1381,7 +1381,7 @@ class ProcedureCall(AST):
             param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
             symbol = AST.semantic.lookInContexts((id,param.toString()))
 
-            if (symbol == None):
+            if symbol is None:
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in' +
                       ' context at ' + tColors.RESET + 'line %s'
@@ -1398,7 +1398,7 @@ class ExitAction(AST):
             return self.type[:]
         else:
             self.type = AST.semantic.lookInContexts(self.fields[0])
-            if (self.type == None):
+            if self.type is None:
                 print(tColors.RED + 'Type Error ' + tColors.RESET + '%s '
                       % (self.fields[0]) + tColors.RED + 'not found in ' +
                       'context at ' + tColors.RESET + 'line %s'
@@ -1468,14 +1468,29 @@ class BuiltinCall(AST):
         ret = []
         name = self.fields[0].fields[0]
         parameterList = self.fields[1].propType().getParameterList()
+        #TODO mais opcoes de print, prt, prc, prs
         if name == 'print':
             for pType in parameterList:
                 if isinstance(pType,Int) or isinstance(pType,Bool):
-                    ret += [('prv',False)]
+                    ret += [('prv', 'False')]
                 elif isinstance(pType,Char):
-                    ret += [('prv',True)]
+                    ret += [('prv', 'True')]
                 elif isinstance(pType,Chars):
                     ret += []
+
+        if name == 'read':
+            for pType in parameterList:
+                if isinstance(pType, Int) or isinstance(pType, Bool)\
+                        or isinstance(pType, Char):
+                    ret += [('rdv')]
+                elif isinstance(pType, Chars):
+                    ret += [('rds')]
+                else:
+                    print(tColors.RED + "ERROR: Couldn't match a type for para"
+                        + "meter in read built-in call")
+
+        #TODO talvez LOWER E UPPER. retornar indice do prim e ultm cara de array
+
         return ret
 
     def recursiveGenCode(self):
