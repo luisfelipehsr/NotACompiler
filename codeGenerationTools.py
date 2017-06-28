@@ -77,13 +77,13 @@ def solveProcedure(code):
             if inst[0] == 'start' and inst[1] == 'procedure':
                 stack.append(i)
             elif inst[0] == 'end' and inst[1] == 'procedure':
-                code.pop(i)
+                code[i] = ('nop')
                 code[stack.pop()] = ('jmp',i)
                 continue
             i += 1
 
 def linkProcedure(code):
-    d = dic()
+    d = dict()
     if isinstance(code, list):
         i = 0
         while i < len(code):
@@ -92,7 +92,7 @@ def linkProcedure(code):
                 d[inst[2]] = i+1
             elif inst[0] == 'procedure' and inst[1] == 'call':
                 code[i] = ('cfu', d[inst[2]])
-
+            i += 1
 
 def fix(code):
     for i in range(len(code)):
