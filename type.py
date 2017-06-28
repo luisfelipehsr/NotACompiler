@@ -168,7 +168,7 @@ class Parameters(Type):
     def getSize(self):
         count = 0
         for param in self.parameterList:
-            cont += param.getSize()
+            count += param.getSize()
         return count
 
     def toString(self):
