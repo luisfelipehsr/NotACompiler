@@ -497,7 +497,7 @@ class Location(AST):
         loc = self.fields[0]
         if not isinstance(loc, AST):
             symbol = AST.semantic.lookInContexts(loc)
-            ret += [('ldr', symbol.pos, symbol.count)]
+            ret += [('ldr', symbol.count,symbol.pos)]
         else:
             ret += loc.reference()
         return ret
