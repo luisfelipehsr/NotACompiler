@@ -1384,6 +1384,8 @@ class StepEnumeration(AST):
             ret += [('ldc',iniVal)]
         ret += self.fields[1].genCode()
         ret += [('stv',id.count,id.pos)]
+        return ret
+
 
     def condition(self):
         id = self.fields[0]
