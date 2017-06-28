@@ -3,10 +3,8 @@ from parserClasses import *
 import ply.yacc as yacc
 from Semantocer import Context
 from lvm import LVM
-from codeGenerationTools import *
 
 class Parser(object):
-
 
     def __init__(self):
         self.lexerHandle = LexerHandle()
