@@ -1,14 +1,18 @@
-/* example2: */
 
-dcl t int;
-t = 4;
-g: proc (t, y, x int);
+dcl a int = 4;
 
-  y = 4;
-  x = 6;
-  t = 3;
-  print(t);
+g: proc (t int) returns (int);
+    if t == 2 then
+        t = 1;
+    elsif t == 3 then
+        t = 99;
+    else
+        t = 42;
+    fi;
+    print(t);
+    return t;
 end;
 
-g(2, t, 9);
-print(t);
+a = g(a);
+a += 4;
+print(a);

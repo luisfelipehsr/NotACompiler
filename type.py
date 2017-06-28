@@ -97,6 +97,9 @@ class Procedure(Type):
     def getParameters(self):
         return self.parameters
 
+    def getSize(self):
+        return 0
+
     def getReturn(self):
         return self.ret
 

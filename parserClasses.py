@@ -189,10 +189,9 @@ class Declaration(AST):
                 v = self.fields[2].propType()
                 if isinstance(v,Synonym):
                     v = v.subType
-                if v.value is not None:
                     ret += [('ldc',v.value)]
-                else:
-                    if first is True:
+                elif v.value is None:
+                    if first == True:
                         first = AST.semantic.lookInContexts(id)
                     else:
                         ret += [('ldv',first.count,first.pos)]
@@ -490,7 +489,6 @@ class Location(AST):
             else:
                 ret += [('ldc', symbol.type.subType.value)]
         else:
-            print(type(loc))
             ret += loc.load()
         return ret
 
@@ -789,8 +787,7 @@ class Expression(AST):
             return self.type
 
     def recursiveGenCode(self):
-        #type = self.propType()
-        self.propType()
+        type = self.propType()
         # if isinstance(type,Int) or isinstance(type,Char) or isinstance(type,Bool):
         #     if type.isConstant():
         #         return []
@@ -1266,10 +1263,16 @@ class ElseClause(AST):
             return True
 
     def addTag(self):
-        return [('start','else')]
+        if len(self.fields) == 1:
+            return [('start','else')]
+        else:
+            return [('start', 'elsif')]
 
     def genCode(self):
-        return [('end','else')]
+        if len(self.fields) == 1:
+            return [('end','else')]
+        else:
+            return [('end', 'elsif')]
 
 class DoAction(AST):
     def updateContext(self):
@@ -1461,9 +1464,9 @@ class CallAction(AST):
             self.type = self.fields[0].propType()
             return self.type
 
-    #TODO terminar
+
     def load(self):
-        return []
+        return self.recursiveGenCode()
 
 class ProcedureCall(AST):
 
@@ -1471,7 +1474,7 @@ class ProcedureCall(AST):
         id = self.fields[0]
         param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
         symbol = AST.semantic.lookInContexts((id, param.toString()))
-        return symbol is not None
+        return symbol != None
 
     def propType(self):
         if self.type is not None:
@@ -1498,8 +1501,18 @@ class ProcedureCall(AST):
         ret += [('procedure','call',symbol.getType().myid)]
         return ret
 
+    def addTag(self):
+        id = self.fields[0]
+        param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
+        symbol = AST.semantic.lookInContexts((id, param.toString()))
+        if not isinstance(symbol.getType().ret, Null):
+            return [('alc',symbol.getType().ret.getSize())]
+        else:
+            return []
+
     def recursiveGenCode(self):
         ret = []
+        ret += self.addTag()
         if len(self.fields) == 2:
             parameters = self.fields[1].fields
             for n in reversed(parameters):
@@ -1509,16 +1522,7 @@ class ProcedureCall(AST):
                             ret += [('ldc',n.propType().value)]
                     else:
                         ret += n.recursiveGenCode()
-        print("current memory: ", AST.semantic.getCurrentMemoryCount())
         ret += self.genCode()
-        size = 0
-        for parameter in self.fields[1].fields:
-            #print(parameter.propType().getSize())
-            if isinstance(parameter, AST) and parameter.propType().value is None:
-
-            size += parameter.propType().getSize()
-            AST.semantic.removeFromContext()
-        ret += [('dlc', size)]
         return ret
 
 class ExitAction(AST):
@@ -1548,6 +1552,23 @@ class ReturnAction(AST):
             self.type = self.fields[1].propType()
             return self.type[:]
 
+    def addTag(self):
+        symbol = AST.semantic.lookInContexts('return')
+        if isinstance(symbol.getType(), Int) or isinstance(symbol.getType(), Char) or isinstance(symbol.getType(),Bool):
+            return []
+        else:
+            return [('ldr',symbol.count,symbol.pos)]
+
+    def genCode(self):
+        ret = []
+        symbol = AST.semantic.lookInContexts('return')
+        if isinstance(symbol.getType(),Int) or isinstance(symbol.getType(),Char) or isinstance(symbol.getType(),Bool):
+            ret += [('stv',symbol.count,symbol.pos)]
+        else:
+            ret += [('smv',symbol.getType().getSize())]
+        ret += [('return','to')]
+        return ret
+
 class ResultAction(AST):
     def propType(self):
         if len(self.type) > 0:
@@ -1555,6 +1576,22 @@ class ResultAction(AST):
         else:
             self.type = self.fields[0].propType()
             return self.type[:]
+
+    def addTag(self):
+        symbol = AST.semantic.lookInContexts('return')
+        if isinstance(symbol.getType(), Int) or isinstance(symbol.getType(), Char) or isinstance(symbol.getType(),Bool):
+            return []
+        else:
+            return [('ldr',symbol.count,symbol.pos)]
+
+    def genCode(self):
+        ret = []
+        symbol = AST.semantic.lookInContexts('return')
+        if isinstance(symbol.getType(),Int) or isinstance(symbol.getType(),Char) or isinstance(symbol.getType(),Bool):
+            ret += [('stv',symbol.count,symbol.pos)]
+        else:
+            ret += [('smv',symbol.getType().getSize())]
+        return ret
 
 class BuiltinCall(AST):
 
@@ -1666,16 +1703,13 @@ class BuiltinName(AST):
             self.type = Int()
         return self.type
 
-#TODO consertar contexto sendo incrementado antes de terminar de passar parametros
 class ProcedureStatement(AST):
     def updateContext(self):
         id = self.fields[0]
         type = self.fields[1].propType()
         s = Symbol(id,type)
         AST.semantic.addToContext(s)
-        print(id, AST.semantic.contextList)
         self.context = AST.semantic.pushContext(real='True')
-
 
     def addTag(self):
         k = self.fields[1].propType().myid
@@ -1689,7 +1723,7 @@ class ProcedureStatement(AST):
         parameterSize = procedure.parameters.getSize()
         menCount = AST.semantic.getCurrentMemoryCount()
         ret = []
-        #ret += [('dlc', menCount - parameterSize)]
+        ret += [('return','here')]
         ret += [('dlc', menCount)]
         ret += [('ret', procedure.myid, parameterSize)]
         ret += [('end','procedure',procedure.myid)]
@@ -1697,23 +1731,29 @@ class ProcedureStatement(AST):
 
     def recursiveGenCode(self):
         ret = []
+        id = self.fields[0]
+        type = self.fields[1].propType()
         pDefinition = self.fields[1]
         parameters = pDefinition.fields[0]
-        print(type(parameters))
+        leng = AST.semantic.contextLen()
+        s = Symbol(id, type)
+        AST.semantic.addToContext(s)
+
+        AST.semantic.pushContext()
+        if not isinstance(type.ret,Null):
+            AST.semantic.addToContext(Symbol('return',type.ret))
         if isinstance(parameters,FormalParameterList):
             ret += parameters.recursiveGenCode()
-        print("Update context on procedure")
-        self.updateContext()
+
+        self.context = AST.semantic.pushContext(real='True')
+
         ret += self.addTag()
-        print(pDefinition.fields)
         for f in pDefinition.fields:
             if not isinstance(f, FormalParameterList):
                 ret += f.recursiveGenCode()
         ret += self.genCode()
+        AST.semantic.trimToLen(leng)
         return ret
-
-
-
 
 class ProcedureDefinition(AST):
     def propType(self):
@@ -1745,7 +1785,6 @@ class FormalParameterList(AST):
             self.type = Parameters(self.type)
             return self.type
 
-
 class FormalParameter(AST):
     def propType(self):
         if self.type is not None:
@@ -1761,7 +1800,10 @@ class FormalParameter(AST):
         for id in self.fields[0].fields:
             AST.semantic.addToContext(Symbol(id,
                                   self.fields[1].propType()))
-            print(AST.semantic.totalContext)
+
+    def recursiveGenCode(self):
+        self.updateContext()
+        return []
 
 class ParameterSpec(AST):
     def propType(self):
@@ -1780,3 +1822,4 @@ class ResultSpec(AST):
         else:
             self.type = self.fields[0].propType()
             return self.type
+

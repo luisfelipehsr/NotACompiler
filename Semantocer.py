@@ -22,29 +22,20 @@ class Context(object):
         symbol.pos = self.memoryCount[-1]
         if not isinstance(symbol.type,Synonym):
             self.memoryCount[-1] += symbol.type.getSize()
-
-    def removeFromContext(self, symbol):
-        if not isinstance(symbol,Symbol):
-            raise TypeError('Only symbols can be removed from a context')
-        #print(symbol.type)
-        self.contextList[-1][symbol.getId()] = symbol
-        if isinstance(self.contextList[-1], dict):
-            self.contextList[-1].pop(symbol.getId())
-
-        if not isinstance(symbol.type,Synonym):
-            self.memoryCount[-1] -= symbol.type.getSize()
-        return
-
+        
     def getFromContext(self,id):
         return self.contextList[-1][id]
 
     def pushContext(self,real='False'):
         self.contextList.append(dict())
-        self.memoryCount.append(0)
-        self.contextId.append(self.totalContext)
         if real == 'True':
+            self.contextId.append(self.totalContext)
             self.totalContext += 1
-        print('Pushed New Context')
+            self.memoryCount.append(0)
+        else:
+            self.contextId.append(self.contextId[-1])
+            self.memoryCount.append(self.memoryCount[-1])
+        #print('Pushed New Context',real)
         return self.contextList[-1]
 
     def popContext(self):

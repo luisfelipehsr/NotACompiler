@@ -137,9 +137,7 @@ class LVM (object):
         return
 
     def neq(self):
-        res = self.M[self.sp - 1] != self.M[self.sp]
-        print(self.M[self.sp - 1], self.M[self.sp])
-        self.M[self.sp - 1] = res
+        self.M[self.sp - 1] = self.M[self.sp - 1] != self.M[self.sp]
         self.sp -= 1
         self.pc += 1
         return
@@ -148,7 +146,7 @@ class LVM (object):
         self.pc = p
         return
 
-    def jof(self, p):
+    def jof(self,p):
         if not self.M[self.sp]:
             self.pc = p
         else:
@@ -254,9 +252,9 @@ class LVM (object):
 
     def prv(self,ischar):
         if ischar == 'True':
-            print(chr(self.M[self.sp]), end='')
+            print(chr(self.M[self.sp]),'')
         else:
-            print(int(self.M[self.sp]), end='')
+            print(int(self.M[self.sp]),'')
         self.sp -= 1
         self.pc += 1
         return
@@ -268,7 +266,7 @@ class LVM (object):
         return
 
     def prc(self,i):
-        print(self.H[i], end='')
+        print(self.H[i],'')
         self.pc += 1
 
     def prs(self):
@@ -295,7 +293,7 @@ class LVM (object):
         return True
 
     def runInst(self, instruction):
-        print(instruction)
+        #print(instruction)
         if instruction[0] == 'ldc':
             self.ldc(instruction[1])
         elif instruction[0] == 'ldv':
@@ -395,10 +393,15 @@ class LVM (object):
             if not self.runInst(code[self.pc]): # Executa comando na posicao pc
                 break
             elif self.debug:
-                print('Stack = '+str(self.M))
-                print('D = ' + str(self.D))
+                print(code[self.pc])
+                print('Stack = ')
+                for i in reversed(range(self.sp+1)):
+                    print(self.M[i])
+                print('D = '+str(self.D))
                 print('Sp = ' + str(self.sp))
                 print('Pc = ' + str(self.pc))
+                input("Press Enter to continue...")
+
             continue
 
 # Metodo principal do script

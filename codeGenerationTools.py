@@ -10,15 +10,37 @@ def solveIf(code):
                     continue
                 elif inst[1] == 'then':
                     stack.append(i)
+                elif inst[1] == 'else':
+                    add = stack.pop()
+                    code[add] = ('jof', i)
+                    code[i] = ('nop')
+                    continue
+                elif inst[1] == 'elsif':
+                    add = stack.pop()
+                    code[add] = ('jof', i)
+                    code[i] = ('nop')
+                    continue
+
             elif inst[0] == 'end':
                 if inst[1] == 'if':
-                    code.pop(i)
+                    if len(stack) > 0:
+                        add = stack.pop()
+                        code[add] = ('jof', i)
+                    code[i] = ('nop')
                     continue
-                elif inst[1] == 'then':
-                    add = stack.pop()
-                    code[add] = ('jof',i)
-                    code.pop(i)
-                    continue
+            i += 1
+
+def solveIfLinkage(code):
+    stack = []
+    if isinstance(code, list):
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'end' and inst[1] == 'then':
+                stack.append(i)
+            elif inst[0] == 'end' and inst[1] == 'if':
+                for p in stack:
+                    code[p] = ('jmp',i)
             i += 1
 
 def solveDoJmpBack(code):
@@ -64,7 +86,6 @@ def solveDoCleanUp(code):
             i += 1
 
 def solveDo(code):
-    solveDoCleanUp(code)
     solveDoJmpBack(code)
     solveDoJmpOut(code)
 
@@ -94,6 +115,21 @@ def linkProcedure(code):
                 code[i] = ('cfu', d[inst[2]])
             i += 1
 
+def returnProcedure(code):
+    stack = []
+    if isinstance(code, list):
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'return' and inst[1] == 'to':
+                stack.append(i)
+            elif inst[0] == 'return' and inst[1] == 'here':
+                for p in stack:
+                    code[p] = ('jmp', i)
+                code.pop(i)
+                continue
+            i += 1
+
 def fix(code):
     for i in range(len(code)):
         if isinstance(code[i],tuple):
@@ -102,8 +138,11 @@ def fix(code):
             code[i] = [code[i]]
 
 def solve(code):
+    solveDoCleanUp(code)
+    solveIfLinkage(code)
     solveIf(code)
     solveDo(code)
-    #linkProcedure(code)
-    #solveProcedure(code)
+    returnProcedure(code)
+    linkProcedure(code)
+    solveProcedure(code)
     fix(code)
