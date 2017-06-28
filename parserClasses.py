@@ -1682,6 +1682,23 @@ class ProcedureStatement(AST):
         ret += [('end','procedure',procedure.myid)]
         return ret
 
+    def recursiveGenCode(self):
+        ret = []
+        pDefinition = self.fields[1]
+        parameters = pDefinition.fields[1]
+        if isinstance(parameters,FormalParameterList):
+            ret += parameters.recursiveGenCode()
+        self.updateContext()
+        ret += self.addTag()
+        for f in pDefinition.fields:
+            if not isinstance(parameters, FormalParameterList):
+                ret += f.recursiveGenCode()
+        ret += self.genCode()
+        return ret
+
+
+
+
 class ProcedureDefinition(AST):
     def propType(self):
         if self.type is not None:
@@ -1697,7 +1714,11 @@ class ProcedureDefinition(AST):
             self.type = Procedure(self.fields[0].propType(),self.fields[1].propType())
         return self.type
 
+    def recursiveGenCode(self):
+        return []
+
 class FormalParameterList(AST):
+
     def propType(self):
         if self.type is not None:
             return self.type
@@ -1707,6 +1728,7 @@ class FormalParameterList(AST):
                 self.type += [x.propType()]
             self.type = Parameters(self.type)
             return self.type
+
 
 class FormalParameter(AST):
     def propType(self):
