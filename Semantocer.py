@@ -4,8 +4,10 @@ class Context(object):
 
     def __init__(self):
         self.contextList = []
+        self.contextId = []
         self.memoryCount = []
         self.functionCount = 0
+        self.totalContext = 0
 
     def addToContext(self,symbol):
         #print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
@@ -16,7 +18,7 @@ class Context(object):
             self.functionCount += 1
             symbol.type.myid = self.functionCount
         self.contextList[-1][symbol.getId()] = symbol
-        symbol.count = len(self.contextList) - 1
+        symbol.count = self.contextId[-1]
         symbol.pos = self.memoryCount[-1]
         if not isinstance(symbol.type,Synonym):
             self.memoryCount[-1] += symbol.type.getSize()
@@ -24,15 +26,19 @@ class Context(object):
     def getFromContext(self,id):
         return self.contextList[-1][id]
 
-    def pushContext(self):
+    def pushContext(self,real='False'):
         self.contextList.append(dict())
         self.memoryCount.append(0)
+        self.contextId.append(self.totalContext)
+        if real == 'True':
+            self.totalContext += 1
         #print('Pushed New Context')
         return self.contextList[-1]
 
     def popContext(self):
         self.contextList.pop()
         self.memoryCount.pop()
+        self.contextId.pop()
         #print('Poped Context')
 
     def lookInContexts(self,id):

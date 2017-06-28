@@ -90,7 +90,7 @@ def fix(code):
             code[i] = [code[i]]
 
 def solve(code):
-    solveIf(code)
-    solveDo(code)
+    #solveIf(code)
+    #solveDo(code)
     #solveProcedure(code)
     fix(code)

@@ -127,7 +127,7 @@ class AST(object):
 
 class Program(AST):
     def updateContext(self):
-        self.context = AST.semantic.pushContext()
+        self.context = AST.semantic.pushContext(real='True')
 
     def addTag(self):
         return [('stp')]
@@ -1466,7 +1466,6 @@ class ProcedureCall(AST):
         symbol = AST.semantic.lookInContexts((id, param.toString()))
         return symbol != None
 
-
     def propType(self):
         if self.type is not None:
             return self.type
@@ -1481,8 +1480,30 @@ class ProcedureCall(AST):
                       ' context at ' + tColors.RESET + 'line %s'
                       % (self.linespan[0]))
             else:
-                self.type = symbol.getType()
+                self.type = symbol.getType().getReturn()
             return self.type
+
+    def genCode(self):
+        ret = []
+        id = self.fields[0]
+        param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
+        symbol = AST.semantic.lookInContexts((id, param.toString()))
+        ret += [('procedure','call',symbol.getType().myid)]
+        return ret
+
+    def recursiveGenCode(self):
+        ret = []
+        if len(self.fields) == 2:
+            parameters = self.fields[1].fields
+            for n in reversed(parameters):
+                if isinstance(n, AST):
+                    if n.propType().value is not None:
+                        if isinstance(n.propType(),Int) or isinstance(n.propType(),Bool) or isinstance(n.propType(),Char):
+                            ret += [('ldc',n.propType().value)]
+                    else:
+                        ret += n.recursiveGenCode()
+        ret += self.genCode()
+        return ret
 
 class ExitAction(AST):
     # <ExitAction> ::= EXIT ID
@@ -1635,7 +1656,7 @@ class ProcedureStatement(AST):
         type = self.fields[1].propType()
         s = Symbol(id,type)
         AST.semantic.addToContext(s)
-        self.context = AST.semantic.pushContext()
+        self.context = AST.semantic.pushContext(real='True')
 
 
     def addTag(self):
