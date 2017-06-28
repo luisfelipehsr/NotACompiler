@@ -4,6 +4,7 @@ class Context(object):
 
     def __init__(self):
         self.contextList = []
+        self.contextParameters = []
         self.contextId = []
         self.memoryCount = []
         self.contextType = []
@@ -20,9 +21,10 @@ class Context(object):
         self.contextList[-1][symbol.getId()] = symbol
         symbol.count = self.contextId[-1]
         if  symbol.count > 0:
-            symbol.pos = self.memoryCount[-1] - 3
+            symbol.pos = self.memoryCount[-1] - self.contextParameters[-1]
             if flag:
                 symbol.pos = -self.memoryCount[-1]-3
+                self.contextParameters[-1] += 1
         else:
             symbol.pos = self.memoryCount[-1]
 
@@ -40,9 +42,11 @@ class Context(object):
             self.contextId.append(self.totalContext)
             self.totalContext += 1
             self.memoryCount.append(0)
+            self.contextParameters.append(0)
         else:
             self.contextId.append(self.contextId[-1])
             self.memoryCount.append(self.memoryCount[-1])
+            self.contextParameters.append(self.contextParameters[-1])
         print('Pushed New Context',real)
         return self.contextList[-1]
 
@@ -55,6 +59,7 @@ class Context(object):
         self.contextList.pop()
         self.contextId.pop()
         self.contextType.pop()
+        self.contextParameters.pop()
         print('Poped Context')
 
     def lookInContexts(self,id):

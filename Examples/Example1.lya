@@ -2,18 +2,22 @@
 
 
 fat: proc (n,p,q int) returns (int);
-  dcl theta,omega int = 4;
+  dcl theta, omega, gama, cama int = 4;
   if n==0 then
     return 1;
   else
     return n * fat (n-1,p,q);
   fi;
+  do
+    for c = 2 to 5;
+       print(c);
+  od;
 end;
 
 dcl x,y int;
 print("give-me a positive integer:");
 read(x);
-print("fatorial of ", x, " = ", fat(x,y,y));
+fat(x,y,y)
 
 
 
