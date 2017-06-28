@@ -8,16 +8,12 @@ fat: proc (n,p,q int) returns (int);
   else
     return n * fat (n-1,p,q);
   fi;
-  do
-    for c = 2 to 5;
-       print(c);
-  od;
 end;
 
 dcl x,y int;
 print("give-me a positive integer:");
 read(x);
-fat(x,y,y)
+fat(x,y,y);
 
 
 

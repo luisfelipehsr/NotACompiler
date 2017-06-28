@@ -5,10 +5,7 @@ def solveIf(code):
         while i < len(code):
             inst = code[i]
             if inst[0] == 'start':
-                if inst[1] == 'if':
-                    code.pop(i)
-                    continue
-                elif inst[1] == 'then':
+                if inst[1] == 'then':
                     stack.append(i)
                 elif inst[1] == 'else':
                     add = stack.pop()
@@ -80,7 +77,8 @@ def solveDoCleanUp(code):
         i = 0
         while i < len(code):
             inst = code[i]
-            if inst[0] == 'start' and (inst[1] == 'update' or inst[1] == 'do'):
+            if inst[0] == 'start' and (inst[1] == 'update' or inst[1] == 'do' or inst[1] == 'if') \
+                    or inst[0] == 'end' and (inst[1] == 'else'):
                 code.pop(i)
                 continue
             i += 1
