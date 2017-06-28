@@ -685,6 +685,10 @@ class PrimitiveValue(AST):
     def load(self):
         return []
 
+    def reference(self):
+        print(tColors.RED +'Cant find reference to PrimitiveValue',self.linespan)
+        return []
+
     def recursiveGenCode(self):
         loc = self.fields[0]
         return loc.recursiveGenCode()
@@ -738,6 +742,7 @@ class ValueArraySlice(AST):
             return self.type[:]
 
 class Expression(AST):
+
     def propType(self):
         if self.type is not None:
             return self.type
@@ -751,6 +756,9 @@ class Expression(AST):
         #     if type.isConstant():
         #         return []
         return self.fields[0].recursiveGenCode()
+
+    def reference(self):
+        return self.fields[0].reference()
 
 class ConditionalExpression(AST):
     def typeCheck(self):
@@ -918,6 +926,13 @@ class Operand0(AST):
                 ret += [('leq')]
         return ret
 
+    def reference(self):
+        if len(self.fields) == 1:
+            return self.fields[0].reference()
+        else:
+            print(tColors.RED +'Code generation Error cant find reference to expression',self.linespan)
+            return []
+
 class Operator1(AST):
     _fields = ['Operator']
 
@@ -971,11 +986,16 @@ class Operand1(AST):
                 return ret
         return ret
 
+    def reference(self):
+        if len(self.fields) == 1:
+            return self.fields[0].reference()
+        else:
+            print(tColors.RED +'Code generation Error cant find reference to expression',self.linespan)
+            return []
+
 class Operator2(AST):
     def genCode(self):
         ret = []
-
-
         return ret
 
 class Operand2(AST):
@@ -1024,6 +1044,13 @@ class Operand2(AST):
             return ret
         return ret
 
+    def reference(self):
+        if len(self.fields) == 1:
+            return self.fields[0].reference()
+        else:
+            print(tColors.RED +'Code generation Error cant find reference to expression',self.linespan)
+            return []
+
 class Operand3(AST):
     def typeCheck(self):
         if len(self.fields) == 1:
@@ -1055,6 +1082,13 @@ class Operand3(AST):
             return ret
         return ret
 
+    def reference(self):
+        if len(self.fields) == 1:
+            return self.fields[0].reference()
+        else:
+            print(tColors.RED +'Code generation Error cant find reference to expression',self.linespan)
+            return []
+
 class Operand4(AST):
     def propType(self):
         if self.type is not None:
@@ -1068,6 +1102,13 @@ class Operand4(AST):
         if isinstance(loc,Location):
             return loc.load()
         return loc.recursiveGenCode()
+
+    def reference(self):
+        if len(self.fields) == 1:
+            return self.fields[0].reference()
+        else:
+            print(tColors.RED +'Code generation Error cant find reference to expression',self.linespan)
+            return []
 
 class ReferencedLocation(AST):
     def propType(self):
@@ -1506,6 +1547,7 @@ class BuiltinCall(AST):
                 else:
                     print(tColors.RED + "ERROR: Couldn't match a type for para"
                         + "meter in read built-in call")
+            ret += [('smv',len(parameterList))]
 
         #TODO talvez LOWER E UPPER. retornar indice do prim e ultm cara de array
 
@@ -1513,10 +1555,14 @@ class BuiltinCall(AST):
 
     def recursiveGenCode(self):
         ret = []
+        name = self.fields[0].fields[0]
         parameterList = self.fields[1].fields
         for n in reversed(parameterList):
             if isinstance(n, AST):
-                ret += n.recursiveGenCode()
+                if name == 'read':
+                    ret += n.reference()
+                else:
+                    ret += n.recursiveGenCode()
         ret += self.genCode()
         return ret
 

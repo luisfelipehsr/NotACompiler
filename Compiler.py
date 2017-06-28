@@ -1,4 +1,4 @@
-import Parser as lya
+import parserlya as lya
 import codeGenerationTools as cgt
 import sys
 
