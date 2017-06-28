@@ -102,4 +102,4 @@ class Context(object):
             self.popContext()
 
     def getCurrentMemoryCount(self):
-        return self.memoryCount[-1]
+        return self.memoryCount[-1] - self.contextParameters[-1]

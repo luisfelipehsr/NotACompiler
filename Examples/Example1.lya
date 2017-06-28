@@ -11,9 +11,10 @@ fat: proc (n,p,q int) returns (int);
 end;
 
 dcl x,y int;
+y = 2;
 print("give-me a positive integer:");
 read(x);
-fat(x,y,y);
+x = fat(x,y,y);
 
 
 
