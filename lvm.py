@@ -393,10 +393,14 @@ class LVM (object):
             if not self.runInst(code[self.pc]): # Executa comando na posicao pc
                 break
             elif self.debug:
-                print('Stack = '+str(self.M))
+                print(code[self.pc])
+                print('Stack = ')
+                for i in reversed(range(self.sp+1)):
+                    print(self.M[i])
                 print('D = '+str(self.D))
                 print('Sp = ' + str(self.sp))
                 print('Pc = ' + str(self.pc))
+                input("Press Enter to continue...")
 
             continue
 

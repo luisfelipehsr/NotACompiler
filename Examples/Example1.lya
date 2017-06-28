@@ -1,8 +1,7 @@
 /* example2: */
 syn size int = 5;
-dcl a,b array[0:5] int;
+dcl a,b array[0:size] int;
 dcl c int;
-dcl t chars[5];
 
 a[size-1] = 99;
 c = a[4];
@@ -12,10 +11,11 @@ if c == 99 then
     c+= 1;
 fi;
 
-read(t);
+read(c);
 print("valores de c apos a operacao: ", c, " valor incrementado em 1: ", c+1);
 print(c-33);
 c = c-1;
-print(t);
+
+
 
 

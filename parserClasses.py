@@ -189,9 +189,8 @@ class Declaration(AST):
                 v = self.fields[2].propType()
                 if isinstance(v,Synonym):
                     v = v.subType
-                if v.value is not None:
                     ret += [('ldc',v.value)]
-                else:
+                elif v.value is None:
                     if first == True:
                         first = AST.semantic.lookInContexts(id)
                     else:
@@ -1762,6 +1761,10 @@ class FormalParameter(AST):
         for id in self.fields[0].fields:
             AST.semantic.addToContext(Symbol(id,
                                   self.fields[1].propType()))
+
+    def recursiveGenCode(self):
+        self.updateContext()
+        return []
 
 class ParameterSpec(AST):
     def propType(self):

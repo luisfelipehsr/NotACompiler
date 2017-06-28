@@ -1,6 +1,5 @@
-/* example2: */
 
-dcl t int = 2;
+dcl a int = 2;
 
 g: proc (t int);
     if t == 2 then
@@ -13,6 +12,6 @@ g: proc (t int);
     print(t);
 end;
 
-g(t);
-t += 4;
-print(t);
+g(a);
+a += 4;
+print(a);

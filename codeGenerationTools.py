@@ -39,7 +39,7 @@ def solveIfLinkage(code):
                 stack.append(i)
             elif inst[0] == 'end' and inst[1] == 'if':
                 for p in stack:
-                    code[p] = ('jmp',i+1)
+                    code[p] = ('jmp',i)
                 code.pop(i)
                 continue
             i += 1
