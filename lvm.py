@@ -137,7 +137,9 @@ class LVM (object):
         return
 
     def neq(self):
-        self.M[self.sp - 1] = self.M[self.sp - 1] != self.M[self.sp]
+        res = self.M[self.sp - 1] != self.M[self.sp]
+        print(self.M[self.sp - 1], self.M[self.sp])
+        self.M[self.sp - 1] = res
         self.sp -= 1
         self.pc += 1
         return
@@ -146,7 +148,7 @@ class LVM (object):
         self.pc = p
         return
 
-    def jof(self,p):
+    def jof(self, p):
         if not self.M[self.sp]:
             self.pc = p
         else:
@@ -293,7 +295,7 @@ class LVM (object):
         return True
 
     def runInst(self, instruction):
-        #print(instruction)
+        print(instruction)
         if instruction[0] == 'ldc':
             self.ldc(instruction[1])
         elif instruction[0] == 'ldv':
@@ -394,6 +396,7 @@ class LVM (object):
                 break
             elif self.debug:
                 print('Stack = '+str(self.M))
+                print('D = ' + str(self.D))
                 print('Sp = ' + str(self.sp))
                 print('Pc = ' + str(self.pc))
             continue

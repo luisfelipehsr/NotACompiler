@@ -1,25 +1,14 @@
 /* example2: */
 
-dcl z,t int;
-
-g: proc (t int);
-  dcl x,y,z,k int;
-  dcl a array[0:10,0:10] int;
-  t *= 2;
-  x  = 2*t;
-  z  = x+1;
-end;
-
-f: proc (a int);
-  dcl x,y,z,k int;
-  a *= 2;
-  x  = 2*a;
-  z  = x+1;
-end;
-
-g(2);
-
-f(z);
-
-z = 3;
+dcl t int;
 t = 4;
+g: proc (t, y, x int);
+
+  y = 4;
+  x = 6;
+  t = 3;
+  print(t);
+end;
+
+g(2, t, 9);
+print(t);

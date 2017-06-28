@@ -104,6 +104,6 @@ def fix(code):
 def solve(code):
     solveIf(code)
     solveDo(code)
-    linkProcedure(code)
-    solveProcedure(code)
+    #linkProcedure(code)
+    #solveProcedure(code)
     fix(code)

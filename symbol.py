@@ -1,6 +1,6 @@
 from type import *
 class Symbol(object):
-    def __init__(self,id,type):
+    def __init__(self, id, type):
         if not isinstance(type,Type):
             raise TypeError('Type %s must be a valid Type-class' %(type))
         if isinstance(type,Procedure):

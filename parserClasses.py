@@ -192,7 +192,7 @@ class Declaration(AST):
                 if v.value is not None:
                     ret += [('ldc',v.value)]
                 else:
-                    if first == True:
+                    if first is True:
                         first = AST.semantic.lookInContexts(id)
                     else:
                         ret += [('ldv',first.count,first.pos)]
@@ -789,7 +789,8 @@ class Expression(AST):
             return self.type
 
     def recursiveGenCode(self):
-        type = self.propType()
+        #type = self.propType()
+        self.propType()
         # if isinstance(type,Int) or isinstance(type,Char) or isinstance(type,Bool):
         #     if type.isConstant():
         #         return []
@@ -1470,7 +1471,7 @@ class ProcedureCall(AST):
         id = self.fields[0]
         param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
         symbol = AST.semantic.lookInContexts((id, param.toString()))
-        return symbol != None
+        return symbol is not None
 
     def propType(self):
         if self.type is not None:
@@ -1508,7 +1509,16 @@ class ProcedureCall(AST):
                             ret += [('ldc',n.propType().value)]
                     else:
                         ret += n.recursiveGenCode()
+        print("current memory: ", AST.semantic.getCurrentMemoryCount())
         ret += self.genCode()
+        size = 0
+        for parameter in self.fields[1].fields:
+            #print(parameter.propType().getSize())
+            if isinstance(parameter, AST) and parameter.propType().value is None:
+
+            size += parameter.propType().getSize()
+            AST.semantic.removeFromContext()
+        ret += [('dlc', size)]
         return ret
 
 class ExitAction(AST):
@@ -1656,12 +1666,14 @@ class BuiltinName(AST):
             self.type = Int()
         return self.type
 
+#TODO consertar contexto sendo incrementado antes de terminar de passar parametros
 class ProcedureStatement(AST):
     def updateContext(self):
         id = self.fields[0]
         type = self.fields[1].propType()
         s = Symbol(id,type)
         AST.semantic.addToContext(s)
+        print(id, AST.semantic.contextList)
         self.context = AST.semantic.pushContext(real='True')
 
 
@@ -1677,7 +1689,8 @@ class ProcedureStatement(AST):
         parameterSize = procedure.parameters.getSize()
         menCount = AST.semantic.getCurrentMemoryCount()
         ret = []
-        ret += [('dlc', menCount - parameterSize)]
+        #ret += [('dlc', menCount - parameterSize)]
+        ret += [('dlc', menCount)]
         ret += [('ret', procedure.myid, parameterSize)]
         ret += [('end','procedure',procedure.myid)]
         return ret
@@ -1685,13 +1698,16 @@ class ProcedureStatement(AST):
     def recursiveGenCode(self):
         ret = []
         pDefinition = self.fields[1]
-        parameters = pDefinition.fields[1]
+        parameters = pDefinition.fields[0]
+        print(type(parameters))
         if isinstance(parameters,FormalParameterList):
             ret += parameters.recursiveGenCode()
+        print("Update context on procedure")
         self.updateContext()
         ret += self.addTag()
+        print(pDefinition.fields)
         for f in pDefinition.fields:
-            if not isinstance(parameters, FormalParameterList):
+            if not isinstance(f, FormalParameterList):
                 ret += f.recursiveGenCode()
         ret += self.genCode()
         return ret
@@ -1745,6 +1761,7 @@ class FormalParameter(AST):
         for id in self.fields[0].fields:
             AST.semantic.addToContext(Symbol(id,
                                   self.fields[1].propType()))
+            print(AST.semantic.totalContext)
 
 class ParameterSpec(AST):
     def propType(self):
