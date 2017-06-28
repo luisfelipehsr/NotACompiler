@@ -10,6 +10,8 @@ a = b;
 if c == 99 then
     c+= 1;
 fi;
+read(c);
+print(c);
 print("valores de c apos a operacao: ", c, " valor incrementado em 1: ", c+1);
 print(c-33);
 print(b[1]);
