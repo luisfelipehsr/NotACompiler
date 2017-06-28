@@ -1738,15 +1738,11 @@ class ProcedureStatement(AST):
         leng = AST.semantic.contextLen()
         s = Symbol(id, type)
         AST.semantic.addToContext(s)
-
-        AST.semantic.pushContext()
-        if not isinstance(type.ret,Null):
-            AST.semantic.addToContext(Symbol('return',type.ret))
+        AST.semantic.pushContext(real='True')
         if isinstance(parameters,FormalParameterList):
             ret += parameters.recursiveGenCode()
-
-        self.context = AST.semantic.pushContext(real='True')
-
+        if not isinstance(type.ret,Null):
+            AST.semantic.addToContext(Symbol('return',type.ret),flag=True)
         ret += self.addTag()
         for f in pDefinition.fields:
             if not isinstance(f, FormalParameterList):
@@ -1797,9 +1793,10 @@ class FormalParameter(AST):
             return self.type
 
     def updateContext(self):
-        for id in self.fields[0].fields:
-            AST.semantic.addToContext(Symbol(id,
-                                  self.fields[1].propType()))
+        for id in reversed(self.fields[0].fields):
+            aux = Symbol(id,self.fields[1].propType())
+            AST.semantic.addToContext(aux,flag=True)
+
 
     def recursiveGenCode(self):
         self.updateContext()

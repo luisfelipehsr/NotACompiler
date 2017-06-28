@@ -1,20 +1,19 @@
-/* example2: */
-syn size int = 5;
-dcl a,b array[0:size] int;
-dcl c int;
+/* Compute the fatorial of an integer */
 
-a[size-1] = 99;
-c = a[4];
-a[1] = c;
-a = b;
-if c == 99 then
-    c+= 1;
-fi;
 
-read(c);
-print("valores de c apos a operacao: ", c, " valor incrementado em 1: ", c+1);
-print(c-33);
-c = c-1;
+fat: proc (n,p,q int) returns (int);
+  dcl theta,omega int = 4;
+  if n==0 then
+    return 1;
+  else
+    return n * fat (n-1,p,q);
+  fi;
+end;
+
+dcl x,y int;
+print("give-me a positive integer:");
+read(x);
+print("fatorial of ", x, " = ", fat(x,y,y));
 
 
 

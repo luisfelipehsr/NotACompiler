@@ -6,20 +6,27 @@ class Context(object):
         self.contextList = []
         self.contextId = []
         self.memoryCount = []
+        self.contextType = []
         self.functionCount = 0
         self.totalContext = 0
 
-    def addToContext(self,symbol):
-        #print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
+    def addToContext(self,symbol,flag=False):
+        print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
         if not isinstance(symbol,Symbol):
             raise TypeError('Only symbols can be added to a context')
-        #print(symbol.type)
         if isinstance(symbol.type,Procedure):
             self.functionCount += 1
             symbol.type.myid = self.functionCount
         self.contextList[-1][symbol.getId()] = symbol
         symbol.count = self.contextId[-1]
-        symbol.pos = self.memoryCount[-1]
+        if  symbol.count > 0:
+            symbol.pos = self.memoryCount[-1] - 3
+            if flag:
+                symbol.pos = -self.memoryCount[-1]-3
+        else:
+            symbol.pos = self.memoryCount[-1]
+
+        print(symbol.count,symbol.pos)
         if not isinstance(symbol.type,Synonym):
             self.memoryCount[-1] += symbol.type.getSize()
         
@@ -28,6 +35,7 @@ class Context(object):
 
     def pushContext(self,real='False'):
         self.contextList.append(dict())
+        self.contextType.append(real)
         if real == 'True':
             self.contextId.append(self.totalContext)
             self.totalContext += 1
@@ -35,14 +43,19 @@ class Context(object):
         else:
             self.contextId.append(self.contextId[-1])
             self.memoryCount.append(self.memoryCount[-1])
-        #print('Pushed New Context',real)
+        print('Pushed New Context',real)
         return self.contextList[-1]
 
     def popContext(self):
+        if self.contextType[-1] == 'False':
+            aux = self.memoryCount.pop()
+            self.memoryCount[-1] = aux
+        else:
+            self.memoryCount.pop()
         self.contextList.pop()
-        self.memoryCount.pop()
         self.contextId.pop()
-        #print('Poped Context')
+        self.contextType.pop()
+        print('Poped Context')
 
     def lookInContexts(self,id):
         for a in reversed(range(len(self.contextList))):
