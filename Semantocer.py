@@ -11,11 +11,12 @@ class Context(object):
         #print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
         if not isinstance(symbol,Symbol):
             raise TypeError('Only symbols can be added to a context')
+        #print(symbol.type)
         if isinstance(symbol.type,Procedure):
             self.functionCount += 1
             symbol.type.myid = self.functionCount
         self.contextList[-1][symbol.getId()] = symbol
-        symbol.cont = len(self.contextList)
+        symbol.count = len(self.contextList) - 1
         symbol.pos = self.memoryCount[-1]
         if not isinstance(symbol.type,Synonym):
             self.memoryCount[-1] += symbol.type.getSize()

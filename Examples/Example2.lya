@@ -3,7 +3,8 @@
 dcl z,t int;
 
 g: proc (t int);
-  dcl x int;
+  dcl x,y,z,k int;
+  dcl a array[0:10,0:10] int;
   t *= 2;
   x  = 2*t;
   z  = x+1;
@@ -11,7 +12,3 @@ end;
 
 z = 3;
 t = 4;
-g(t); print(z,t); "sakdlsakdals (z) sadasdsada"
-g(z); print(z,t);
-g(t+z); print(z,t);
-g(7); print(z,t);

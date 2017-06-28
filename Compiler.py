@@ -35,7 +35,7 @@ def main():
         if debug is True:
             lyaParser.ast.buildGraph("CompiledExamples/" + name)
         code = lyaParser.ast.recursiveGenCode() # gera pre-codigo do programa
-        cgt.solveIf(code) # adiciona pulos no codigo para ifs
+        cgt.solve(code) # adiciona pulos no codigo para ifs
 
         # constroi arquivo de saida
         codeFilename = name[:(len(name) - 4)]

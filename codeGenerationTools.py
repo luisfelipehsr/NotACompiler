@@ -68,6 +68,20 @@ def solveDo(code):
     solveDoJmpBack(code)
     solveDoJmpOut(code)
 
+def solveProcedure(code):
+    stack = []
+    if isinstance(code, list):
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'start' and inst[1] == 'procedure':
+                stack.append(i)
+            elif inst[0] == 'end' and inst[1] == 'procedure':
+                code.pop(i)
+                code[stack.pop()] = ('jmp',i)
+                continue
+            i += 1
+
 def fix(code):
     for i in range(len(code)):
         if isinstance(code[i],tuple):
@@ -78,4 +92,5 @@ def fix(code):
 def solve(code):
     solveIf(code)
     solveDo(code)
+    #solveProcedure(code)
     fix(code)

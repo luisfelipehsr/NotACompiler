@@ -1632,10 +1632,11 @@ class ProcedureStatement(AST):
         AST.semantic.addToContext(s)
         self.context = AST.semantic.pushContext()
 
+
     def addTag(self):
         k = self.fields[1].propType().myid
         ret = []
-        ret += [('start', 'procedure')]
+        ret += [('start', 'procedure',k)]
         ret += [('enf', k)]
         return ret
 
@@ -1646,6 +1647,7 @@ class ProcedureStatement(AST):
         ret = []
         ret += [('dlc', menCount - parameterSize)]
         ret += [('ret', procedure.myid, parameterSize)]
+        ret += [('end','procedure',procedure.myid)]
         return ret
 
 class ProcedureDefinition(AST):

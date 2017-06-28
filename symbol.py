@@ -5,8 +5,7 @@ class Symbol(object):
             raise TypeError('Type %s must be a valid Type-class' %(type))
         if isinstance(type,Procedure):
             self.id = (id,type.getParameters().toString())
-            self.type = type.getReturn()
-            self.parameters = type.getParameters()
+            self.type = type
         else:
             self.id = id
             self.type = type
