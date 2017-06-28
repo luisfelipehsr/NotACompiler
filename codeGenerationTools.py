@@ -5,27 +5,25 @@ def solveIf(code):
         while i < len(code):
             inst = code[i]
             if inst[0] == 'start':
-                if inst[1] == 'if':
-                    code.pop(i)
-                    continue
-                elif inst[1] == 'then':
+                if inst[1] == 'then':
                     stack.append(i)
                 elif inst[1] == 'else':
-                    code.pop(i)
+                    add = stack.pop()
+                    code[add] = ('jof', i)
+                    code[i] = ('nop')
                     continue
                 elif inst[1] == 'elsif':
-                    code.pop(i)
+                    add = stack.pop()
+                    code[add] = ('jof', i)
+                    code[i] = ('nop')
                     continue
 
             elif inst[0] == 'end':
-                if inst[1] == 'then':
-                    add = stack.pop()
-                    code[add] = ('jof',i)
-                elif inst[1] == 'else':
-                    code.pop(i)
-                    continue
-                elif inst[1] == 'elsif':
-                    code.pop(i)
+                if inst[1] == 'if':
+                    if len(stack) > 0:
+                        add = stack.pop()
+                        code[add] = ('jof', i)
+                    code[i] = ('nop')
                     continue
             i += 1
 
@@ -40,8 +38,6 @@ def solveIfLinkage(code):
             elif inst[0] == 'end' and inst[1] == 'if':
                 for p in stack:
                     code[p] = ('jmp',i)
-                code.pop(i)
-                continue
             i += 1
 
 def solveDoJmpBack(code):
@@ -81,7 +77,8 @@ def solveDoCleanUp(code):
         i = 0
         while i < len(code):
             inst = code[i]
-            if inst[0] == 'start' and (inst[1] == 'update' or inst[1] == 'do'):
+            if (inst[0] == 'start' and (inst[1] == 'update' or inst[1] == 'do' or inst[1] == 'if'))\
+                    or inst[0] == 'end' and (inst[1] == 'else' or inst[1] == 'elsif'):
                 code.pop(i)
                 continue
             i += 1
@@ -140,8 +137,8 @@ def fix(code):
 
 def solve(code):
     solveDoCleanUp(code)
-    solveIf(code)
     solveIfLinkage(code)
+    solveIf(code)
     solveDo(code)
     returnProcedure(code)
     linkProcedure(code)

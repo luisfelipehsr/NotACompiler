@@ -1,5 +1,5 @@
 
-dcl a int = 2;
+dcl a int = 4;
 
 g: proc (t int) returns (int);
     if t == 2 then
@@ -13,6 +13,6 @@ g: proc (t int) returns (int);
     return t;
 end;
 
-g(2);
+a = g(a);
 a += 4;
 print(a);

@@ -489,7 +489,6 @@ class Location(AST):
             else:
                 ret += [('ldc', symbol.type.subType.value)]
         else:
-            print(type(loc))
             ret += loc.load()
         return ret
 
@@ -1465,9 +1464,9 @@ class CallAction(AST):
             self.type = self.fields[0].propType()
             return self.type
 
-    #TODO terminar
+
     def load(self):
-        return []
+        return self.recursiveGenCode()
 
 class ProcedureCall(AST):
 
