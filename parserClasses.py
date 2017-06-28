@@ -193,7 +193,6 @@ class Declaration(AST):
                 else:
                     if first == True:
                         first = AST.semantic.lookInContexts(id)
-                        print('first')
                     else:
                         ret += [('ldv',first.count,first.pos)]
         return ret
@@ -1794,7 +1793,7 @@ class FormalParameter(AST):
             return self.type
 
     def updateContext(self):
-        for id in reversed(self.fields[0].fields):
+        for id in self.fields[0].fields:
             aux = Symbol(id,self.fields[1].propType())
             AST.semantic.addToContext(aux,flag=True)
 
