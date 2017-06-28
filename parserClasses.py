@@ -1374,12 +1374,16 @@ class StepEnumeration(AST):
             return a.equals(b) and b.equals(c)
 
     def initialization(self):
+        ret = []
+        id = self.fields[0]
         self.updateContext()
+        id = AST.semantic.lookInContexts(id)
         init = self.fields[1]
         iniVal = init.propType().value
         if  iniVal is not None:
-            return [('ldc',iniVal)]
-        return self.fields[1].genCode()
+            ret += [('ldc',iniVal)]
+        ret += self.fields[1].genCode()
+        ret += [('stv',id.count,id.pos)]
 
     def condition(self):
         id = self.fields[0]
