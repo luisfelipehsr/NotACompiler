@@ -174,8 +174,8 @@ class LVM (object):
 
     def enf(self,k):
         self.sp += 1
-        if k not in D:
-            D[k] = 0
+        if k not in self.D:
+            self.D[k] = 0
         self.M[self.sp] = self.D[k]
         self.D[k] = self.sp + 1
         self.pc += 1
