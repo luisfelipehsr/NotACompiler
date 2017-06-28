@@ -19,9 +19,10 @@ def main():
                  + "'debug' '#examples total'")
 
     # Gera arquivos compilados de cada arquivo .lya passado
-    lyaParser = lya.Parser()
     for name in files:
+        lyaParser = lya.Parser()
         lyaParser.lexer.lineno = 1
+        lya.AST.stringLiterals = [r'\n']
         print('\n' + name )
         if debug is False:
             file = open(name,'r')

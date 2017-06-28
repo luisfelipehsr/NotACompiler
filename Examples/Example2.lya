@@ -11,7 +11,7 @@ end;
 
 z = 3;
 t = 4;
-g(t); print(z,t); "sakdlsakdals (z) sadasdsada"
+g(t); print(z,t);
 g(z); print(z,t);
 g(t+z); print(z,t);
 g(7); print(z,t);
