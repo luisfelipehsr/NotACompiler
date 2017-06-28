@@ -82,6 +82,9 @@ def solveProcedure(code):
                 continue
             i += 1
 
+#def linkProcedure(code):
+
+
 def fix(code):
     for i in range(len(code)):
         if isinstance(code[i],tuple):
