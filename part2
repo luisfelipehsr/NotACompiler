@@ -18,7 +18,7 @@ declaração de qq coisa vc adiciona ela ao contexto e põe seu tipo e offset (v
 
 
 
-chamada de função dá call function > alocate > enter function > código > return function
+chamada de função dá enter function > alocate > call function > código > return function
 
 quando você acha alguem q pode ter um contexto (for, while), vc cria um contexto, adiciona quem precisa.
 na hora de usar variaveis, ve se tem no contexto atual, se não, olha no de cima.

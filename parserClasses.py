@@ -11,14 +11,16 @@ class tColors:
 
 class AST(object):
     semantic = None
-    stringLiterals = [r'\n']
+    stringLiterals = None
 
     def __init__(self, *args):
         self.fields = list(args)
         self.type = None
         self.linespan = None
         self.context = None
-     
+
+
+
     def setLinespan(self, p, start, end):
         s = p.linespan(start)[0]
         e = p.linespan(end)[1]
@@ -1568,9 +1570,12 @@ class BuiltinCall(AST):
                 elif isinstance(pType,Char):
                     ret += [('prv', 'True')]
                 elif isinstance(pType,Chars):
-                    i = AST.addStringLiteral(self, pType.value)
-                    print(i, pType.value)
-                    ret += [('prc', i)]
+                    if pType.value is None:
+                        ret += [('prs')]
+                    else:
+                        i = AST.addStringLiteral(self, pType.value)
+                        print(i, pType.value)
+                        ret += [('prc', i)]
             ret += [('prc', 0)]
 
         if name == 'read':

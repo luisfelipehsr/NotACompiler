@@ -233,7 +233,7 @@ class LVM (object):
 
     def rdv(self,):
         self.sp += 1
-        self.M[self.sp] = input()
+        self.M[self.sp] = eval(input())
         self.pc += 1
         return
 
@@ -412,15 +412,16 @@ def main():
         sys.exit("ERROR: must have one argument specifying file or two:"
                  + "'debug' '#examples'")
 
-    if debug is True:
-        lvm = LVM(debug=True)
-    else:
-        lvm = LVM()
-
     # Executa os arquivos .lvm passados
     for name in files:
         if debug is True:
             print("Executing object ", name)
+
+        # Inicia LVM
+        if debug is True:
+            lvm = LVM(debug=True)
+        else:
+            lvm = LVM()
 
         # Le linhas do arquivo e as armazena numa lista
         codeFile = open(name, 'r')
