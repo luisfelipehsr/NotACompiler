@@ -82,7 +82,16 @@ def solveProcedure(code):
                 continue
             i += 1
 
-#def linkProcedure(code):
+def linkProcedure(code):
+    d = dic()
+    if isinstance(code, list):
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'start' and inst[1] == 'procedure':
+                d[inst[2]] = i+1
+            elif inst[0] == 'procedure' and inst[1] == 'call':
+                code[i] = ('cfu', d[inst[2]])
 
 
 def fix(code):
@@ -93,7 +102,8 @@ def fix(code):
             code[i] = [code[i]]
 
 def solve(code):
-    #solveIf(code)
-    #solveDo(code)
-    #solveProcedure(code)
+    solveIf(code)
+    solveDo(code)
+    linkProcedure(code)
+    solveProcedure(code)
     fix(code)
