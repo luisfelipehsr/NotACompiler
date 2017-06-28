@@ -1632,6 +1632,22 @@ class ProcedureStatement(AST):
         AST.semantic.addToContext(s)
         self.context = AST.semantic.pushContext()
 
+    def addTag(self):
+        k = self.fields[1].propType().myid
+        ret = []
+        ret += [('start', 'procedure')]
+        ret += [('enf', k)]
+        return ret
+
+    def genCode(self):
+        procedure = self.fields[1].propType()
+        parameterSize = procedure.parameters.getSize()
+        menCount = AST.semantic.getCurrentMemoryCount()
+        ret = []
+        ret += [('dlc', menCount - parameterSize)]
+        ret += [('ret', procedure.myid, parameterSize)]
+        return ret
+
 class ProcedureDefinition(AST):
     def propType(self):
         if self.type is not None:

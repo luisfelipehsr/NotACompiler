@@ -91,6 +91,7 @@ class Procedure(Type):
             raise TypeError('param %s must be of type Param and ret %s must be of type Type' %(param,ret))
         self.parameters = param
         self.ret = ret
+        self.myid = 0
         self.string = 'Procedure'
 
     def getParameters(self):
@@ -164,6 +165,12 @@ class Parameters(Type):
     def getParameterList(self):
         return self.parameterList
 
+    def getSize(self):
+        count = 0
+        for param in self.parameterList:
+            cont += param.getSize()
+        return count
+
     def toString(self):
         ret = '( '
         for t in self.parameterList:
@@ -221,6 +228,9 @@ class ModeType(Type):
 class Null(Type):
     def __init__(self):
         self.string = 'Null'
+
+    def getSize(self):
+        return 0
 
 class Synonym(Type):
     def __init__(self,t):
