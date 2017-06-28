@@ -252,9 +252,9 @@ class LVM (object):
 
     def prv(self,ischar):
         if ischar == 'True':
-            print(chr(self.M[self.sp]), end='')
+            print(chr(self.M[self.sp]),'')
         else:
-            print(int(self.M[self.sp]), end='')
+            print(int(self.M[self.sp]),'')
         self.sp -= 1
         self.pc += 1
         return
@@ -266,7 +266,7 @@ class LVM (object):
         return
 
     def prc(self,i):
-        print(self.H[i], end='')
+        print(self.H[i],'')
         self.pc += 1
 
     def prs(self):

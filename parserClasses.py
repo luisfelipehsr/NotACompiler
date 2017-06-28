@@ -1677,23 +1677,34 @@ class ProcedureStatement(AST):
         parameterSize = procedure.parameters.getSize()
         menCount = AST.semantic.getCurrentMemoryCount()
         ret = []
-        ret += [('dlc', menCount - parameterSize)]
+        ret += [('dlc', menCount)]
         ret += [('ret', procedure.myid, parameterSize)]
         ret += [('end','procedure',procedure.myid)]
         return ret
 
     def recursiveGenCode(self):
         ret = []
+        id = self.fields[0]
+        type = self.fields[1].propType()
         pDefinition = self.fields[1]
-        parameters = pDefinition.fields[1]
+        parameters = pDefinition.fields[0]
+        leng = AST.semantic.contextLen()
+        s = Symbol(id, type)
+        AST.semantic.addToContext(s)
+
+        AST.semantic.pushContext()
+
         if isinstance(parameters,FormalParameterList):
             ret += parameters.recursiveGenCode()
-        self.updateContext()
+
+        self.context = AST.semantic.pushContext(real='True')
+
         ret += self.addTag()
         for f in pDefinition.fields:
-            if not isinstance(parameters, FormalParameterList):
+            if not isinstance(f, FormalParameterList):
                 ret += f.recursiveGenCode()
         ret += self.genCode()
+        AST.semantic.trimToLen(leng)
         return ret
 
 
