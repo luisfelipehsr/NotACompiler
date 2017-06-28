@@ -190,9 +190,10 @@ class Declaration(AST):
                 if isinstance(v,Synonym):
                     v = v.subType
                     ret += [('ldc',v.value)]
-                elif v.value is None:
+                else:
                     if first == True:
                         first = AST.semantic.lookInContexts(id)
+                        print('first')
                     else:
                         ret += [('ldv',first.count,first.pos)]
         return ret
