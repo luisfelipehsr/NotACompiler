@@ -250,9 +250,9 @@ class LVM (object):
 
     def prv(self,ischar):
         if ischar == 'True':
-            print(chr(self.M[self.sp]))
+            print(chr(self.M[self.sp]), end='')
         else:
-            print(int(self.M[self.sp]))
+            print(int(self.M[self.sp]), end='')
         self.sp -= 1
         self.pc += 1
         return
@@ -264,7 +264,7 @@ class LVM (object):
         return
 
     def prc(self,i):
-        print(self.H[i])
+        print(self.H[i], end='')
         self.pc += 1
 
     def prs(self):
@@ -291,7 +291,7 @@ class LVM (object):
         return True
 
     def runInst(self, instruction):
-        print(instruction)
+        #print(instruction)
         if instruction[0] == 'ldc':
             self.ldc(instruction[1])
         elif instruction[0] == 'ldv':
@@ -429,9 +429,12 @@ def main():
         # Adiciona em H as n strings constantes presentes no inicio do arquivo
         n = codeList[0]
         n = int(n)
-        for stringLiteral in codeList[1:n+1]:
+        lvm.H += ["\n"]
+        for stringLiteral in codeList[2:n+1]:
+            tam = len(stringLiteral)
+            stringLiteral = stringLiteral[:tam-1]
             lvm.H += [stringLiteral]
-
+        print(lvm.H)
         regex = re.compile(r'\((.*)\)')
         regex2 = re.compile(r'[a-zA-Z0-9]+')
         regex3 = re.compile(r'[a-zA-Z]+')

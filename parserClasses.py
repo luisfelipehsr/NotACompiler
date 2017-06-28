@@ -11,7 +11,7 @@ class tColors:
 
 class AST(object):
     semantic = None
-    stringLiterals = []
+    stringLiterals = [r'\n']
 
     def __init__(self, *args):
         self.fields = list(args)
@@ -1494,6 +1494,7 @@ class BuiltinCall(AST):
                     i = AST.addStringLiteral(self, pType.value)
                     print(i, pType.value)
                     ret += [('prc', i)]
+            ret += [('prc', 0)]
 
         if name == 'read':
             for pType in parameterList:

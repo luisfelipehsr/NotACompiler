@@ -1,6 +1,7 @@
-2
+3
+\n
 valores de c apos a operacao: 
-valor incrementado em 1: 
+ valor incrementado em 1: 
 ('stp')
 ('alc', 5)
 ('alc', 5)
@@ -38,8 +39,20 @@ valor incrementado em 1:
 ('ldc', 1)
 ('add')
 ('ldv', 0, 10)
-('prc', 0)
-('prv', 'False')
 ('prc', 1)
 ('prv', 'False')
+('prc', 2)
+('prv', 'False')
+('prc', 0)
+('ldv', 0, 10)
+('ldc', 33)
+('sub')
+('prv', 'False')
+('prc', 0)
+('ldr', 5, 0)
+('ldc', 1)
+('idx', 1)
+('grc')
+('prv', 'False')
+('prc', 0)
 ('end')
