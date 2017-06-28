@@ -1,12 +1,12 @@
 /* example2: */
 
-dcl t int;
+dcl t int = 2;
 
 g: proc (t int);
     t = 1;
+    print(t);
 end;
 
 g(t);
-
-
-t = 4;
+t += 4;
+print(t);

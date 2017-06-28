@@ -394,8 +394,10 @@ class LVM (object):
                 break
             elif self.debug:
                 print('Stack = '+str(self.M))
+                print('D = '+str(self.D))
                 print('Sp = ' + str(self.sp))
                 print('Pc = ' + str(self.pc))
+                input()
             continue
 
 # Metodo principal do script

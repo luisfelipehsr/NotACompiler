@@ -10,7 +10,7 @@ class Context(object):
         self.totalContext = 0
 
     def addToContext(self,symbol):
-        print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
+        #print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
         if not isinstance(symbol,Symbol):
             raise TypeError('Only symbols can be added to a context')
         #print(symbol.type)
@@ -35,14 +35,14 @@ class Context(object):
         else:
             self.contextId.append(self.contextId[-1])
             self.memoryCount.append(self.memoryCount[-1])
-        print('Pushed New Context',real)
+        #print('Pushed New Context',real)
         return self.contextList[-1]
 
     def popContext(self):
         self.contextList.pop()
         self.memoryCount.pop()
         self.contextId.pop()
-        print('Poped Context')
+        #print('Poped Context')
 
     def lookInContexts(self,id):
         for a in reversed(range(len(self.contextList))):
