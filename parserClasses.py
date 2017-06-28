@@ -641,7 +641,7 @@ class ExpressionList(AST):
     _fields = ['Expression', 'ExpressionList']
 
 class ArraySlice(AST):
-    #TODO Tests
+
     def typeCheck(self):
         mode = self.fields[0].propType()
         exprx = self.fields[1].propType()
@@ -650,7 +650,7 @@ class ArraySlice(AST):
             return exprx.isConstant() and expry.isConstant()
         else:
             return False
-    #TODO Tests
+
     def propType(self):
 
         if self.type is not None:
@@ -662,17 +662,53 @@ class ArraySlice(AST):
             ret = Array(mode.subType,Range(exprx.value,expry.value,subRange=mode.range.subRange))
             self.type = ret
             return ret
-    #TODO Finish
+
     def load(self):
-        exprx = self.fields[1]
-        expry = self.fields[2]
-    #TODO Finish
+        ret = []
+        location = self.fields[0].reference()
+        locationType = self.fields[0].propType()
+        exprx = self.fields[1].propType().value
+        expry = self.fields[2].propType().value
+        k = exprx - expry
+        rng = locationType.range
+        ret += location
+        ret += [('ldc', exprx)]
+        if rng.begin.value != 0:
+            ret += [('ldc', rng.begin.value)]
+            ret += [('sub')]
+        ret += [('idx', locationType.subType.getSize())]
+        ret += [('lmv',k)]
+
     def store(self):
-        exprx = self.fields[1]
-        expry = self.fields[2]
-    #TODO Finish
+        ret = []
+        location = self.fields[0].reference()
+        locationType = self.fields[0].propType()
+        exprx = self.fields[1].propType().value
+        expry = self.fields[2].propType().value
+        k = exprx - expry
+        rng = locationType.range
+        ret += location
+        ret += [('ldc', exprx)]
+        if rng.begin.value != 0:
+            ret += [('ldc', rng.begin.value)]
+            ret += [('sub')]
+        ret += [('idx', locationType.subType.getSize())]
+        ret += [('smv', k)]
+
     def reference(self):
-        return []
+        ret = []
+        location = self.fields[0].reference()
+        locationType = self.fields[0].propType()
+        exprx = self.fields[1].propType().value
+        expry = self.fields[2].propType().value
+        k = exprx - expry
+        rng = locationType.range
+        ret += location
+        ret += [('ldc', exprx)]
+        if rng.begin.value != 0:
+            ret += [('ldc', rng.begin.value)]
+            ret += [('sub')]
+        ret += [('idx', locationType.subType.getSize())]
 
 class PrimitiveValue(AST):
     def propType(self):
@@ -1565,8 +1601,6 @@ class BuiltinCall(AST):
                     ret += n.recursiveGenCode()
         ret += self.genCode()
         return ret
-
-
 
 class BuiltinName(AST):
 

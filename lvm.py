@@ -231,7 +231,7 @@ class LVM (object):
         self.pc += 1
         return
 
-    def rdv(self):
+    def rdv(self,):
         self.sp += 1
         self.M[self.sp] = input()
         self.pc += 1
