@@ -53,7 +53,7 @@ def solveDoJmpBack(code):
             if inst[0] == 'start':
                 if inst[1] == 'condition':
                     stack.append(i)
-                    code.pop(i)
+                    code[i] = ('nop')
                     continue
 
             if inst[0] == 'end':
@@ -72,7 +72,7 @@ def solveDoJmpOut(code):
             elif inst[0] == 'end' and inst[1] == 'do':
                 add = stack.pop()
                 code[add] = ('jof',i)
-                code.pop(i)
+                code[i] = ('nop')
                 continue
             i+= 1
 
@@ -87,7 +87,6 @@ def solveDoCleanUp(code):
             i += 1
 
 def solveDo(code):
-    solveDoCleanUp(code)
     solveDoJmpBack(code)
     solveDoJmpOut(code)
 
@@ -117,6 +116,21 @@ def linkProcedure(code):
                 code[i] = ('cfu', d[inst[2]])
             i += 1
 
+def returnProcedure(code):
+    stack = []
+    if isinstance(code, list):
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'return' and inst[1] == 'to':
+                stack.append(i)
+            elif inst[0] == 'return' and inst[1] == 'here':
+                for p in stack:
+                    code[p] = ('jmp', i)
+                code.pop(i)
+                continue
+            i += 1
+
 def fix(code):
     for i in range(len(code)):
         if isinstance(code[i],tuple):
@@ -125,9 +139,11 @@ def fix(code):
             code[i] = [code[i]]
 
 def solve(code):
+    solveDoCleanUp(code)
     solveIf(code)
     solveIfLinkage(code)
     solveDo(code)
+    returnProcedure(code)
     linkProcedure(code)
     solveProcedure(code)
     fix(code)
