@@ -1265,10 +1265,16 @@ class ElseClause(AST):
             return True
 
     def addTag(self):
-        return [('start','else')]
+        if len(self.fields) == 1:
+            return [('start','else')]
+        else:
+            return [('start', 'elsif')]
 
     def genCode(self):
-        return [('end','else')]
+        if len(self.fields) == 1:
+            return [('end','else')]
+        else:
+            return [('end', 'elsif')]
 
 class DoAction(AST):
     def updateContext(self):

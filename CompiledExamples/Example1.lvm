@@ -36,6 +36,7 @@ valores de c apos a operacao:
 ('ldc', 1)
 ('add')
 ('stv', 0, 10)
+('jmp', 36)
 ('ldr', 0, 11)
 ('rds')
 ('smv', 1)

@@ -10,15 +10,38 @@ def solveIf(code):
                     continue
                 elif inst[1] == 'then':
                     stack.append(i)
-            elif inst[0] == 'end':
-                if inst[1] == 'if':
+                elif inst[1] == 'else':
                     code.pop(i)
                     continue
-                elif inst[1] == 'then':
+                elif inst[1] == 'elsif':
+                    code.pop(i)
+                    continue
+
+            elif inst[0] == 'end':
+                if inst[1] == 'then':
                     add = stack.pop()
                     code[add] = ('jof',i)
+                elif inst[1] == 'else':
                     code.pop(i)
                     continue
+                elif inst[1] == 'elsif':
+                    code.pop(i)
+                    continue
+            i += 1
+
+def solveIfLinkage(code):
+    stack = []
+    if isinstance(code, list):
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'end' and inst[1] == 'then':
+                stack.append(i)
+            elif inst[0] == 'end' and inst[1] == 'if':
+                for p in stack:
+                    code[p] = ('jmp',i+1)
+                code.pop(i)
+                continue
             i += 1
 
 def solveDoJmpBack(code):
@@ -103,6 +126,7 @@ def fix(code):
 
 def solve(code):
     solveIf(code)
+    solveIfLinkage(code)
     solveDo(code)
     linkProcedure(code)
     solveProcedure(code)

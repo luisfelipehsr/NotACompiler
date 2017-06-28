@@ -3,7 +3,13 @@
 dcl t int = 2;
 
 g: proc (t int);
-    t = 1;
+    if t == 2 then
+        t = 1;
+    elsif t == 3 then
+        t = 99;
+    else
+        t = 42;
+    fi;
     print(t);
 end;
 
