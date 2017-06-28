@@ -397,7 +397,7 @@ class LVM (object):
                 print('D = '+str(self.D))
                 print('Sp = ' + str(self.sp))
                 print('Pc = ' + str(self.pc))
-                input()
+
             continue
 
 # Metodo principal do script
