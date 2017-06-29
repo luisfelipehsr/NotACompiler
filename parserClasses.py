@@ -976,7 +976,7 @@ class Operand0(AST):
             elif op ==  '>':
                 ret += [('grt')]
             elif op ==  '<':
-                ret += [('less')]
+                ret += [('les')]
             elif op ==  '>=':
                 ret += [('gre')]
             elif op ==  '<=':
@@ -1135,7 +1135,7 @@ class Operand3(AST):
     def genCode(self):
         ret = []
         if len(self.fields) == 2:
-            op = self.fields[1]
+            op = self.fields[0]
             if op == '-':
                 ret += [('neg')]
             else:
@@ -1571,16 +1571,18 @@ class ProcedureCall(AST):
             param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
             symbol = AST.semantic.lookInContexts((id, param.toString()))
             parameters = self.fields[1].fields
-            for i in reversed(range(len(parameters))):
+            #for i in reversed(range(len(parameters))): #TODO REVERSED
+            for i in range(len(parameters)):
                 n = parameters[i]
                 if isinstance(n, AST):
                     nType = n.propType()
-                    print(symbol.type.parameters.getParameterList())
+                    #print(symbol.type.parameters.getParameterList())
                     pType = symbol.type.parameters.parameterList[i]
                     if nType.value is not None:
                         if isinstance(nType,Int) or isinstance(nType,Bool)\
                                 or isinstance(nType,Char):
-                            ret += [('ldc',nType.value)]
+                            #ret += [('ldc',nType.value)]
+                            ret += n.recursiveGenCode()
                     else:
                         if isinstance(nType,Int) or isinstance(nType,Bool)\
                                 or isinstance(nType,Char):
@@ -1622,6 +1624,7 @@ class ExitAction(AST):
 class ReturnAction(AST):
     def typeCheck(self):
         myType = self.propType()
+        #print(AST.semantic.contextList)
         symbol = AST.semantic.lookInContexts('return')
         print(symbol.type, myType)
         return symbol.type.equals(myType)
@@ -1639,6 +1642,8 @@ class ReturnAction(AST):
 
     def addTag(self):
         symbol = AST.semantic.lookInContexts('return')
+        if symbol is None:
+            return []
         if isinstance(symbol.getType(), Int) or isinstance(symbol.getType(), Char) or isinstance(symbol.getType(),Bool):
             return []
         else:
@@ -1647,7 +1652,11 @@ class ReturnAction(AST):
     def genCode(self):
         ret = []
         symbol = AST.semantic.lookInContexts('return')
-        if isinstance(symbol.getType(),Int) or isinstance(symbol.getType(),Char) or isinstance(symbol.getType(),Bool):
+        if symbol is None:
+            return [('return','to')]
+        if isinstance(symbol.getType(),Int) or \
+                isinstance(symbol.getType(),Char) or \
+                isinstance(symbol.getType(),Bool):
             ret += [('stv',symbol.count,symbol.pos)]
         else:
             ret += [('smv',symbol.getType().getSize())]
@@ -1727,7 +1736,7 @@ class BuiltinCall(AST):
         parameterList = self.fields[1].propType().getParameterList()
         #TODO mais opcoes de print, prt, prc, prs
         if name == 'print':
-            for pType in parameterList:
+            for pType in reversed(parameterList): #TODO reversed
                 if isinstance(pType,Int) or isinstance(pType,Bool):
                     ret += [('prv', 'False')]
                 elif isinstance(pType,Char):
@@ -1743,7 +1752,7 @@ class BuiltinCall(AST):
 
         if name == 'read':
             print(parameterList)
-            for pType in parameterList:
+            for pType in parameterList: #TODO REVERSED
                 if isinstance(pType, Int) or isinstance(pType, Bool)\
                         or isinstance(pType, Char):
                     ret += [('rdv')]
@@ -1764,12 +1773,27 @@ class BuiltinCall(AST):
         name = self.fields[0].fields[0]
         parameterList = self.fields[1].fields
 
-        for n in reversed(parameterList):
-            if isinstance(n, AST):
-                if name == 'read':
+        # for n in reversed(parameterList): #TODO REVERSED
+        # #for n in parameterList:
+        #     if isinstance(n, AST):
+        #         if name == 'read':
+        #             ret += n.reference()
+        #         else:
+        #             ret += n.recursiveGenCode()
+        if name == 'read':
+            for n in reversed(parameterList):
+                if isinstance(n, AST):
                     ret += n.reference()
-                else:
+        elif name == 'print':
+            for n in parameterList:
+                if isinstance(n, AST):
                     ret += n.recursiveGenCode()
+        # #for n in parameterList:
+        #     if isinstance(n, AST):
+        #         if name == 'read':
+        #             ret += n.reference()
+        #         else:
+        #             ret += n.recursiveGenCode()
         ret += self.genCode()
         return ret
 
@@ -1877,6 +1901,15 @@ class FormalParameterList(AST):
             self.type = Parameters(self.type)
             return self.type
 
+    # TODO added to try and reverse parameter order
+    def recursiveGenCode(self):
+        ret = []
+        for n in reversed(self.fields):
+            if isinstance(n,AST):
+                ret += n.recursiveGenCode()
+        return ret
+
+
 class FormalParameter(AST):
     def propType(self):
         if self.type is not None:
@@ -1889,7 +1922,9 @@ class FormalParameter(AST):
             return self.type
 
     def updateContext(self):
-        for id in self.fields[0].fields:
+        #TODO reversed
+        #for id in self.fields[0].fields:
+        for id in reversed(self.fields[0].fields):
             aux = Symbol(id,self.fields[1].propType())
             AST.semantic.addToContext(aux,flag=True)
 
