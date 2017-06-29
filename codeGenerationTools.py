@@ -18,7 +18,6 @@ def solveIf(code):
                     code[i] = ('nop')
 
             elif inst[0] == 'end':
-                print('end', i)
                 if inst[1] == 'if':
                     if len(stack) > 0:
                         add = stack.pop()
