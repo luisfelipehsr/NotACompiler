@@ -13,7 +13,7 @@ class Context(object):
         self.totalContext = 0
 
     def addToContext(self,symbol,flag=False):
-        print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
+        #print('Added %s of type %s of total size %d' %(symbol.id,symbol.type.toString(),symbol.type.getSize()))
         if not isinstance(symbol,Symbol):
             raise TypeError('Only symbols can be added to a context')
         if isinstance(symbol.type,Procedure):
@@ -32,7 +32,7 @@ class Context(object):
         else:
             symbol.pos = self.memoryCount[-1]
 
-        print(symbol.count,symbol.pos)
+        #print(symbol.count,symbol.pos)
         if not isinstance(symbol.type,Synonym):
             self.memoryCount[-1] += symbol.type.getSize()
         
