@@ -1524,10 +1524,14 @@ class ProcedureCall(AST):
         ret = []
         ret += self.addTag()
         if len(self.fields) == 2:
+            param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
+            symbol = AST.semantic.lookInContexts((id, param.toString()))
             parameters = self.fields[1].fields
-            for n in reversed(parameters):
+            for i in reversed(range(len(parameters))):
+                n = parameters[i]
                 if isinstance(n, AST):
                     nType = n.propType()
+                    pType = symbol.type.parameters.parameterList[i]
                     if nType.value is not None:
                         if isinstance(nType,Int) or isinstance(nType,Bool)\
                                 or isinstance(nType,Char):
@@ -1535,7 +1539,7 @@ class ProcedureCall(AST):
                     else:
                         if isinstance(nType,Int) or isinstance(nType,Bool)\
                                 or isinstance(nType,Char):
-                            if nType.local:
+                            if pType.local:
                                 ret += n.reference()
                             else:
                                 ret = n.recursiveGenCode()
