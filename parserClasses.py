@@ -1636,10 +1636,8 @@ class ReturnAction(AST):
         #print(AST.semantic.contextList)
         symbol = AST.semantic.lookInContexts('return')
         #print(symbol.type, myType)
-        if myType is None and symbol is None:
-            return True
-        elif myType is None:
-            return False
+        if isinstance(myType,Null):
+            return isinstance(symbol.type,Null)
         return symbol.type.equals(myType)
 
     def propType(self):
@@ -1655,7 +1653,7 @@ class ReturnAction(AST):
 
     def addTag(self):
         symbol = AST.semantic.lookInContexts('return')
-        if symbol is None:
+        if isinstance(symbol.type,Null):
             return []
         if isinstance(symbol.getType(), Int) or isinstance(symbol.getType(), Char) or isinstance(symbol.getType(),Bool):
             return []
