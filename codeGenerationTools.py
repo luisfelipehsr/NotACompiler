@@ -18,6 +18,7 @@ def solveIf(code):
                     code[i] = ('nop')
 
             elif inst[0] == 'end':
+                print('end', i)
                 if inst[1] == 'if':
                     if len(stack) > 0:
                         add = stack.pop()
@@ -47,7 +48,7 @@ def solveDoJmpBack(code):
             if inst[0] == 'start':
                 if inst[1] == 'condition':
                     stack.append(i)
-                    code.pop(i)
+                    code[i] = ('nop')
                     continue
 
             if inst[0] == 'end':
@@ -66,7 +67,7 @@ def solveDoJmpOut(code):
             elif inst[0] == 'end' and inst[1] == 'do':
                 add = stack.pop()
                 code[add] = ('jof',i)
-                code.pop(i)
+                code[i] = ('nop')
                 continue
             i+= 1
 
@@ -135,10 +136,17 @@ def fix(code):
 
 def solve(code):
     solveDoCleanUp(code)
+    print("tamanho codigo", len(code))
     solveIfLinkage(code)
+    print("tamanho codigo", len(code))
     solveIf(code)
+    print("tamanho codigo", len(code))
     solveDo(code)
+    print("tamanho codigo", len(code))
     returnProcedure(code)
+    print("tamanho codigo", len(code))
     linkProcedure(code)
+    print("tamanho codigo", len(code))
     solveProcedure(code)
+    print("tamanho codigo", len(code))
     fix(code)

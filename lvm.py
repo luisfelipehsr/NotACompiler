@@ -68,7 +68,9 @@ class LVM (object):
         return
 
     def div(self):
-        self.M[self.sp-1] /= self.M[self.sp]
+        x = self.M[self.sp-1] / self.M[self.sp]
+        self.M[self.sp - 1] = int(x)
+        #self.M[self.sp-1] /= self.M[self.sp]
         self.sp -= 1
         self.pc += 1
         return
@@ -423,7 +425,7 @@ def main():
     # Executa os arquivos .lvm passados
     for name in files:
         if debug is True:
-            print("Executing object ", name)
+            print("Executing archive ", name)
 
         # Inicia LVM
         if debug is True:
@@ -443,9 +445,9 @@ def main():
             tam = len(stringLiteral)
             stringLiteral = stringLiteral[:tam-1]
             lvm.H += [stringLiteral]
-        print(lvm.H)
+        #print(lvm.H)
         regex = re.compile(r'\((.*)\)')
-        regex2 = re.compile(r'[a-zA-Z0-9]+')
+        regex2 = re.compile(r'[-]?[a-zA-Z0-9]+')
         regex3 = re.compile(r'[a-zA-Z]+')
         code = []
         for line in codeList[n+1:]:
@@ -463,7 +465,7 @@ def main():
                         command += [int(term)]
             code += [command] # adiciona esta sublista a lista de comandos
 
-        print(code)
+        #print(code)
 
         # Executa arquivo
         lvm.runCode(code)

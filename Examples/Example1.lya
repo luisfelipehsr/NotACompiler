@@ -1,21 +1,13 @@
-/* Compute the fatorial of an integer */
+/* example3: */
 
+dcl m int;
+m = 4;
+f: proc (k int loc) returns (int);
+  dcl p int;
 
-fat: proc (n,p,q int) returns (int);
-  dcl theta, omega, gama, cama int = 4;
-  if n==0 then
-    return 1;
-  else
-    return n * fat (n-1,p,q);
-  fi;
+  p = 3;
+  k = p;
+  return k;
 end;
 
-dcl x,y int;
-y = 2;
-print("give-me a positive integer:");
-read(x);
-x = fat(x,y,y);
-
-
-
-
+print(f(m), m);

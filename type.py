@@ -11,25 +11,28 @@ class Type(object):
         return 1
 
 class Int(Type):
-    def __init__(self,value = None):
+    def __init__(self, value=None, local=False):
         self.string = 'Int'
         self.value = value
+        self.local = local
 
     def isConstant(self):
         return self.value is not None
 
 class Bool(Type):
-    def __init__(self,value = None):
+    def __init__(self, value=None, local=False):
         self.string = 'Bool'
         self.value = value
+        self.local = local
 
     def isConstant(self):
         return not self.value is not None
 
 class Char(Type):
-    def __init__(self,value = None):
+    def __init__(self,value=None, local=False):
         self.string = 'Char'
         self.value = value
+        self.local = local
 
     def isConstant(self):
         return self.value is not None
@@ -242,6 +245,13 @@ class Synonym(Type):
         self.subType = t
         self.string = 'Syn'
 
+#class Loc(Type):
+#    def __init__(self, t):
+#        if not isinstance(t,Int) and not isinstance(t, Char)\
+#            and not isinstance(t, Bool):
+#            raise TypeError('t %s must be of type Char or Int' %(t))
+#        self.subType = t
+#        self.string = 'Loc'
 
 def main():
     #t = Procedure(Parameters(Int(),Int()),Int())

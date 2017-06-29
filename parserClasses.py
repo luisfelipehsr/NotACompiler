@@ -45,6 +45,7 @@ class AST(object):
             label += 'Type= ' + str(self.type.toString()) + ' '
         if isinstance(self.type,Int):
             label += 'Value= ' + str(self.type.value)
+            label += 'Local= ' + str(self.type.local)
         label += ']'
 
         graph.add_node(dot.Node(myId,label = label))
@@ -470,6 +471,12 @@ class Location(AST):
             if isinstance(symbol.type, Array):
                 ret += [('ldr',symbol.count,symbol.pos)]
                 ret += [('smv',symbol.type.getRange().getCount())]
+            elif isinstance(loc, Int) or isinstance(loc, Bool)\
+                    or isinstance(loc, Char):
+                if loc.local:
+                    ret += [('ldv',symbol.count,symbol.pos)]
+                    ret += [('smv',1)]
+
             else:
                 ret += [('stv', symbol.count, symbol.pos)]
         else:
@@ -486,6 +493,10 @@ class Location(AST):
                 ret += [('lmv',symbol.type.getRange().getCount())]
             elif not isinstance(symbol.type,Synonym):
                 ret += [('ldv',symbol.count,symbol.pos)]
+
+            elif isinstance(loc, Loc):
+                ret += [('ldv', symbol.count, symbol.pos)]
+                ret += [('grc')]
             else:
                 ret += [('ldc', symbol.type.subType.value)]
         else:
@@ -1189,6 +1200,7 @@ class AssignmentAction(AST):
         if len(self.fields) == 2:
             b = self.fields[1].propType()
             return a.equals(b)
+
         elif self.fields[1] == '&':
             b = self.fields[2].propType()
             return (a.equals(b) and isinstance(b,Chars)) or \
@@ -1515,11 +1527,20 @@ class ProcedureCall(AST):
             parameters = self.fields[1].fields
             for n in reversed(parameters):
                 if isinstance(n, AST):
-                    if n.propType().value is not None:
-                        if isinstance(n.propType(),Int) or isinstance(n.propType(),Bool) or isinstance(n.propType(),Char):
-                            ret += [('ldc',n.propType().value)]
+                    nType = n.propType()
+                    if nType.value is not None:
+                        if isinstance(nType,Int) or isinstance(nType,Bool)\
+                                or isinstance(nType,Char):
+                            ret += [('ldc',nType.value)]
                     else:
-                        ret += n.recursiveGenCode()
+                        if isinstance(nType,Int) or isinstance(nType,Bool)\
+                                or isinstance(nType,Char):
+                            if nType.local:
+                                ret += n.reference()
+                            else:
+                                ret = n.recursiveGenCode()
+                        else:
+                            ret += n.recursiveGenCode()
         ret += self.genCode()
         return ret
 
@@ -1651,16 +1672,18 @@ class BuiltinCall(AST):
             ret += [('prc', 0)]
 
         if name == 'read':
+            print(parameterList)
             for pType in parameterList:
                 if isinstance(pType, Int) or isinstance(pType, Bool)\
                         or isinstance(pType, Char):
                     ret += [('rdv')]
+                    ret += [('smv', 1)]
                 elif isinstance(pType, Chars):
                     ret += [('rds')]
                 else:
                     print(tColors.RED + "ERROR: Couldn't match a type for para"
                         + "meter in read built-in call")
-            ret += [('smv',len(parameterList))]
+
 
         #TODO talvez LOWER E UPPER. retornar indice do prim e ultm cara de array
 
@@ -1670,6 +1693,7 @@ class BuiltinCall(AST):
         ret = []
         name = self.fields[0].fields[0]
         parameterList = self.fields[1].fields
+
         for n in reversed(parameterList):
             if isinstance(n, AST):
                 if name == 'read':
@@ -1705,6 +1729,10 @@ class ProcedureStatement(AST):
     def updateContext(self):
         id = self.fields[0]
         type = self.fields[1].propType()
+        parameterTypes = type.parameters.getParameterList()
+        #for i in range(len(parameterTypes)): # caso de loc
+        #    if isinstance(parameterTypes[i], Loc):
+        #        parameterTypes[i] = parameterTypes[i].subType
         s = Symbol(id,type)
         AST.semantic.addToContext(s)
         self.context = AST.semantic.pushContext(real='True')
@@ -1808,6 +1836,8 @@ class ParameterSpec(AST):
             self.type = self.fields[0].propType()
             if isinstance(self.type,ModeType):
                 self.type = self.type.subType
+            if len(self.fields) == 2:
+                self.type.local = True
             return self.type
 
 class ResultSpec(AST):
