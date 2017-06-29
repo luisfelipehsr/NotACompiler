@@ -7,5 +7,5 @@ f: proc (n int, k int loc) returns (int);
   k = 5;
 end;
 
-;
+
 print(3,4);

@@ -1626,7 +1626,11 @@ class ReturnAction(AST):
         myType = self.propType()
         #print(AST.semantic.contextList)
         symbol = AST.semantic.lookInContexts('return')
-        print(symbol.type, myType)
+        #print(symbol.type, myType)
+        if myType is None and symbol is None:
+            return True
+        elif myType is None:
+            return False
         return symbol.type.equals(myType)
 
     def propType(self):
@@ -1785,7 +1789,7 @@ class BuiltinCall(AST):
                 if isinstance(n, AST):
                     ret += n.reference()
         elif name == 'print':
-            for n in parameterList:
+            for n in reversed(parameterList):
                 if isinstance(n, AST):
                     ret += n.recursiveGenCode()
         # #for n in parameterList:
