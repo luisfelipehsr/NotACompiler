@@ -32,7 +32,6 @@ class Context(object):
         else:
             symbol.pos = self.memoryCount[-1]
 
-        #print(symbol.count,symbol.pos)
         if not isinstance(symbol.type,Synonym):
             self.memoryCount[-1] += symbol.type.getSize()
         
@@ -51,7 +50,6 @@ class Context(object):
             self.contextId.append(self.contextId[-1])
             self.memoryCount.append(self.memoryCount[-1])
             self.contextParameters.append(self.contextParameters[-1])
-        #print('Pushed New Context',real)
         return self.contextList[-1]
 
     def popContext(self):
@@ -64,7 +62,6 @@ class Context(object):
         self.contextId.pop()
         self.contextType.pop()
         self.contextParameters.pop()
-        #print('Poped Context')
 
     def lookInContexts(self,id):
         for a in reversed(range(len(self.contextList))):
@@ -86,7 +83,8 @@ class Context(object):
     def printContext(self):
         for id in range(len(self.contextList)):
             for item in self.contextList[id]:
-                print('%s of type %s in context %d' %(str(item),self.contextList[id][item],id))
+                #print('%s of type %s in context %d' %(str(item),self.contextList[id][item],id))
+                return
 
     def getCurrentContext(self):
         return len(self.contextList) -1
