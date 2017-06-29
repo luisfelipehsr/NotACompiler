@@ -1,13 +1,10 @@
-/* example3: */
+/* Compute the fatorial of an integer */
 
-dcl m int;
-m = 4;
-f: proc (k int loc) returns (int);
-  dcl p int;
+dcl k int;
 
-  p = 3;
-  k = p;
-  return k;
+fat: proc (n int loc) returns (int);
+  n = 3;
 end;
 
-print(f(m), m);
+fat(k);
+print(k);

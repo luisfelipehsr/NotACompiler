@@ -123,8 +123,7 @@ def returnProcedure(code):
             elif inst[0] == 'return' and inst[1] == 'here':
                 for p in stack:
                     code[p] = ('jmp', i)
-                code.pop(i)
-                continue
+                code[i] = ('nop')
             i += 1
 
 def fix(code):
