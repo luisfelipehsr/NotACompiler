@@ -1454,7 +1454,6 @@ class StepEnumeration(AST):
             #ret += [('ldc',iniVal)]
         ret += self.fields[1].recursiveGenCode()
         ret += [('stv',id.count,id.pos)]
-        print(ret)
         return ret
 
 
@@ -1579,7 +1578,6 @@ class ProcedureCall(AST):
     def recursiveGenCode(self):
         ret = []
         ret += self.addTag()
-        print(ret)
 
         if len(self.fields) == 2:
             id = self.fields[0]
@@ -1618,7 +1616,6 @@ class ProcedureCall(AST):
 
 
         ret += self.genCode()
-        print(ret)
         return ret
 
 class ExitAction(AST):
@@ -1778,7 +1775,6 @@ class BuiltinCall(AST):
             ret += [('prc', 0)]
 
         if name == 'read':
-            print(parameterList)
             for pType in parameterList: #TODO REVERSED
                 if isinstance(pType, Int) or isinstance(pType, Bool)\
                         or isinstance(pType, Char):
