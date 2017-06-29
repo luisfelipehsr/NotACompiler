@@ -34,12 +34,13 @@ Limitacoes e consideracoes:
      mente.
 
 Funcao dos arquivos e diretorios:
-   Compiler      = eh o compilador
-   lvm           = eh a lvm
-   lexer         = eh o lexer utilizado
-   parserlya     = arquivo principal do parser
-   parserClasses = possui as classes com os nos da AST gerada
-   Semantocer    = implementa as funcoes que lidam com o contexto
-   type          = define os tipos
-   valueToken    = define o resultado dos token de true e false
-   symbol        = define simbolos, eles guardam um tipo e posicao, e sao adicionados ao contexto
+   Compiler            = eh o compilador
+   lvm                 = eh a lvm
+   lexer               = eh o lexer utilizado
+   parserlya           = arquivo principal do parser
+   parserClasses       = possui as classes com os nos da AST gerada
+   Semantocer          = implementa as funcoes que lidam com o contexto
+   type                = define os tipos
+   valueToken          = define o resultado dos token de true e false
+   symbol              = define simbolos, eles guardam um tipo e posicao, e sao adicionados ao contexto
+   codeGenerationTools = utilizado para formatar os comandos adicionando desvios de fluxo
