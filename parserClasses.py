@@ -1524,6 +1524,7 @@ class ProcedureCall(AST):
         ret = []
         ret += self.addTag()
         if len(self.fields) == 2:
+            id = self.fields[0]
             param = Parameters() if len(self.fields) == 1  else self.fields[1].propType()
             symbol = AST.semantic.lookInContexts((id, param.toString()))
             parameters = self.fields[1].fields
