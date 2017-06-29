@@ -820,10 +820,6 @@ class Expression(AST):
             return self.type
 
     def recursiveGenCode(self):
-        #type = self.propType()
-        # if isinstance(type,Int) or isinstance(type,Char) or isinstance(type,Bool):
-        #     if type.isConstant():
-        #         return []
         return self.fields[0].recursiveGenCode()
 
     def reference(self):
@@ -900,11 +896,8 @@ class Operand0(AST):
             isRelational = isinstance(operatorType,RelationalOperator)
 
             if isRelational:
-
                 if operand0Type.equals(operand1Type):
-
                     operator = operatorType.fields[0]
-
                     if operator in ['&&', '||']:
                         if isinstance(operand0Type,Bool):
                             return True
@@ -912,7 +905,6 @@ class Operand0(AST):
                             print('Operands must be of type bool. Got %s:'
                                   %(operand0Type))
                             return False
-
                     elif operator in ['==','!=']:
                         if isinstance(operand0Type,Int) or isinstance(operand0Type,Bool) or isinstance(operand0Type,Char):
                             return True
@@ -920,7 +912,6 @@ class Operand0(AST):
                             print('Operands must be of type bool,int or Char. Got' +
                                   '%s:' %(operand0Type))
                             return False
-
                     else:
                         if isinstance(operand0Type,Int):
                             return True
@@ -928,16 +919,12 @@ class Operand0(AST):
                             print('Operands must be of type int. Got %s:'
                                   %(operand0Type))
                             return False
-
                 else:
                     print('Both operands must be of same type:')
                     return False
-
             else:
-
                 if operand1Type is None:
                     return False
-
                 if isinstance(operand1Type,Array):
                     if operand1Type.subType.equals(operand0Type):
                         return True
@@ -994,10 +981,6 @@ class Operand0(AST):
             elif op ==  '<=':
                 ret += [('leq')]
         return ret
-
-    # def recursiveGenCode(self):
-    #     if len(self.fields) == 3:
-    #         self.fields[0]
 
     def reference(self):
         if len(self.fields) == 1:
@@ -1207,18 +1190,8 @@ class ActionStatement(AST):
 
     def updateContext(self):
         if len(self.fields) == 2:
-            #print(self.fields)
             s = Symbol(self.fields[0], Label())
             AST.semantic.addToContext(s)
-
-    # def addTag(self):
-    #     if len(self.fields) == 1:
-    #         return []
-    #     symbol = AST.semantic.lookInContexts(self.fields[0])
-    #     print(AST.semantic.contextList)
-    #     print(type(symbol))
-    #     ret = [('start', 'label', symbol.type.myid)]
-    #     return ret
 
     def genCode(self):
         if len(self.fields) == 1:
@@ -1380,13 +1353,6 @@ class ControlPart(AST):
         return []
 
 class ForControl(AST):
-    # def addTag(self):
-    #     return [('start','for')]
-    #
-    # def genCode(self):
-    #     ret = []
-    #     ret += [('end','for')]
-    #     return ret
 
     def initialization(self):
         return self.fields[0].initialization()
@@ -1439,20 +1405,12 @@ class StepEnumeration(AST):
         id = AST.semantic.lookInContexts(id)
         if id is None:
             self.updateContext()
-            #ret += [('for', 'alocation')]
             ret += [('alc', 1)]
             id = AST.semantic.lookInContexts(self.fields[0])
-        #else:
-        #    ret += [('for', 'withoutAlocation')]
-        # init = self.fields[1]
-        # iniVal = init.propType().value
-        # if  iniVal is not None:
-        #     ret += [('alc', 1)]
-            #ret += [('ldc',iniVal)]
+
         ret += self.fields[1].recursiveGenCode()
         ret += [('stv',id.count,id.pos)]
         return ret
-
 
     def condition(self):
         id = self.fields[0]
@@ -1586,21 +1544,8 @@ class ProcedureCall(AST):
                 n = parameters[i]
                 if isinstance(n, AST):
                     nType = n.propType()
-                    #print(symbol.type.parameters.getParameterList())
                     pType = symbol.type.parameters.parameterList[i]
-                    # if nType.value is not None:
-                    #     if isinstance(nType,Int) or isinstance(nType,Bool)\
-                    #             or isinstance(nType,Char):
-                    #         ret += n.recursiveGenCode()
-                    # else:
-                    #     if isinstance(nType,Int) or isinstance(nType,Bool)\
-                    #             or isinstance(nType,Char):
-                    #         if pType.local and not nType.local:
-                    #             ret += n.reference()
-                    #         else:
-                    #             ret += n.recursiveGenCode()
-                    #     else:
-                    #         ret += n.recursiveGenCode()
+
                     if (isinstance(nType, Int) or isinstance(nType, Bool) \
                         or isinstance(nType, Char)) and nType.value is None:
                         if pType.local and not nType.local:
@@ -1643,9 +1588,7 @@ class ExitAction(AST):
 class ReturnAction(AST):
     def typeCheck(self):
         myType = self.propType()
-        #print(AST.semantic.contextList)
         symbol = AST.semantic.lookInContexts('return')
-        #print(symbol.type, myType)
         if isinstance(myType,Null):
             return isinstance(symbol.type,Null)
         return symbol.type.equals(myType)
@@ -1767,7 +1710,6 @@ class BuiltinCall(AST):
                         ret += [('prs')]
                     else:
                         i = AST.addStringLiteral(self, pType.value)
-                        #print(i, pType.value)
                         ret += [('prc', i)]
             ret += [('prc', 0)]
 
@@ -1793,13 +1735,6 @@ class BuiltinCall(AST):
         name = self.fields[0].fields[0]
         parameterList = self.fields[1].fields
 
-        # for n in reversed(parameterList): #TODO REVERSED
-        # #for n in parameterList:
-        #     if isinstance(n, AST):
-        #         if name == 'read':
-        #             ret += n.reference()
-        #         else:
-        #             ret += n.recursiveGenCode()
         if name == 'read':
             for n in reversed(parameterList):
                 if isinstance(n, AST):
@@ -1808,12 +1743,7 @@ class BuiltinCall(AST):
             for n in reversed(parameterList):
                 if isinstance(n, AST):
                     ret += n.recursiveGenCode()
-        # #for n in parameterList:
-        #     if isinstance(n, AST):
-        #         if name == 'read':
-        #             ret += n.reference()
-        #         else:
-        #             ret += n.recursiveGenCode()
+
         ret += self.genCode()
         return ret
 
@@ -1843,10 +1773,6 @@ class ProcedureStatement(AST):
     def updateContext(self):
         id = self.fields[0]
         type = self.fields[1].propType()
-        #parameterTypes = type.parameters.getParameterList()
-        #for i in range(len(parameterTypes)): # caso de loc
-        #    if isinstance(parameterTypes[i], Loc):
-        #        parameterTypes[i] = parameterTypes[i].subType
         s = Symbol(id,type)
         AST.semantic.addToContext(s)
         self.context = AST.semantic.pushContext(real='True')
