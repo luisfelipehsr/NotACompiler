@@ -451,7 +451,7 @@ def main():
             tam = len(stringLiteral)
             stringLiteral = stringLiteral[:tam-1]
             lvm.H += [stringLiteral.replace(r'\n', "\n")] # MODIFIED TO REPLACE \\n with \n
-        #print(lvm.H)
+
         regex = re.compile(r'\((.*)\)')
         regex2 = re.compile(r'[-]?[a-zA-Z0-9]+')
         regex3 = re.compile(r'[a-zA-Z]+')
@@ -476,7 +476,7 @@ def main():
                     command[1] = True
             code += [command] # adiciona esta sublista a lista de comandos
 
-        #print(code)
+
 
         # Executa arquivo
         lvm.runCode(code)

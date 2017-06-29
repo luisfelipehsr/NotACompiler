@@ -253,19 +253,3 @@ class Label(Type):
 
     def getSize(self):
         return 0
-#class Loc(Type):
-#    def __init__(self, t):
-#        if not isinstance(t,Int) and not isinstance(t, Char)\
-#            and not isinstance(t, Bool):
-#            raise TypeError('t %s must be of type Char or Int' %(t))
-#        self.subType = t
-#        self.string = 'Loc'
-
-def main():
-    #t = Procedure(Parameters(Int(),Int()),Int())
-    #y = Procedure(Parameters(Int(), Int()),Null())
-    #print(t.equals(y))
-    print("TODO")
-
-if __name__	=='__main__':
-    main()

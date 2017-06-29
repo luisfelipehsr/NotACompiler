@@ -776,9 +776,6 @@ class Literal(AST):
         ret = []
         val = self.propType()
         if isinstance(val,Chars): # Caso de string constante salva em H
-            #k = AST.addStringLiteral(self, val.value)
-            #print(k, AST.stringLiterals[k])
-            #ret += [('sts', k)]
             ret = []
         elif isinstance(val,Bool):
             ret += [('ldc',val.value)]
