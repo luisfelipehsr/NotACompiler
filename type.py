@@ -70,6 +70,7 @@ class Array(Type):
         self.subType = t
         self.range = r
         self.string = 'Array'
+        self.local = False
 
     def getSubType(self):
         return self.subType

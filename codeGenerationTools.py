@@ -71,25 +71,25 @@ def solveDoJmpOut(code):
                 #continue
             i+= 1
 
-def solveDoDealocate(code):
-    stack = []
-    if isinstance(code, list):
-        i = 0
-        while i < len(code):
-            inst = code[i]
-            if inst[0] == 'for' and inst[1] == 'alocation':
-                stack.append((i,True))
-            if inst[0] == 'for' and inst[1] == 'withoutAlocation':
-                stack.append((i, False))
-            elif inst[0] == 'end' and inst[1] == 'do':
-                pair = stack.pop()
-                token = pair[0]
-                code[token] = ('nop')
-                if pair[1]:
-                    code[i] = ('dlc', 1)
-                else:
-                    code[i] = ('nop')
-            i+= 1
+# def solveDoDealocate(code):
+#     stack = []
+#     if isinstance(code, list):
+#         i = 0
+#         while i < len(code):
+#             inst = code[i]
+#             if inst[0] == 'for' and inst[1] == 'alocation':
+#                 stack.append((i,True))
+#             if inst[0] == 'for' and inst[1] == 'withoutAlocation':
+#                 stack.append((i, False))
+#             elif inst[0] == 'end' and inst[1] == 'do':
+#                 pair = stack.pop()
+#                 token = pair[0]
+#                 code[token] = ('nop')
+#                 if pair[1]:
+#                     code[i] = ('dlc', 1)
+#                 else:
+#                     code[i] = ('nop')
+#             i+= 1
 
 def solveDoCleanUp(code):
     if isinstance(code, list):

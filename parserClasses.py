@@ -470,8 +470,12 @@ class Location(AST):
         symbol = AST.semantic.lookInContexts(loc)
         if not isinstance(loc, AST):
             if isinstance(symbol.type, Array):
-                ret += [('ldr',symbol.count,symbol.pos)]
-                ret += [('smv',symbol.type.getRange().getCount())]
+                if symbol.type.local:
+                    ret += [('ldv', symbol.count, symbol.pos)]
+                    ret += [('smv', symbol.type.getRange().getCount())]
+                else:
+                    ret += [('ldr',symbol.count,symbol.pos)]
+                    ret += [('smv',symbol.type.getRange().getCount())]
             elif isinstance(symbol.type, Int) or isinstance(symbol.type, Bool)\
                     or isinstance(symbol.type, Char):
                 if symbol.type.local:
@@ -494,8 +498,11 @@ class Location(AST):
             symbol = AST.semantic.lookInContexts(loc)
             #ret+= [('{} {}').format(symbol.type.local, loc)]
             if isinstance(symbol.type,Array):
-                ret += [('ldr',symbol.count,symbol.pos)]
-                ret += [('lmv',symbol.type.getRange().getCount())]
+                if symbol.type.local:
+                    ret += [('ldr', symbol.count, symbol.pos)]
+                else:
+                    ret += [('ldr',symbol.count,symbol.pos)]
+                    ret += [('lmv',symbol.type.getRange().getCount())]
             elif not isinstance(symbol.type, Synonym):
                 if symbol.type.local:
                     ret += [('ldv', symbol.count, symbol.pos)]
@@ -591,8 +598,12 @@ class ArrayElement(AST):
 
     def store(self):
         ret = []
-        location = self.fields[0].reference()
         locationType = self.fields[0].propType()
+        if locationType.local:
+            location = self.fields[0].load()
+        else:
+            location = self.fields[0].reference()
+
         expressionList = self.fields[1].fields
         ret += location
         rng = locationType.range
@@ -610,8 +621,12 @@ class ArrayElement(AST):
 
     def load(self):
         ret = []
-        location = self.fields[0].reference()
         locationType = self.fields[0].propType()
+        if locationType.local:
+            location = self.fields[0].load()
+        else:
+            location = self.fields[0].reference()
+
         expressionList = self.fields[1].fields
         ret += location
         rng = locationType.range
@@ -1597,6 +1612,7 @@ class ProcedureCall(AST):
                             ret += n.reference()
                         else:
                             ret += n.recursiveGenCode()
+
                     else:
                         ret += n.recursiveGenCode()
 
