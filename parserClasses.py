@@ -1451,10 +1451,8 @@ class WhileControl(AST):
         return isinstance(self.fields[0].propType(),Bool)
 
     def condition(self):
-        return self.fields[0].genCode()
+        return self.fields[0].recursiveGenCode()
 
-    def recursiveGenCode(self):
-        return []
 
 class CallAction(AST):
     def propType(self):

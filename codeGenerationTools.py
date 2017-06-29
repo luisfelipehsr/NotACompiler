@@ -11,12 +11,11 @@ def solveIf(code):
                     add = stack.pop()
                     code[add] = ('jof', i)
                     code[i] = ('nop')
-                    continue
+
                 elif inst[1] == 'elsif':
                     add = stack.pop()
                     code[add] = ('jof', i)
                     code[i] = ('nop')
-                    continue
 
             elif inst[0] == 'end':
                 if inst[1] == 'if':
@@ -24,7 +23,6 @@ def solveIf(code):
                         add = stack.pop()
                         code[add] = ('jof', i)
                     code[i] = ('nop')
-                    continue
             i += 1
 
 def solveIfLinkage(code):
