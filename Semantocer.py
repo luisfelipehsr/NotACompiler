@@ -9,6 +9,7 @@ class Context(object):
         self.memoryCount = []
         self.contextType = []
         self.functionCount = 0
+        self.labelCount = 0
         self.totalContext = 0
 
     def addToContext(self,symbol,flag=False):
@@ -18,6 +19,9 @@ class Context(object):
         if isinstance(symbol.type,Procedure):
             self.functionCount += 1
             symbol.type.myid = self.functionCount
+        if isinstance(symbol.type, Label):
+            self.labelCount += 1
+            symbol.type.myid = self.labelCount
         self.contextList[-1][symbol.getId()] = symbol
         symbol.count = self.contextId[-1]
         if  symbol.count > 0:

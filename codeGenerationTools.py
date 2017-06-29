@@ -68,7 +68,27 @@ def solveDoJmpOut(code):
                 add = stack.pop()
                 code[add] = ('jof',i)
                 code[i] = ('nop')
-                continue
+                #continue
+            i+= 1
+
+def solveDoDealocate(code):
+    stack = []
+    if isinstance(code, list):
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'for' and inst[1] == 'alocation':
+                stack.append((i,True))
+            if inst[0] == 'for' and inst[1] == 'withoutAlocation':
+                stack.append((i, False))
+            elif inst[0] == 'end' and inst[1] == 'do':
+                pair = stack.pop()
+                token = pair[0]
+                code[token] = ('nop')
+                if pair[1]:
+                    code[i] = ('dlc', 1)
+                else:
+                    code[i] = ('nop')
             i+= 1
 
 def solveDoCleanUp(code):
@@ -85,6 +105,7 @@ def solveDoCleanUp(code):
 def solveDo(code):
     solveDoJmpBack(code)
     solveDoJmpOut(code)
+    #solveDoDealocate(code)
 
 def solveProcedure(code):
     stack = []
@@ -126,6 +147,24 @@ def returnProcedure(code):
                 code[i] = ('nop')
             i += 1
 
+def solveLabel(code):
+    if isinstance(code, list):
+        labels = dict()
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'end' and inst[1] == 'label':
+                code[i] = ('lbl', inst[2])
+                labels[inst[2]] = i
+            i += 1
+        i = 0
+        while i < len(code):
+            inst = code[i]
+            if inst[0] == 'exit':
+                code[i] = ('jmp', labels[inst[1]])
+            i += 1
+
+
 def fix(code):
     for i in range(len(code)):
         if isinstance(code[i],tuple):
@@ -135,17 +174,11 @@ def fix(code):
 
 def solve(code):
     solveDoCleanUp(code)
-    print("tamanho codigo", len(code))
     solveIfLinkage(code)
-    print("tamanho codigo", len(code))
     solveIf(code)
-    print("tamanho codigo", len(code))
     solveDo(code)
-    print("tamanho codigo", len(code))
     returnProcedure(code)
-    print("tamanho codigo", len(code))
     linkProcedure(code)
-    print("tamanho codigo", len(code))
     solveProcedure(code)
-    print("tamanho codigo", len(code))
+    solveLabel(code)
     fix(code)

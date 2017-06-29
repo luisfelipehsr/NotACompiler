@@ -38,7 +38,7 @@ class Char(Type):
         return self.value is not None
 
 class Chars(Type):
-    def __init__(self,r,value = None,id = None):
+    def __init__(self, r, value=None, id=None):
         self.subType = Char()
         self.range = r
         self.value = value
@@ -245,6 +245,13 @@ class Synonym(Type):
         self.subType = t
         self.string = 'Syn'
 
+class Label(Type):
+    def __init__(self):
+        self.string = 'Label'
+        self.myid = None
+
+    def getSize(self):
+        return 0
 #class Loc(Type):
 #    def __init__(self, t):
 #        if not isinstance(t,Int) and not isinstance(t, Char)\
@@ -259,4 +266,5 @@ def main():
     #print(t.equals(y))
     print("TODO")
 
-if __name__	=='__main__':main()
+if __name__	=='__main__':
+    main()

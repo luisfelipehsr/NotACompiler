@@ -254,21 +254,21 @@ class LVM (object):
 
     def prv(self,ischar):
         if ischar == 'True':
-            print(chr(self.M[self.sp]),'')
+            print(chr(self.M[self.sp]),end='')
         else:
-            print(int(self.M[self.sp]),'')
+            print(int(self.M[self.sp]),end='')
         self.sp -= 1
         self.pc += 1
         return
 
     def prt(self,k):
-        print(self.M[self.sp-k+1:self.sp+1])
+        print(self.M[self.sp-k+1:self.sp+1], end='')
         self.sp -= (k-1)
         self.pc += 1
         return
 
     def prc(self,i):
-        print(self.H[i],'')
+        print(self.H[i],end='')
         self.pc += 1
 
     def prs(self):
@@ -276,7 +276,7 @@ class LVM (object):
         tam = self.M[adr]
         for i in range(0, tam):
             adr += 1
-            print(self.M[adr])
+            print(self.M[adr],end='')
         self.sp -= 1
         self.pc += 1
         return
@@ -284,6 +284,10 @@ class LVM (object):
     def stp(self):
         self.sp = -1
         self.D[0] = 0
+        self.pc += 1
+        return
+
+    def lbl(self):
         self.pc += 1
         return
 
@@ -380,6 +384,8 @@ class LVM (object):
             self.prs()
         elif instruction[0] == 'stp':
             self.stp()
+        elif instruction[0] == 'lbl':
+            self.lbl()
         elif instruction[0] == 'nop':
             self.nop()
         elif instruction[0] == 'end':
@@ -444,7 +450,7 @@ def main():
         for stringLiteral in codeList[2:n+1]:
             tam = len(stringLiteral)
             stringLiteral = stringLiteral[:tam-1]
-            lvm.H += [stringLiteral]
+            lvm.H += [stringLiteral.replace(r'\n', "\n")] # MODIFIED TO REPLACE \\n with \n
         #print(lvm.H)
         regex = re.compile(r'\((.*)\)')
         regex2 = re.compile(r'[-]?[a-zA-Z0-9]+')
@@ -463,6 +469,11 @@ def main():
                         command += [term]
                     else:
                         command += [int(term)]
+            if len(command) == 2 and command[0] == 'ldc':
+                if command[1] == 'false':
+                    command[1] = False
+                elif command[1] == 'true':
+                    command[1] = True
             code += [command] # adiciona esta sublista a lista de comandos
 
         #print(code)

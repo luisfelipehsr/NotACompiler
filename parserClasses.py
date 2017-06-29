@@ -1,6 +1,7 @@
 import pydot as dot
 import uuid
 import copy
+from valueToken import ValueToken
 from type import *
 from symbol import Symbol
 
@@ -616,6 +617,7 @@ class ArrayElement(AST):
         val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
+
             if rng.begin.value != 0:
                 ret += [('ldc',rng.begin.value)]
                 ret += [('sub')]
@@ -635,7 +637,7 @@ class ArrayElement(AST):
         val = 1
         for expression in expressionList:
             ret += expression.recursiveGenCode()
-            if rng.begin != 0:
+            if rng.begin.value != 0:
                 ret += [('ldc',rng.begin)]
                 ret += [('sub')]
             ret += [('idx', locationType.subType.getSize() * val)]
@@ -749,6 +751,9 @@ class Literal(AST):
         token = self.fields[0]
         if isinstance(token,Type):
             self.type = token
+        if isinstance(token, ValueToken):
+            if isinstance(token.type, Bool):
+                self.type = Bool(token.value)
         return self.type
 
     def genCode(self):
@@ -802,7 +807,7 @@ class Expression(AST):
             return self.type
 
     def recursiveGenCode(self):
-        type = self.propType()
+        #type = self.propType()
         # if isinstance(type,Int) or isinstance(type,Char) or isinstance(type,Bool):
         #     if type.isConstant():
         #         return []
@@ -932,8 +937,8 @@ class Operand0(AST):
                     if isinstance(operand0Type,Char):
                         return True
                     else:
-                        print('Expected first operand of type char.' +
-                              'Got %s:'
+                        print(tColors.RED + 'Expected first operand of type' +
+                              'char. Got %s:'
                               %(operand0Type))
                         return False
 
@@ -976,6 +981,10 @@ class Operand0(AST):
             elif op ==  '<=':
                 ret += [('leq')]
         return ret
+
+    # def recursiveGenCode(self):
+    #     if len(self.fields) == 3:
+    #         self.fields[0]
 
     def reference(self):
         if len(self.fields) == 1:
@@ -1185,7 +1194,25 @@ class ActionStatement(AST):
 
     def updateContext(self):
         if len(self.fields) == 2:
-            AST.semantic.addToContext(self.fields[0],self.type)
+            #print(self.fields)
+            s = Symbol(self.fields[0], Label())
+            AST.semantic.addToContext(s)
+
+    # def addTag(self):
+    #     if len(self.fields) == 1:
+    #         return []
+    #     symbol = AST.semantic.lookInContexts(self.fields[0])
+    #     print(AST.semantic.contextList)
+    #     print(type(symbol))
+    #     ret = [('start', 'label', symbol.type.myid)]
+    #     return ret
+
+    def genCode(self):
+        if len(self.fields) == 1:
+            return []
+        symbol = AST.semantic.lookInContexts(self.fields[0])
+        ret = [('end', 'label', symbol.type.myid)]
+        return ret
 
 class Action(AST):
     def propType(self):
@@ -1396,14 +1423,22 @@ class StepEnumeration(AST):
     def initialization(self):
         ret = []
         id = self.fields[0]
-        self.updateContext()
         id = AST.semantic.lookInContexts(id)
-        init = self.fields[1]
-        iniVal = init.propType().value
-        if  iniVal is not None:
-            ret += [('ldc',iniVal)]
-        ret += self.fields[1].genCode()
+        if id is None:
+            self.updateContext()
+            #ret += [('for', 'alocation')]
+            ret += [('alc', 1)]
+            id = AST.semantic.lookInContexts(self.fields[0])
+        #else:
+        #    ret += [('for', 'withoutAlocation')]
+        # init = self.fields[1]
+        # iniVal = init.propType().value
+        # if  iniVal is not None:
+        #     ret += [('alc', 1)]
+            #ret += [('ldc',iniVal)]
+        ret += self.fields[1].recursiveGenCode()
         ret += [('stv',id.count,id.pos)]
+        print(ret)
         return ret
 
 
@@ -1417,8 +1452,8 @@ class StepEnumeration(AST):
         if maxVal is not None:
             ret += [('ldc',maxVal)]
         else:
-            ret += max.genCode()
-        ret += ['neq']
+            ret += max.recursiveGenCode()
+        ret += ['leq']
         return ret
 
     def update(self):
@@ -1572,7 +1607,16 @@ class ExitAction(AST):
                       'context at ' + tColors.RESET + 'line %s'
                       % (self.linespan[0]))
             return self.type[:]
-    _fields = ['Id']
+
+    def genCode(self):
+        ret = []
+        symbol = AST.semantic.lookInContexts(self.fields[0])
+        if symbol is None or not isinstance(symbol.type, Label):
+            print(tColors.RED + "ERROR: Couldn't find label" +
+                "{} in context".format(self.fields[0]))
+        else:
+            ret += [('exit', symbol.type.myid)]
+        return ret
 
 class ReturnAction(AST):
     def typeCheck(self):
@@ -1692,7 +1736,7 @@ class BuiltinCall(AST):
                         ret += [('prs')]
                     else:
                         i = AST.addStringLiteral(self, pType.value)
-                        print(i, pType.value)
+                        #print(i, pType.value)
                         ret += [('prc', i)]
             ret += [('prc', 0)]
 
@@ -1754,7 +1798,7 @@ class ProcedureStatement(AST):
     def updateContext(self):
         id = self.fields[0]
         type = self.fields[1].propType()
-        parameterTypes = type.parameters.getParameterList()
+        #parameterTypes = type.parameters.getParameterList()
         #for i in range(len(parameterTypes)): # caso de loc
         #    if isinstance(parameterTypes[i], Loc):
         #        parameterTypes[i] = parameterTypes[i].subType
