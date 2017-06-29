@@ -1116,9 +1116,9 @@ class Operand3(AST):
         if len(self.fields) == 1:
             return True
         else:
+            fType = self.fields[1].propType()
             if self.fields[0] == '-':
-                fType = self.fields[1].propType()
-                res = isinstance(fType, Int) or isinstance(self.fields)
+                res = isinstance(fType, Int)
                 return res
             else:
                 return isinstance(fType,Bool)
@@ -1790,7 +1790,7 @@ class BuiltinCall(AST):
                 if isinstance(n, AST):
                     ret += n.reference()
         elif name == 'print':
-            for n in parameterList:
+            for n in reversed(parameterList):
                 if isinstance(n, AST):
                     ret += n.recursiveGenCode()
         # #for n in parameterList:
