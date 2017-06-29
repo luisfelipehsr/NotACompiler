@@ -1578,20 +1578,14 @@ class ProcedureCall(AST):
                     nType = n.propType()
                     #print(symbol.type.parameters.getParameterList())
                     pType = symbol.type.parameters.parameterList[i]
-                    if nType.value is not None:
-                        if isinstance(nType,Int) or isinstance(nType,Bool)\
-                                or isinstance(nType,Char):
-                            #ret += [('ldc',nType.value)]
-                            ret += n.recursiveGenCode()
-                    else:
-                        if isinstance(nType,Int) or isinstance(nType,Bool)\
-                                or isinstance(nType,Char):
-                            if pType.local and not nType.local:
-                                ret += n.reference()
-                            else:
-                                ret += n.recursiveGenCode()
+                    if isinstance(nType,Int) or isinstance(nType,Bool)\
+                        or isinstance(nType,Char):
+                        if pType.local and not nType.local:
+                            ret += n.reference()
                         else:
                             ret += n.recursiveGenCode()
+                    else:
+                        ret += n.recursiveGenCode()
         ret += self.genCode()
         print(ret)
         return ret
@@ -1644,7 +1638,7 @@ class ReturnAction(AST):
 
     def addTag(self):
         symbol = AST.semantic.lookInContexts('return')
-        if symbol is None:
+        if isinstance(symbol.type,Null):
             return []
         if isinstance(symbol.getType(), Int) or isinstance(symbol.getType(), Char) or isinstance(symbol.getType(),Bool):
             return []
